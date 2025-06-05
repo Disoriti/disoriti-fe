@@ -1,10 +1,12 @@
+import "@/app/globals.css";
+
 import type { Metadata } from "next";
 import { Poppins } from "next/font/google";
 import { Geist_Mono } from "next/font/google";
 
 import { Toaster } from "@/components/ui/sonner";
 
-import "./globals.css";
+
 
 // Body font - Poppins
 const poppins = Poppins({
@@ -23,7 +25,7 @@ const geistMono = Geist_Mono({
 // Example setup will go in global CSS as: --font-heading: "Bauhaus 93";
 
 export const metadata: Metadata = {
-  title: "Disoriti App",
+  title: "Disoriti - AI-powered ad generator",
   description: "Frontend powered by Next.js and Shadcn UI",
 };
 

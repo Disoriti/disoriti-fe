@@ -1,55 +1,88 @@
-import { AppSidebar } from "@/components/app-sidebar"
 import {
   Breadcrumb,
   BreadcrumbItem,
-  BreadcrumbLink,
   BreadcrumbList,
   BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb"
-import { Separator } from "@/components/ui/separator"
-import {
-  SidebarInset,
-  SidebarProvider,
-  SidebarTrigger,
-} from "@/components/ui/sidebar"
+} from "@/components/ui/breadcrumb";
+import { AnalyticsCard } from "@/components/ui/analytics-card";
+import { FeatureCard } from "@/components/ui/feature-card";
+import { DashboardWelcome } from "@/components/ui/dashboard-welcome";
+import { PlusCircle, Library, Bot, Calendar, Settings } from "lucide-react";
 
 export default function Page() {
   return (
-    <SidebarProvider>
-      <AppSidebar />
-      <SidebarInset>
-        <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
-          <div className="flex items-center gap-2 px-4">
-            <SidebarTrigger className="-ml-1" />
-            <Separator
-              orientation="vertical"
-              className="mr-2 data-[orientation=vertical]:h-4"
-            />
-            <Breadcrumb>
-              <BreadcrumbList>
-                <BreadcrumbItem className="hidden md:block">
-                  <BreadcrumbLink href="#">
-                    Building Your Application
-                  </BreadcrumbLink>
-                </BreadcrumbItem>
-                <BreadcrumbSeparator className="hidden md:block" />
-                <BreadcrumbItem>
-                  <BreadcrumbPage>Data Fetching</BreadcrumbPage>
-                </BreadcrumbItem>
-              </BreadcrumbList>
-            </Breadcrumb>
-          </div>
-        </header>
-        <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
-          <div className="grid auto-rows-min gap-4 md:grid-cols-3">
-            <div className="bg-muted/50 aspect-video rounded-xl" />
-            <div className="bg-muted/50 aspect-video rounded-xl" />
-            <div className="bg-muted/50 aspect-video rounded-xl" />
-          </div>
-          <div className="bg-muted/50 min-h-[100vh] flex-1 rounded-xl md:min-h-min" />
+    <div className="space-y-8 p-6">
+      <Breadcrumb>
+        <BreadcrumbList>
+          <BreadcrumbItem>
+            <BreadcrumbPage>| Dashboard</BreadcrumbPage>
+          </BreadcrumbItem>
+        </BreadcrumbList>
+      </Breadcrumb>
+      <DashboardWelcome name="shadcn" />
+
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+        <AnalyticsCard
+          title="Total Posts"
+          value="1,234"
+          description="Posts created this month"
+          trend={{ value: 12, isPositive: true }}
+        />
+        <AnalyticsCard
+          title="Active Campaigns"
+          value="12"
+          description="Currently running campaigns"
+          trend={{ value: 8, isPositive: true }}
+        />
+        <AnalyticsCard
+          title="Engagement Rate"
+          value="24.5%"
+          description="Average engagement per post"
+          trend={{ value: 3.2, isPositive: false }}
+        />
+        <AnalyticsCard
+          title="Total Reach"
+          value="45.2K"
+          description="Total audience reached"
+          trend={{ value: 15, isPositive: true }}
+        />
+      </div>
+
+      <div className="mt-8">
+        <h2 className="mb-6 text-2xl font-semibold text-white">Quick Actions</h2>
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <FeatureCard
+            title="Create Post"
+            description="Generate and create new social media posts with AI assistance"
+            icon={PlusCircle}
+            href="/create"
+          />
+          <FeatureCard
+            title="Library"
+            description="Manage and edit your existing posts and campaigns"
+            icon={Library}
+            href="/library"
+          />
+          <FeatureCard
+            title="Disoriti Assistant"
+            description="Get AI-powered suggestions and optimize your content"
+            icon={Bot}
+            href="/assistant"
+          />
+          <FeatureCard
+            title="Planner"
+            description="Plan and schedule your posts and campaigns"
+            icon={Calendar}
+            href="/dashboard/planner"
+          />
+          <FeatureCard
+            title="User Settings"
+            description="Manage your account and preferences"
+            icon={Settings}
+            href="/settings"
+          />
         </div>
-      </SidebarInset>
-    </SidebarProvider>
-  )
+      </div>
+    </div>
+  );
 }
