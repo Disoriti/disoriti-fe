@@ -11,6 +11,7 @@ import {
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Image, Video } from "lucide-react";
+import NavigationButtons from "@/components/NavigationButtons";
 
 export default function MediaPage() {
   const [selected, setSelected] = useState<"image" | "video">();
@@ -79,33 +80,16 @@ export default function MediaPage() {
           </button>
         </div>
 
-        {/* Navigation Buttons */}
-        <div className="flex flex-row gap-6 justify-center mt-4">
-          {/* Previous Button */}
-          <button
-            className="group relative inline-flex items-center justify-center px-8 py-3 rounded-xl border border-destructive/20 text-white/50 bg-disoriti-primary/5 font-medium transition-all duration-300 hover:border-disoriti-primary/50 hover:bg-disoriti-primary/10 shadow-md"
-            onClick={() => router.back()}
-          >
-            ← Previous
-          </button>
-
-          {/* Next Button */}
-          <button
-            className={`group relative inline-flex items-center justify-center px-8 py-3 rounded-xl font-semibold text-lg transition-all duration-300 shadow-lg ${
-              selected
-                ? "text-white border border-accent/20 hover:shadow-accent/40 hover:scale-105"
-                : "bg-disoriti-accent/10 text-white/50 border border-accent/20 opacity-50 cursor-not-allowed"
-            }`}
-            disabled={!selected}
-            onClick={() => {
-              if (selected) {
-                router.push(`/dashboard/create/upload?type=${type}&media=${selected}`);
-              }
-            }}
-          >
-            Next →
-          </button>
-        </div>
+        <NavigationButtons
+          onPrevious={() => router.back()}
+          onNext={() => {
+            if (selected) {
+              router.push(`/dashboard/create/upload?type=${type}&media=${selected}`);
+            }
+          }}
+          disablePrevious={false}
+          disableNext={!selected}
+        />
       </div>
     </div>
   );

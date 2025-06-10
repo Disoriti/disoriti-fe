@@ -8,8 +8,9 @@ import {
     BreadcrumbSeparator,
   } from "@/components/ui/breadcrumb";
 import { useEffect, useState } from "react";
-import { Folder } from "lucide-react";
+import { Folder, Download } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import AdGenerationLoader from "@/components/AdGenerationLoader";
 
 // Example ad type
 interface Ad {
@@ -75,6 +76,8 @@ function SkeletonCard() {
 export default function LibraryPage() {
   const [ads, setAds] = useState<Ad[]>([]);
   const [loading, setLoading] = useState(true);
+  const [generatingImage, setGeneratingImage] = useState(false);
+  const [generatedImage, setGeneratedImage] = useState<string | null>(null);
 
   useEffect(() => {
     // Simulate loading and set mock ads
@@ -83,6 +86,27 @@ export default function LibraryPage() {
       setLoading(false);
     }, 1000);
   }, []);
+
+  const handleGenerateImage = async () => {
+    setGeneratingImage(true);
+    // Simulate API call to generate image
+    setTimeout(() => {
+      // Replace with actual API response
+      setGeneratedImage("https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=80");
+      setGeneratingImage(false);
+    }, 3000);
+  };
+
+  const handleDownloadImage = () => {
+    if (generatedImage) {
+      const link = document.createElement('a');
+      link.href = generatedImage;
+      link.download = 'generated-ad.png';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+  };
 
   return (
     <div className="space-y-8 p-6">
@@ -98,6 +122,25 @@ export default function LibraryPage() {
         </BreadcrumbList>
       </Breadcrumb>
       <h1 className="text-3xl font-bold mb-8 text-disoriti-primary">Your Ad Library</h1>
+      
+      {generatingImage && <AdGenerationLoader />}
+      
+      {generatedImage && (
+        <div className="mb-8 p-6 bg-gradient-to-br from-disoriti-primary/10 to-disoriti-accent/10 rounded-2xl">
+          <h2 className="text-xl font-bold mb-4">Generated Ad</h2>
+          <div className="relative aspect-w-16 aspect-h-9 rounded-xl overflow-hidden mb-4">
+            <img src={generatedImage} alt="Generated Ad" className="w-full h-full object-cover" />
+          </div>
+          <button
+            onClick={handleDownloadImage}
+            className="flex items-center gap-2 px-4 py-2 bg-disoriti-primary text-white rounded-lg hover:bg-disoriti-primary/90 transition-colors"
+          >
+            <Download className="w-4 h-4" />
+            Download Image
+          </button>
+        </div>
+      )}
+
       {loading ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 min-h-[400px]">
           {Array.from({ length: 6 }).map((_, i) => (

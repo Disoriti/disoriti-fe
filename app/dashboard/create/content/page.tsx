@@ -10,7 +10,9 @@ import {
 } from "@/components/ui/breadcrumb";
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Sparkles, Pencil, Bot } from "lucide-react";
+import { Sparkles, Pencil, Bot, Download } from "lucide-react";
+import AdGenerationLoader from "@/components/AdGenerationLoader";
+import NavigationButtons from "@/components/NavigationButtons";
 
 export default function ContentPage() {
   const [selectedOption, setSelectedOption] = useState<"ai" | "manual" | null>(null);
@@ -19,6 +21,8 @@ export default function ContentPage() {
   const [hasCTA, setHasCTA] = useState(false);
   const [ctaText, setCtaText] = useState("");
   const [extraText, setExtraText] = useState("");
+  const [generatingImage, setGeneratingImage] = useState(false);
+  const [generatedImage, setGeneratedImage] = useState<string | null>(null);
   const router = useRouter();
   const searchParams = useSearchParams();
   const type = searchParams.get("type");
@@ -26,6 +30,27 @@ export default function ContentPage() {
   const platform = searchParams.get("platform");
   const postType = searchParams.get("postType");
   const settings = searchParams.get("settings");
+
+  const handleGenerateImage = async () => {
+    setGeneratingImage(true);
+    // Simulate API call to generate image
+    setTimeout(() => {
+      // Replace with actual API response
+      setGeneratedImage("https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=80");
+      setGeneratingImage(false);
+    }, 3000);
+  };
+
+  const handleDownloadImage = () => {
+    if (generatedImage) {
+      const link = document.createElement('a');
+      link.href = generatedImage;
+      link.download = 'generated-ad.png';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+  };
 
   return (
     <div className="space-y-8 p-6">
@@ -67,161 +92,172 @@ export default function ContentPage() {
         Configure your post content
       </h1>
 
-      {/* Option Selection */}
-      <div className="flex flex-col items-center gap-8">
-        {!selectedOption ? (
-          <div className="flex gap-10 w-full justify-center">
+
+      {generatingImage && <AdGenerationLoader />}
+
+      {generatedImage ? (
+        <div className="w-full max-w-2xl mx-auto bg-gradient-to-br from-disoriti-primary/5 to-disoriti-accent/5 p-8 rounded-2xl border border-disoriti-primary/20">
+          <h2 className="text-2xl font-bold mb-6">Your Generated Ad</h2>
+          <div className="relative aspect-w-16 aspect-h-9 rounded-xl overflow-hidden mb-6">
+            <img src={generatedImage} alt="Generated Ad" className="w-full h-full object-cover" />
+          </div>
+          <div className="flex justify-between items-center">
             <button
-              className="flex flex-col items-center justify-center rounded-2xl border-2 transition-all duration-300 shadow-xl bg-gradient-to-br from-disoriti-primary/10 to-disoriti-accent/10 px-16 py-20 text-2xl font-bold w-[340px] h-56 hover:border-disoriti-primary/60 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-disoriti-primary/40"
-              onClick={() => setSelectedOption("ai")}
-              type="button"
+              onClick={() => setGeneratedImage(null)}
+              className="px-6 py-2 rounded-xl border border-disoriti-primary/30 text-disoriti-primary bg-disoriti-primary/10 font-medium hover:bg-disoriti-primary/20 transition-all"
             >
-              <span className="mb-4 flex items-center justify-center">
-                <span className="relative flex items-center justify-center">
-                  <span className="absolute inline-flex h-16 w-16 rounded-full bg-gradient-to-br from-disoriti-primary/30 to-disoriti-accent/30 blur-xl animate-pulse" />
-                  <Bot className="h-12 w-12 text-disoriti-primary drop-shadow-lg relative z-10" />
+              ← Back to Content
+            </button>
+            <button
+              onClick={handleDownloadImage}
+              className="flex items-center gap-2 px-6 py-2 rounded-xl bg-disoriti-primary text-white font-medium hover:bg-disoriti-primary/90 transition-all"
+            >
+              <Download className="w-4 h-4" />
+              Download Image
+            </button>
+          </div>
+        </div>
+      ) : (
+        <>
+          {/* Option Selection */}
+          {!selectedOption ? (
+            <div className="flex gap-10 w-full justify-center">
+              <button
+                className="flex flex-col items-center justify-center rounded-2xl border-2 transition-all duration-300 shadow-xl bg-gradient-to-br from-disoriti-primary/10 to-disoriti-accent/10 px-16 py-20 text-2xl font-bold w-[340px] h-56 hover:border-disoriti-primary/60 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-disoriti-primary/40"
+                onClick={() => setSelectedOption("ai")}
+                type="button"
+              >
+                <span className="mb-4 flex items-center justify-center">
+                  <span className="relative flex items-center justify-center">
+                    <span className="absolute inline-flex h-16 w-16 rounded-full bg-gradient-to-br from-disoriti-primary/30 to-disoriti-accent/30 blur-xl animate-pulse" />
+                    <Bot className="h-12 w-12 text-disoriti-primary drop-shadow-lg relative z-10" />
+                  </span>
                 </span>
-              </span>
-              <span className="mb-2">Let AI do the magic</span>
-              <span className="text-base font-normal text-disoriti-primary/70">
-                Generate post content automatically
-              </span>
-            </button>
-            <button
-              className="flex flex-col items-center justify-center rounded-2xl border-2 transition-all duration-300 shadow-xl bg-gradient-to-br from-disoriti-primary/10 to-disoriti-accent/10 px-16 py-20 text-2xl font-bold w-[340px] h-56 hover:border-disoriti-primary/60 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-disoriti-primary/40"
-              onClick={() => setSelectedOption("manual")}
-              type="button"
-            >
-              <Pencil className="h-12 w-12 mb-4" />
-              <span className="mb-2">Manual post configuration</span>
-              <span className="text-base font-normal text-disoriti-primary/70">
-                Enter your own post content
-              </span>
-            </button>
-          </div>
-        ) : selectedOption === "ai" ? (
-          <div className="w-full max-w-2xl bg-gradient-to-br from-disoriti-primary/5 to-disoriti-accent/5 p-8 rounded-2xl border border-disoriti-primary/20 flex flex-col items-center">
-            <span className="mb-4 flex items-center justify-center">
-              <span className="relative flex items-center justify-center">
-                <span className="absolute inline-flex h-20 w-20 rounded-full bg-gradient-to-br from-disoriti-primary/30 to-disoriti-accent/30 blur-xl animate-pulse" />
-                <Bot className="h-16 w-16 text-disoriti-primary drop-shadow-lg relative z-10" />
-              </span>
-            </span>
-            <h2 className="text-2xl font-bold mb-4">AI Magic Coming Soon!</h2>
-            <p className="text-base text-disoriti-primary/70 mb-6 text-center">This feature will generate your post content automatically based on your previous selections.</p>
-            <button
-              className="mt-2 px-6 py-2 rounded-xl border border-disoriti-primary/30 text-disoriti-primary bg-disoriti-primary/10 font-medium hover:bg-disoriti-primary/20 transition-all"
-              onClick={() => setSelectedOption(null)}
-            >
-              ← Back
-            </button>
-          </div>
-        ) : (
-          // Manual post content form (existing form)
-          <div className="w-full max-w-2xl bg-gradient-to-br from-disoriti-primary/5 to-disoriti-accent/5 p-8 rounded-2xl border border-disoriti-primary/20">
-            <div className="space-y-6">
-              {/* Post Heading */}
-              <div>
-                <label className="block text-sm font-medium mb-2">Post Heading</label>
-                <input
-                  type="text"
-                  value={postHeading}
-                  onChange={(e) => setPostHeading(e.target.value)}
-                  className="w-full p-3 bg-white/5 rounded-lg border border-disoriti-primary/20 focus:outline-none focus:ring-2 focus:ring-disoriti-primary/40"
-                  placeholder="Enter your post heading"
-                />
-              </div>
-              {/* Post Subheading */}
-              <div>
-                <label className="block text-sm font-medium mb-2">Post Subheading</label>
-                <input
-                  type="text"
-                  value={postSubheading}
-                  onChange={(e) => setPostSubheading(e.target.value)}
-                  className="w-full p-3 bg-white/5 rounded-lg border border-disoriti-primary/20 focus:outline-none focus:ring-2 focus:ring-disoriti-primary/40"
-                  placeholder="Enter your post subheading"
-                />
-              </div>
-              {/* Call to Action */}
-              <div className="space-y-4">
-                <div className="flex items-center gap-3">
-                  <input
-                    type="checkbox"
-                    id="has-cta"
-                    checked={hasCTA}
-                    onChange={(e) => setHasCTA(e.target.checked)}
-                    className="w-4 h-4 rounded border-disoriti-primary/20 focus:ring-2 focus:ring-disoriti-primary/40"
-                  />
-                  <label htmlFor="has-cta" className="text-sm font-medium">
-                    Include Call to Action
-                  </label>
-                </div>
-                {hasCTA && (
-                  <input
-                    type="text"
-                    value={ctaText}
-                    onChange={(e) => setCtaText(e.target.value)}
-                    className="w-full p-3 bg-white/5 rounded-lg border border-disoriti-primary/20 focus:outline-none focus:ring-2 focus:ring-disoriti-primary/40"
-                    placeholder="Enter call to action text"
-                  />
-                )}
-              </div>
-              {/* Extra Text/Information */}
-              <div>
-                <label className="block text-sm font-medium mb-2">Extra Information (Optional)</label>
-                <textarea
-                  value={extraText}
-                  onChange={(e) => setExtraText(e.target.value)}
-                  className="w-full p-3 bg-white/5 rounded-lg border border-disoriti-primary/20 focus:outline-none focus:ring-2 focus:ring-disoriti-primary/40 min-h-[100px] resize-y"
-                  placeholder="Add any additional information for your post"
-                />
+                <span className="mb-2">Let AI do the magic</span>
+                <span className="text-base font-normal text-disoriti-primary/70">
+                  Generate post content automatically
+                </span>
+              </button>
+
+              <button
+                className="flex flex-col items-center justify-center rounded-2xl border-2 transition-all duration-300 shadow-xl bg-gradient-to-br from-disoriti-primary/10 to-disoriti-accent/10 px-16 py-20 text-2xl font-bold w-[340px] h-56 hover:border-disoriti-primary/60 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-disoriti-primary/40"
+                onClick={() => setSelectedOption("manual")}
+                type="button"
+              >
+                <Pencil className="h-12 w-12 mb-4" />
+                <span className="mb-2">Manual post configuration</span>
+                <span className="text-base font-normal text-disoriti-primary/70">
+                  Enter your own post content
+                </span>
+              </button>
+            </div>
+          ) : selectedOption === "ai" ? (
+            <div className="flex justify-center">
+            <div className="w-full max-w-2xl bg-gradient-to-br from-disoriti-primary/5 to-disoriti-accent/5 p-8 rounded-2xl border border-disoriti-primary/20 flex flex-col items-center">
+                <span className="mb-4 flex items-center justify-center">
+                  <span className="relative flex items-center justify-center">
+                    <span className="absolute inline-flex h-20 w-20 rounded-full bg-gradient-to-br from-disoriti-primary/30 to-disoriti-accent/30 blur-xl animate-pulse" />
+                    <Bot className="h-16 w-16 text-disoriti-primary drop-shadow-lg relative z-10" />
+                  </span>
+                </span>
+                <h2 className="text-2xl font-bold mb-4">AI Magic Coming Soon!</h2>
+                <p className="text-base text-disoriti-primary/70 mb-6 text-center">This feature will generate your post content automatically based on your previous selections.</p>
+                <button
+                  className="mt-2 px-6 py-2 rounded-xl border border-disoriti-primary/30 text-disoriti-primary bg-disoriti-primary/10 font-medium hover:bg-disoriti-primary/20 transition-all"
+                  onClick={() => setSelectedOption(null)}
+                >
+                  ← Back
+                </button>
               </div>
             </div>
-          </div>
-        )}
+           
+          ) : (
+            // Manual post content form
+            <div className="flex justify-center">
+              <div className="w-full max-w-2xl bg-gradient-to-br from-disoriti-primary/5 to-disoriti-accent/5 p-8 rounded-2xl border border-disoriti-primary/20">
+                <div className="space-y-6">
+                  {/* Post Heading */}
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Post Heading</label>
+                    <input
+                      type="text"
+                      value={postHeading}
+                      onChange={(e) => setPostHeading(e.target.value)}
+                      className="w-full p-3 bg-white/5 rounded-lg border border-disoriti-primary/20 focus:outline-none focus:ring-2 focus:ring-disoriti-primary/40"
+                      placeholder="Enter your post heading"
+                    />
+                  </div>
+                  {/* Post Subheading */}
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Post Subheading</label>
+                    <input
+                      type="text"
+                      value={postSubheading}
+                      onChange={(e) => setPostSubheading(e.target.value)}
+                      className="w-full p-3 bg-white/5 rounded-lg border border-disoriti-primary/20 focus:outline-none focus:ring-2 focus:ring-disoriti-primary/40"
+                      placeholder="Enter your post subheading"
+                    />
+                  </div>
+                  {/* Call to Action */}
+                  <div>
+                    <div className="flex items-center gap-3">
+                      <input
+                        type="checkbox"
+                        id="has-cta"
+                        checked={hasCTA}
+                        onChange={(e) => setHasCTA(e.target.checked)}
+                        className="w-4 h-4 rounded border-disoriti-primary/20 focus:ring-2 focus:ring-disoriti-primary/40"
+                      />
+                      <label htmlFor="has-cta" className="text-sm font-medium">
+                        Include Call to Action
+                      </label>
+                    </div>
+                    {hasCTA && (
+                      <input
+                        type="text"
+                        value={ctaText}
+                        onChange={(e) => setCtaText(e.target.value)}
+                        className="w-full p-3 bg-white/5 rounded-lg border border-disoriti-primary/20 focus:outline-none focus:ring-2 focus:ring-disoriti-primary/40 mt-2"
+                        placeholder="Enter call to action text"
+                      />
+                    )}
+                  </div>
+                  {/* Extra Text/Information */}
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Extra Information (Optional)</label>
+                    <textarea
+                      value={extraText}
+                      onChange={(e) => setExtraText(e.target.value)}
+                      className="w-full p-3 bg-white/5 rounded-lg border border-disoriti-primary/20 focus:outline-none focus:ring-2 focus:ring-disoriti-primary/40 min-h-[100px] resize-y"
+                      placeholder="Add any additional information for your post"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+          )}
 
-        {/* Navigation Buttons */}
-        <div className="flex flex-row gap-6 justify-center mt-4">
-          {/* Previous Button */}
-          <button
-            className="group relative inline-flex items-center justify-center px-8 py-3 rounded-xl border border-destructive/20 text-white/50 bg-disoriti-primary/5 font-medium transition-all duration-300 hover:border-disoriti-primary/50 hover:bg-disoriti-primary/10 shadow-md"
-            onClick={() => {
+          {/* Navigation Buttons */}
+          <NavigationButtons
+            onPrevious={() => {
               if (selectedOption) {
                 setSelectedOption(null);
               } else {
                 router.back();
               }
             }}
-          >
-            ← Previous
-          </button>
-
-          {/* Next Button */}
-          {selectedOption === "manual" && (
-            <button
-              className={`group relative inline-flex items-center justify-center px-8 py-3 rounded-xl font-semibold text-lg transition-all duration-300 shadow-lg ${
-                postHeading
-                  ? "text-white border border-accent/20 hover:shadow-accent/40 hover:scale-105"
-                  : "bg-disoriti-accent/10 text-white/50 border border-accent/20 opacity-50 cursor-not-allowed"
-              }`}
-              disabled={!postHeading}
-              onClick={() => {
-                if (postHeading) {
-                  router.push(
-                    `/dashboard/create/preview?type=${type}&media=${media}&platform=${platform}&postType=${postType}&settings=${settings}&heading=${encodeURIComponent(
-                      postHeading
-                    )}&subheading=${encodeURIComponent(
-                      postSubheading
-                    )}&cta=${encodeURIComponent(ctaText)}&extra=${encodeURIComponent(extraText)}`
-                  );
-                }
-              }}
-            >
-              Next →
-            </button>
-          )}
-        </div>
-      </div>
+            onNext={() => {
+              if (postHeading) {
+                handleGenerateImage();
+              }
+            }}
+            disablePrevious={false}
+            disableNext={!postHeading || selectedOption !== "manual"}
+            nextLabel="Generate Ad →"
+          />
+        </>
+      )}
     </div>
   );
 } 

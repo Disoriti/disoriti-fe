@@ -11,6 +11,7 @@ import {
 import { useState } from "react";
 import { Instagram, Facebook, Music2 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import NavigationButtons from "@/components/NavigationButtons";
 
 export default function CreatePage() {
   const [selected, setSelected] = useState<"ad" | "social">();
@@ -73,33 +74,16 @@ export default function CreatePage() {
           </button>
         </div>
 
-        {/* Navigation Buttons */}
-        <div className="flex flex-row gap-6 justify-center mt-4">
-          {/* Previous Button */}
-          <button
-            className="group relative inline-flex items-center justify-center px-8 py-3 rounded-xl border border-white/20 text-white/50 bg-disoriti-primary/5 font-medium transition-all duration-300 hover:border-disoriti-primary/50 hover:bg-disoriti-primary/10 shadow-md cursor-not-allowed opacity-50"
-            disabled
-          >
-            ← Previous
-          </button>
-
-          {/* Next Button */}
-          <button
-            className={`group relative inline-flex items-center justify-center px-8 py-3 rounded-xl font-semibold text-lg transition-all duration-300 shadow-lg ${
-              selected
-                ? "text-white border border-white/20 hover:shadow-accent/10 hover:scale-105"
-                : "text-white/50 border border-white/20 opacity-50 cursor-not-allowed"
-            }`}
-            disabled={!selected}
-            onClick={() => {
-              if (selected) {
-                router.push(`/dashboard/create/media?type=${selected}`);
-              }
-            }}
-          >
-            Next →
-          </button>
-        </div>
+        <NavigationButtons
+          onPrevious={() => {}}
+          onNext={() => {
+            if (selected) {
+              router.push(`/dashboard/create/media?type=${selected}`);
+            }
+          }}
+          disablePrevious={true}
+          disableNext={!selected}
+        />
       </div>
     </div>
   );

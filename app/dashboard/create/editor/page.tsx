@@ -12,6 +12,7 @@ import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Settings, Plus, X } from "lucide-react";
 import { HexColorPicker } from "react-colorful";
+import NavigationButtons from "@/components/NavigationButtons";
 
 // Mock settings data - In real app, this would come from your settings store/API
 const mockSettings = {
@@ -264,45 +265,28 @@ export default function EditorPage() {
           </div>
         )}
 
-        {/* Navigation Buttons */}
-        <div className="flex flex-row gap-6 justify-center mt-4">
-          {/* Previous Button */}
-          <button
-            className="group relative inline-flex items-center justify-center px-8 py-3 rounded-xl border border-destructive/20 text-white/50 bg-disoriti-primary/5 font-medium transition-all duration-300 hover:border-disoriti-primary/50 hover:bg-disoriti-primary/10 shadow-md"
-            onClick={() => {
-              if (selectedOption) {
-                setSelectedOption(null);
-              } else {
-                router.back();
-              }
-            }}
-          >
-            ← Previous
-          </button>
-
-          {/* Next Button */}
-          <button
-            className={`group relative inline-flex items-center justify-center px-8 py-3 rounded-xl font-semibold text-lg transition-all duration-300 shadow-lg ${
-              selectedOption
-                ? "text-white border border-accent/20 hover:shadow-accent/40 hover:scale-105"
-                : "bg-disoriti-accent/10 text-white/50 border border-accent/20 opacity-50 cursor-not-allowed"
-            }`}
-            disabled={!selectedOption}
-            onClick={() => {
-              if (selectedOption === "import") {
-                router.push(
-                  `/dashboard/create/content?type=${type}&media=${media}&platform=${platform}&postType=${postType}&settings=imported`
-                );
-              } else if (selectedOption === "new") {
-                router.push(
-                  `/dashboard/create/content?type=${type}&media=${media}&platform=${platform}&postType=${postType}&settings=new`
-                );
-              }
-            }}
-          >
-            Next →
-          </button>
-        </div>
+        <NavigationButtons
+          onPrevious={() => {
+            if (selectedOption) {
+              setSelectedOption(null);
+            } else {
+              router.back();
+            }
+          }}
+          onNext={() => {
+            if (selectedOption === "import") {
+              router.push(
+                `/dashboard/create/content?type=${type}&media=${media}&platform=${platform}&postType=${postType}&settings=imported`
+              );
+            } else if (selectedOption === "new") {
+              router.push(
+                `/dashboard/create/content?type=${type}&media=${media}&platform=${platform}&postType=${postType}&settings=new`
+              );
+            }
+          }}
+          disablePrevious={false}
+          disableNext={!selectedOption}
+        />
       </div>
     </div>
   );

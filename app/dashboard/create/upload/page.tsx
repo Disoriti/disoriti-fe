@@ -11,6 +11,7 @@ import {
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Facebook, Instagram, Linkedin, Music2 } from "lucide-react";
+import NavigationButtons from "@/components/NavigationButtons";
 
 // Define types for our data structure
 type PostType = {
@@ -167,45 +168,25 @@ export default function UploadPage() {
           )}
         </div>
 
-        {/* Navigation Buttons */}
-        <div className="flex flex-row gap-6 justify-center mt-4">
-          {/* Previous Button */}
-          <button
-            className="group relative inline-flex items-center justify-center px-8 py-3 rounded-xl border border-destructive/20 text-white/50 bg-disoriti-primary/5 font-medium transition-all duration-300 hover:border-disoriti-primary/50 hover:bg-disoriti-primary/10 shadow-md"
-            onClick={() => {
-              if (selectedPlatform) {
-                setSelectedPlatform(null);
-                setSelectedPostType(null);
-              } else {
-                router.back();
-              }
-            }}
-          >
-            ← Previous
-          </button>
-
-          {/* Next Button */}
-          <button
-            className={`group relative inline-flex items-center justify-center px-8 py-3 rounded-xl font-semibold text-lg transition-all duration-300 shadow-lg ${
-              (selectedPlatform && selectedPostType) || (!selectedPlatform && type === "ad")
-                ? "text-white border border-accent/20 hover:shadow-accent/40 hover:scale-105"
-                : "bg-disoriti-accent/10 text-white/50 border border-accent/20 opacity-50 cursor-not-allowed"
-            }`}
-            disabled={!selectedPlatform || !selectedPostType}
-            onClick={() => {
-              if (selectedPlatform && selectedPostType) {
-                // Navigate to the next step with all the selected options
-                router.push(
-                  `/dashboard/create/editor?type=${type}&media=${media}&platform=${selectedPlatform}&postType=${encodeURIComponent(
-                    selectedPostType.type
-                  )}`
-                );
-              }
-            }}
-          >
-            Next →
-          </button>
-        </div>
+        <NavigationButtons
+          onPrevious={() => {
+            if (selectedPlatform) {
+              setSelectedPlatform(null);
+              setSelectedPostType(null);
+            } else {
+              router.back();
+            }
+          }}
+          onNext={() => {
+            if (selectedPlatform && selectedPostType) {
+              router.push(
+                `/dashboard/create/editor?type=${type}&media=${media}&platform=${selectedPlatform}&postType=${encodeURIComponent(selectedPostType.type)}`
+              );
+            }
+          }}
+          disablePrevious={false}
+          disableNext={!(selectedPlatform && selectedPostType)}
+        />
       </div>
     </div>
   );
