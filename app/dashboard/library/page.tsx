@@ -8,7 +8,8 @@ import {
     BreadcrumbSeparator,
   } from "@/components/ui/breadcrumb";
 import { useEffect, useState } from "react";
-import { Folder, Download } from "lucide-react";
+import { Folder, Download, BadgeCheckIcon } from "lucide-react";
+import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton";
 import AdGenerationLoader from "@/components/AdGenerationLoader";
 
@@ -121,7 +122,7 @@ export default function LibraryPage() {
           </BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>
-      <h1 className="text-3xl font-bold mb-8 text-disoriti-primary">Your Ad Library</h1>
+      <h1 className="text-3xl md:text-3xl font-bold text-disoriti-primary mb-8 tracking-tight animate-glow">Your Ad Library</h1>
       
       {generatingImage && <AdGenerationLoader />}
       
@@ -166,15 +167,20 @@ export default function LibraryPage() {
               </div>
               <h2 className="text-xl font-bold mb-2">{ad.heading}</h2>
               <div className="flex items-center gap-2 text-sm text-disoriti-primary/70 mb-2">
-                <span>{ad.platform}</span>
-                <span>•</span>
-                <span>{ad.postType}</span>
+              <Badge
+                variant="secondary"
+                className="bg-blue-500 text-white dark:bg-blue-600"
+              >
+                <BadgeCheckIcon />
+                {ad.platform}
+              </Badge>
+                <Badge variant="outline">{ad.postType}</Badge>
               </div>
               <div className="flex justify-between items-center mt-auto">
                 <span className="text-xs text-disoriti-primary/50">{new Date(ad.createdAt).toLocaleDateString()}</span>
                 <div className="flex gap-2">
-                  <button className="text-xs px-3 py-1 rounded bg-disoriti-primary/10 hover:bg-disoriti-primary/20">View</button>
-                  <button className="text-xs px-3 py-1 rounded bg-disoriti-accent/10 hover:bg-disoriti-accent/20">Download</button>
+                  <button className="text-xs px-4 py-2 rounded bg-disoriti-primary hover:bg-disoriti-primary border border-disoriti-primary/30">View</button>
+                  <button className="text-xs px-4 py-2 rounded bg-disoriti-accent hover:bg-disoriti-accent border border-disoriti-accent/30">Download</button>
                 </div>
               </div>
             </div>
