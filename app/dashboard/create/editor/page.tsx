@@ -12,7 +12,7 @@ import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Settings, Plus, X } from "lucide-react";
 import { HexColorPicker } from "react-colorful";
-import NavigationButtons from "@/components/NavigationButtons";
+import NavigationButtons from "@/components/navigation-buttons";
 
 // Mock settings data - In real app, this would come from your settings store/API
 const mockSettings = {

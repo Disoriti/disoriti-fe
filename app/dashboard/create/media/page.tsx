@@ -11,7 +11,7 @@ import {
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Image, Video } from "lucide-react";
-import NavigationButtons from "@/components/NavigationButtons";
+import NavigationButtons from "@/components/navigation-buttons";
 
 export default function MediaPage() {
   const [selected, setSelected] = useState<"image" | "video">();

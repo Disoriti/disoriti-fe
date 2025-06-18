@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { LoginForm } from "@/components/login-form"
+import { LoginForm } from "@/app/login/login-form"
 import { toast } from "sonner"
 
 import { API_LOGIN_URL } from "@/lib/links"

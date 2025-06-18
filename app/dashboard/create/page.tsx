@@ -11,7 +11,7 @@ import {
 import { useState } from "react";
 import { Instagram, Facebook, Music2 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import NavigationButtons from "@/components/NavigationButtons";
+import NavigationButtons from "@/components/navigation-buttons";
 
 export default function CreatePage() {
   const [selected, setSelected] = useState<"ad" | "social">();

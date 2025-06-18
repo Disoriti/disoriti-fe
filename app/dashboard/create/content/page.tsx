@@ -11,8 +11,8 @@ import {
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Sparkles, Pencil, Bot, Download } from "lucide-react";
-import AdGenerationLoader from "@/components/AdGenerationLoader";
-import NavigationButtons from "@/components/NavigationButtons";
+import AdGenerationLoader from "@/components/ad-generation-loader";
+import NavigationButtons from "@/components/navigation-buttons";
 
 export default function ContentPage() {
   const [selectedOption, setSelectedOption] = useState<"ai" | "manual" | null>(null);

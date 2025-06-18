@@ -11,7 +11,7 @@ import { useEffect, useState } from "react";
 import { Folder, Download, BadgeCheckIcon } from "lucide-react";
 import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton";
-import AdGenerationLoader from "@/components/AdGenerationLoader";
+import AdGenerationLoader from "@/components/ad-generation-loader";
 
 // Example ad type
 interface Ad {
