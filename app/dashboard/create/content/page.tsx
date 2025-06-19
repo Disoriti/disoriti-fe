@@ -13,6 +13,10 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Sparkles, Pencil, Bot, Download } from "lucide-react";
 import AdGenerationLoader from "@/components/ad-generation-loader";
 import NavigationButtons from "@/components/navigation-buttons";
+import AdLayoutSVG from "@/components/AdLayoutSVG";
+import type { Layout } from "@/components/AdLayoutSVG";
+import layoutDataRaw from "../../../../output_sample.json";
+const layoutData = layoutDataRaw as { layouts: Layout[] };
 
 export default function ContentPage() {
   const [selectedOption, setSelectedOption] = useState<"ai" | "manual" | null>(null);
@@ -23,6 +27,7 @@ export default function ContentPage() {
   const [extraText, setExtraText] = useState("");
   const [generatingImage, setGeneratingImage] = useState(false);
   const [generatedImage, setGeneratedImage] = useState<string | null>(null);
+  const [selectedLayoutIdx, setSelectedLayoutIdx] = useState(0);
   const router = useRouter();
   const searchParams = useSearchParams();
   const type = searchParams.get("type");
@@ -92,29 +97,56 @@ export default function ContentPage() {
         Configure your post content
       </h1>
 
-
       {generatingImage && <AdGenerationLoader />}
 
       {generatedImage ? (
-        <div className="w-full max-w-2xl mx-auto bg-gradient-to-br from-disoriti-primary/5 to-disoriti-accent/5 p-8 rounded-2xl border border-disoriti-primary/20">
-          <h2 className="text-2xl font-bold mb-6">Your Generated Ad</h2>
-          <div className="relative aspect-w-16 aspect-h-9 rounded-xl overflow-hidden mb-6">
-            <img src={generatedImage} alt="Generated Ad" className="w-full h-full object-cover" />
+        <div className="w-full max-w-4xl mx-auto bg-gradient-to-br from-disoriti-primary/5 to-disoriti-accent/5 p-8 rounded-2xl border border-disoriti-primary/20 flex flex-row gap-8 items-center justify-center">
+          {/* Tiles on the left (catalogue) */}
+          <div className="flex flex-col gap-4 items-center w-[140px]">
+            {layoutData.layouts.map((layout, idx) => (
+              <div
+                key={layout.id || idx}
+                className={`rounded-lg border-2 cursor-pointer transition-all ${selectedLayoutIdx === idx ? "border-blue-600" : "border-gray-300"}`}
+                style={{ background: "#fff", width: 120, height: 120, overflow: "hidden" }}
+                onClick={() => setSelectedLayoutIdx(idx)}
+              >
+                <AdLayoutSVG
+                  imageUrl={generatedImage}
+                  layout={layout}
+                  width={120}
+                  height={120}
+                  showControls={false}
+                  pointerEventsNone={true}
+                />
+              </div>
+            ))}
           </div>
-          <div className="flex justify-between items-center">
-            <button
-              onClick={() => setGeneratedImage(null)}
-              className="px-6 py-2 rounded-xl border border-disoriti-primary/30 text-disoriti-primary bg-disoriti-primary/10 font-medium hover:bg-disoriti-primary/20 transition-all"
-            >
-              ← Back to Content
-            </button>
-            <button
-              onClick={handleDownloadImage}
-              className="flex items-center gap-2 px-6 py-2 rounded-xl bg-disoriti-primary text-white font-medium hover:bg-disoriti-primary/90 transition-all"
-            >
-              <Download className="w-4 h-4" />
-              Download Image
-            </button>
+          {/* Main display area (center) */}
+          <div className="flex-1 flex flex-col items-center justify-center">
+            <div className="flex flex-col items-center">
+              <AdLayoutSVG
+                imageUrl={generatedImage}
+                layout={layoutData.layouts[selectedLayoutIdx]}
+                width={500}
+                height={500}
+                showControls={true}
+              />
+            </div>
+            <div className="flex justify-between items-center mt-6 w-full">
+              <button
+                onClick={() => setGeneratedImage(null)}
+                className="px-6 py-2 rounded-xl border border-disoriti-primary/30 text-disoriti-primary bg-disoriti-primary/10 font-medium hover:bg-disoriti-primary/20 transition-all"
+              >
+                ← Back to Content
+              </button>
+              <button
+                onClick={handleDownloadImage}
+                className="flex items-center gap-2 px-6 py-2 rounded-xl bg-disoriti-primary text-white font-medium hover:bg-disoriti-primary/90 transition-all"
+              >
+                <Download className="w-4 h-4" />
+                Download Image
+              </button>
+            </div>
           </div>
         </div>
       ) : (

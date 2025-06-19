@@ -1,0 +1,250 @@
+{
+    "success": true,
+    "metadata": {
+      "platform": "instagram",
+      "post_type": "square",
+      "design_style": "bold",
+      "num_options": 3,
+      "input_texts": {
+        "heading": "Summer Sale",
+        "subheading": "Up to 50% Off Everything",
+        "cta": "Shop Now"
+      }
+    },
+    "layouts": [
+      {
+        "id": "bold_impact_center_1",
+        "style": "bold",
+        "confidence": 1.0,
+        "platform_optimized": "instagram_square",
+        "design_notes": "Centered layout creates strong focal point; Complements centered image composition",
+        "elements": {
+          "heading": {
+            "bbox": {
+              "x": 115,
+              "y": 40,
+              "width": 850,
+              "height": 154
+            },
+            "position": {
+              "x1": 115,
+              "y1": 40,
+              "x2": 965,
+              "y2": 194
+            },
+            "styling": {
+              "font_size": 129,
+              "font_weight": "bold",
+              "text_align": "center",
+              "color": "#000000",
+              "background_color": "#FFFFFF80",
+              "margin": 20
+            },
+            "text_content": "Summer Sale"
+          },
+          "subheading": {
+            "bbox": {
+              "x": 108,
+              "y": 504,
+              "width": 864,
+              "height": 72
+            },
+            "position": {
+              "x1": 108,
+              "y1": 504,
+              "x2": 972,
+              "y2": 576
+            },
+            "styling": {
+              "font_size": 60,
+              "font_weight": "normal",
+              "text_align": "center",
+              "color": "#000000",
+              "background_color": "#FFFFFF80",
+              "margin": 15
+            },
+            "text_content": "Up to 50% Off Everything"
+          },
+          "cta": {
+            "bbox": {
+              "x": 411,
+              "y": 976,
+              "width": 258,
+              "height": 64
+            },
+            "position": {
+              "x1": 411,
+              "y1": 976,
+              "x2": 669,
+              "y2": 1040
+            },
+            "styling": {
+              "font_size": 54,
+              "font_weight": "bold",
+              "text_align": "center",
+              "color": "#000000",
+              "background_color": "#FFFFFF80",
+              "margin": 10
+            },
+            "text_content": "Shop Now"
+          }
+        }
+      },
+      {
+        "id": "bold_diagonal_flow_2",
+        "style": "bold",
+        "confidence": 0.7,
+        "platform_optimized": "instagram_square",
+        "design_notes": "Complements centered image composition",
+        "elements": {
+          "heading": {
+            "bbox": {
+              "x": 40,
+              "y": 40,
+              "width": 712,
+              "height": 129
+            },
+            "position": {
+              "x1": 40,
+              "y1": 40,
+              "x2": 752,
+              "y2": 169
+            },
+            "styling": {
+              "font_size": 108,
+              "font_weight": "bold",
+              "text_align": "left",
+              "color": "#000000",
+              "background_color": "#FFFFFF80",
+              "margin": 20
+            },
+            "text_content": "Summer Sale"
+          },
+          "subheading": {
+            "bbox": {
+              "x": 152,
+              "y": 508,
+              "width": 776,
+              "height": 64
+            },
+            "position": {
+              "x1": 152,
+              "y1": 508,
+              "x2": 928,
+              "y2": 572
+            },
+            "styling": {
+              "font_size": 54,
+              "font_weight": "normal",
+              "text_align": "right",
+              "color": "#000000",
+              "background_color": "#FFFFFF80",
+              "margin": 15
+            },
+            "text_content": "Up to 50% Off Everything"
+          },
+          "cta": {
+            "bbox": {
+              "x": 40,
+              "y": 983,
+              "width": 230,
+              "height": 57
+            },
+            "position": {
+              "x1": 40,
+              "y1": 983,
+              "x2": 270,
+              "y2": 1040
+            },
+            "styling": {
+              "font_size": 48,
+              "font_weight": "bold",
+              "text_align": "left",
+              "color": "#000000",
+              "background_color": "#FFFFFF80",
+              "margin": 10
+            },
+            "text_content": "Shop Now"
+          }
+        }
+      },
+      {
+        "id": "bold_corner_emphasis_3",
+        "style": "bold",
+        "confidence": 0.7,
+        "platform_optimized": "instagram_square",
+        "design_notes": "Complements centered image composition",
+        "elements": {
+          "heading": {
+            "bbox": {
+              "x": 400,
+              "y": 40,
+              "width": 640,
+              "height": 116
+            },
+            "position": {
+              "x1": 400,
+              "y1": 40,
+              "x2": 1040,
+              "y2": 156
+            },
+            "styling": {
+              "font_size": 97,
+              "font_weight": "bold",
+              "text_align": "right",
+              "color": "#000000",
+              "background_color": "#FFFFFF80",
+              "margin": 20
+            },
+            "text_content": "Summer Sale"
+          },
+          "subheading": {
+            "bbox": {
+              "x": 152,
+              "y": 508,
+              "width": 776,
+              "height": 64
+            },
+            "position": {
+              "x1": 152,
+              "y1": 508,
+              "x2": 928,
+              "y2": 572
+            },
+            "styling": {
+              "font_size": 54,
+              "font_weight": "normal",
+              "text_align": "left",
+              "color": "#000000",
+              "background_color": "#FFFFFF80",
+              "margin": 15
+            },
+            "text_content": "Up to 50% Off Everything"
+          },
+          "cta": {
+            "bbox": {
+              "x": 437,
+              "y": 989,
+              "width": 206,
+              "height": 51
+            },
+            "position": {
+              "x1": 437,
+              "y1": 989,
+              "x2": 643,
+              "y2": 1040
+            },
+            "styling": {
+              "font_size": 43,
+              "font_weight": "bold",
+              "text_align": "center",
+              "color": "#000000",
+              "background_color": "#FFFFFF80",
+              "margin": 10
+            },
+            "text_content": "Shop Now"
+          }
+        }
+      }
+    ]
+  }
