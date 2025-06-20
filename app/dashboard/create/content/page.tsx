@@ -10,13 +10,33 @@ import {
 } from "@/components/ui/breadcrumb";
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Sparkles, Pencil, Bot, Download } from "lucide-react";
+import { Sparkles, Pencil, Bot, Download, ChevronLeft } from "lucide-react";
 import AdGenerationLoader from "@/components/ad-generation-loader";
 import NavigationButtons from "@/components/navigation-buttons";
 import AdLayoutSVG from "@/components/AdLayoutSVG";
-import type { Layout } from "@/components/AdLayoutSVG";
+import type { Layout, ElementData, Styling } from "@/components/AdLayoutSVG";
 import layoutDataRaw from "../../../../output_sample.json";
-const layoutData = layoutDataRaw as { layouts: Layout[] };
+import { Button, buttonVariants } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import AdLayoutControls from "@/components/AdLayoutControls";
+const layoutData = layoutDataRaw as { layouts: Layout[], metadata: any };
+
+// Parse aspect ratio from post_dimensions (e.g., "4:3")
+function getAspectRatio(dim: string | undefined): [number, number] {
+  if (!dim) return [1, 1];
+  const match = dim.match(/(\d+):(\d+)/);
+  if (match) {
+    return [parseInt(match[1], 10), parseInt(match[2], 10)];
+  }
+  return [1, 1];
+}
+
+const [aspectW, aspectH] = getAspectRatio(layoutData.metadata?.post_dimensions);
+const MAIN_DISPLAY_WIDTH = 500;
+const MAIN_DISPLAY_HEIGHT = Math.round((MAIN_DISPLAY_WIDTH * aspectH) / aspectW);
+const TILE_WIDTH = 120;
+const TILE_HEIGHT = Math.round((TILE_WIDTH * aspectH) / aspectW);
 
 export default function ContentPage() {
   const [selectedOption, setSelectedOption] = useState<"ai" | "manual" | null>(null);
@@ -28,6 +48,8 @@ export default function ContentPage() {
   const [generatingImage, setGeneratingImage] = useState(false);
   const [generatedImage, setGeneratedImage] = useState<string | null>(null);
   const [selectedLayoutIdx, setSelectedLayoutIdx] = useState(0);
+  const [layouts, setLayouts] = useState(layoutData.layouts);
+  const [selectedElement, setSelectedElement] = useState<"heading" | "subheading" | "cta" | null>(null);
   const router = useRouter();
   const searchParams = useSearchParams();
   const type = searchParams.get("type");
@@ -46,15 +68,24 @@ export default function ContentPage() {
     }, 3000);
   };
 
-  const handleDownloadImage = () => {
-    if (generatedImage) {
-      const link = document.createElement('a');
-      link.href = generatedImage;
-      link.download = 'generated-ad.png';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    }
+  const handleLayoutChange = (newLayout: Layout, index: number) => {
+    const newLayouts = [...layouts];
+    newLayouts[index] = newLayout;
+    setLayouts(newLayouts);
+  };
+
+  const handleStyleChange = (type: "heading" | "subheading" | "cta", key: keyof Styling, value: string | number) => {
+    const newLayouts = [...layouts];
+    const newLayout = { ...newLayouts[selectedLayoutIdx] };
+    (newLayout.elements[type].styling as any)[key] = value;
+    newLayouts[selectedLayoutIdx] = newLayout;
+    setLayouts(newLayouts);
+  };
+
+  const handleElementChange = (newElements: { heading: ElementData; subheading: ElementData; cta: ElementData }) => {
+    const newLayouts = [...layouts];
+    newLayouts[selectedLayoutIdx].elements = newElements;
+    setLayouts(newLayouts);
   };
 
   return (
@@ -100,53 +131,71 @@ export default function ContentPage() {
       {generatingImage && <AdGenerationLoader />}
 
       {generatedImage ? (
-        <div className="w-full max-w-4xl mx-auto bg-gradient-to-br from-disoriti-primary/5 to-disoriti-accent/5 p-8 rounded-2xl border border-disoriti-primary/20 flex flex-row gap-8 items-center justify-center">
+        <div className="w-full max-w-6xl mx-auto bg-card p-6 rounded-2xl border border-border shadow-lg flex flex-row gap-8 items-start justify-center">
           {/* Tiles on the left (catalogue) */}
-          <div className="flex flex-col gap-4 items-center w-[140px]">
-            {layoutData.layouts.map((layout, idx) => (
-              <div
-                key={layout.id || idx}
-                className={`rounded-lg border-2 cursor-pointer transition-all ${selectedLayoutIdx === idx ? "border-blue-600" : "border-gray-300"}`}
-                style={{ background: "#fff", width: 120, height: 120, overflow: "hidden" }}
-                onClick={() => setSelectedLayoutIdx(idx)}
-              >
-                <AdLayoutSVG
-                  imageUrl={generatedImage}
-                  layout={layout}
-                  width={120}
-                  height={120}
-                  showControls={false}
-                  pointerEventsNone={true}
-                />
-              </div>
-            ))}
+          <div className="flex flex-col gap-4 items-center w-[150px] pt-12">
+            <h3 className="font-semibold text-lg text-foreground mb-2">Layouts</h3>
+            <div className="flex flex-col gap-4 items-center w-full">
+              {layoutData.layouts.map((layout, idx) => (
+                <div
+                  key={layout.id || idx}
+                  className={`rounded-lg border-2 cursor-pointer transition-all duration-300 transform hover:scale-105 ${selectedLayoutIdx === idx ? "border-primary shadow-primary/30 shadow-lg" : "border-border"}`}
+                  style={{ background: "#fff", width: 140, height: 140, overflow: "hidden" }}
+                  onClick={() => setSelectedLayoutIdx(idx)}
+                >
+                  <AdLayoutSVG
+                    imageUrl={generatedImage}
+                    layout={layout}
+                    width={140}
+                    height={140}
+                    selected={null}
+                    pointerEventsNone={true}
+                  />
+                </div>
+              ))}
+            </div>
           </div>
           {/* Main display area (center) */}
-          <div className="flex-1 flex flex-col items-center justify-center">
-            <div className="flex flex-col items-center">
+          <div className="flex-1 flex flex-col items-center justify-center gap-6">
+            <div className="bg-background/50 p-4 rounded-xl border border-border">
               <AdLayoutSVG
                 imageUrl={generatedImage}
-                layout={layoutData.layouts[selectedLayoutIdx]}
+                layout={layouts[selectedLayoutIdx]}
                 width={500}
                 height={500}
-                showControls={true}
+                selected={selectedElement}
+                onSelectElement={setSelectedElement}
+                onElementsChange={handleElementChange}
               />
             </div>
-            <div className="flex justify-between items-center mt-6 w-full">
-              <button
+            <div className="flex justify-between items-center mt-4 w-full max-w-[500px]">
+              <Button
+                variant="ghost"
                 onClick={() => setGeneratedImage(null)}
-                className="px-6 py-2 rounded-xl border border-disoriti-primary/30 text-disoriti-primary bg-disoriti-primary/10 font-medium hover:bg-disoriti-primary/20 transition-all"
+                className="text-muted-foreground hover:text-foreground"
               >
-                ← Back to Content
-              </button>
-              <button
-                onClick={handleDownloadImage}
-                className="flex items-center gap-2 px-6 py-2 rounded-xl bg-disoriti-primary text-white font-medium hover:bg-disoriti-primary/90 transition-all"
+                <ChevronLeft className="w-4 h-4 mr-2" />
+                Back
+              </Button>
+              <a
+                href={generatedImage}
+                download="generated-ad.png"
+                className={buttonVariants({
+                  className: "bg-primary hover:bg-primary/90 text-primary-foreground font-bold shadow-md",
+                })}
               >
-                <Download className="w-4 h-4" />
-                Download Image
-              </button>
+                <Download className="w-4 h-4 mr-2" />
+                Download
+              </a>
             </div>
+          </div>
+          {/* Controls on the right */}
+          <div className="w-[280px] pt-12">
+            <AdLayoutControls
+              elements={layouts[selectedLayoutIdx].elements}
+              selected={selectedElement}
+              onStyleChange={handleStyleChange}
+            />
           </div>
         </div>
       ) : (
@@ -154,10 +203,10 @@ export default function ContentPage() {
           {/* Option Selection */}
           {!selectedOption ? (
             <div className="flex gap-10 w-full justify-center">
-              <button
+              <Button
+                variant="outline"
                 className="flex flex-col items-center justify-center rounded-2xl border-2 transition-all duration-300 shadow-xl bg-gradient-to-br from-disoriti-primary/10 to-disoriti-accent/10 px-16 py-20 text-2xl font-bold w-[340px] h-56 hover:border-disoriti-primary/60 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-disoriti-primary/40"
                 onClick={() => setSelectedOption("ai")}
-                type="button"
               >
                 <span className="mb-4 flex items-center justify-center">
                   <span className="relative flex items-center justify-center">
@@ -169,19 +218,19 @@ export default function ContentPage() {
                 <span className="text-base font-normal text-disoriti-primary/70">
                   Generate post content automatically
                 </span>
-              </button>
+              </Button>
 
-              <button
+              <Button
+                variant="outline"
                 className="flex flex-col items-center justify-center rounded-2xl border-2 transition-all duration-300 shadow-xl bg-gradient-to-br from-disoriti-primary/10 to-disoriti-accent/10 px-16 py-20 text-2xl font-bold w-[340px] h-56 hover:border-disoriti-primary/60 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-disoriti-primary/40"
                 onClick={() => setSelectedOption("manual")}
-                type="button"
               >
                 <Pencil className="h-12 w-12 mb-4" />
                 <span className="mb-2">Manual post configuration</span>
                 <span className="text-base font-normal text-disoriti-primary/70">
                   Enter your own post content
                 </span>
-              </button>
+              </Button>
             </div>
           ) : selectedOption === "ai" ? (
             <div className="flex justify-center">
@@ -192,26 +241,30 @@ export default function ContentPage() {
                     <Bot className="h-16 w-16 text-disoriti-primary drop-shadow-lg relative z-10" />
                   </span>
                 </span>
-                <h2 className="text-2xl font-bold mb-4">AI Magic Coming Soon!</h2>
-                <p className="text-base text-disoriti-primary/70 mb-6 text-center">This feature will generate your post content automatically based on your previous selections.</p>
-                <button
-                  className="mt-2 px-6 py-2 rounded-xl border border-disoriti-primary/30 text-disoriti-primary bg-disoriti-primary/10 font-medium hover:bg-disoriti-primary/20 transition-all"
-                  onClick={() => setSelectedOption(null)}
+                <h2 className="text-2xl font-bold mb-4">Let AI do the magic</h2>
+                <p className="text-disoriti-primary/70 mb-6 text-center">
+                  Our AI will generate the perfect post content for you based on the media and settings you provided.
+                </p>
+                <Button
+                  onClick={handleGenerateImage}
+                  className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold shadow-md px-8 py-6 text-lg rounded-full transition-transform transform hover:scale-105"
                 >
-                  ← Back
-                </button>
-              </div>
+                  <Sparkles className="w-6 h-6 mr-3" />
+                  Generate Post
+                </Button>
             </div>
-           
+            </div>
           ) : (
-            // Manual post content form
+            // Manual form
             <div className="flex justify-center">
               <div className="w-full max-w-2xl bg-gradient-to-br from-disoriti-primary/5 to-disoriti-accent/5 p-8 rounded-2xl border border-disoriti-primary/20">
+                <h2 className="text-2xl font-bold mb-6 text-center">Manual Post Configuration</h2>
                 <div className="space-y-6">
                   {/* Post Heading */}
                   <div>
-                    <label className="block text-sm font-medium mb-2">Post Heading</label>
-                    <input
+                    <Label htmlFor="post-heading">Post Heading</Label>
+                    <Input
+                      id="post-heading"
                       type="text"
                       value={postHeading}
                       onChange={(e) => setPostHeading(e.target.value)}
@@ -221,8 +274,9 @@ export default function ContentPage() {
                   </div>
                   {/* Post Subheading */}
                   <div>
-                    <label className="block text-sm font-medium mb-2">Post Subheading</label>
-                    <input
+                    <Label htmlFor="post-subheading">Post Subheading</Label>
+                    <Input
+                      id="post-subheading"
                       type="text"
                       value={postSubheading}
                       onChange={(e) => setPostSubheading(e.target.value)}
@@ -233,19 +287,19 @@ export default function ContentPage() {
                   {/* Call to Action */}
                   <div>
                     <div className="flex items-center gap-3">
-                      <input
+                      <Input
                         type="checkbox"
                         id="has-cta"
                         checked={hasCTA}
                         onChange={(e) => setHasCTA(e.target.checked)}
                         className="w-4 h-4 rounded border-disoriti-primary/20 focus:ring-2 focus:ring-disoriti-primary/40"
                       />
-                      <label htmlFor="has-cta" className="text-sm font-medium">
+                      <Label htmlFor="has-cta" className="text-sm font-medium">
                         Include Call to Action
-                      </label>
+                      </Label>
                     </div>
                     {hasCTA && (
-                      <input
+                      <Input
                         type="text"
                         value={ctaText}
                         onChange={(e) => setCtaText(e.target.value)}
@@ -256,8 +310,10 @@ export default function ContentPage() {
                   </div>
                   {/* Extra Text/Information */}
                   <div>
-                    <label className="block text-sm font-medium mb-2">Extra Information (Optional)</label>
-                    <textarea
+                    <Label htmlFor="extra-text">Extra Text</Label>
+                    <Input
+                      id="extra-text"
+                      type="text"
                       value={extraText}
                       onChange={(e) => setExtraText(e.target.value)}
                       className="w-full p-3 bg-white/5 rounded-lg border border-disoriti-primary/20 focus:outline-none focus:ring-2 focus:ring-disoriti-primary/40 min-h-[100px] resize-y"
@@ -267,7 +323,6 @@ export default function ContentPage() {
                 </div>
               </div>
             </div>
-            
           )}
 
           {/* Navigation Buttons */}

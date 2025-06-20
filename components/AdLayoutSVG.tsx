@@ -1,5 +1,10 @@
 "use client";
 import React, { useRef, useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Minus, Plus, Palette, Type, Maximize, Frame } from "lucide-react";
+import AdLayoutControls from "@/components/AdLayoutControls";
 
 const fonts = ["Arial", "Georgia", "Impact", "Verdana", "Tahoma", "Times New Roman"];
 type ElementType = "heading" | "subheading" | "cta";
@@ -9,7 +14,9 @@ interface AdLayoutSVGProps {
   layout: Layout;
   width?: number;
   height?: number;
-  showControls?: boolean;
+  selected: ElementType | null;
+  onSelectElement?: (type: ElementType | null) => void;
+  onElementsChange?: (elements: { heading: ElementData; subheading: ElementData; cta: ElementData }) => void;
   pointerEventsNone?: boolean;
 }
 
@@ -25,6 +32,10 @@ export interface Styling {
   background_color: string;
   margin: number;
   font_family?: string;
+  color_opacity?: number;
+  background_opacity?: number;
+  letter_spacing?: number;
+  text_transform?: "none" | "uppercase" | "lowercase" | "capitalize";
 }
 
 export interface ElementData {
@@ -43,51 +54,51 @@ export interface Layout {
   };
 }
 
-const AdLayoutSVG: React.FC<AdLayoutSVGProps> = ({ imageUrl, layout, width = 1080, height = 1080, showControls = true, pointerEventsNone = false }) => {
-  const [elements, setElements] = useState(() => ({
-    heading: { ...layout.elements.heading },
-    subheading: { ...layout.elements.subheading },
-    cta: { ...layout.elements.cta },
-  }));
-  const [selected, setSelected] = useState<ElementType | null>(null);
+// Helper to convert hex to rgba
+function hexToRgba(hex: string, alpha: number = 1): string {
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
+
+const AdLayoutSVG: React.FC<AdLayoutSVGProps> = ({ imageUrl, layout, width = 1080, height = 1080, selected, onSelectElement, onElementsChange, pointerEventsNone }) => {
+  const [elements, setElements] = useState(layout.elements);
   const dragOffset = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
 
-  // Reset elements when layout changes
   useEffect(() => {
-    setElements({
-      heading: { ...layout.elements.heading },
-      subheading: { ...layout.elements.subheading },
-      cta: { ...layout.elements.cta },
-    });
-    setSelected(null);
+    setElements(layout.elements);
   }, [layout]);
 
-  // Drag handlers
-  const handleDragStart = (type: ElementType, e: React.MouseEvent<SVGRectElement | SVGTextElement, MouseEvent>) => {
-    dragOffset.current = {
-      x: e.clientX - elements[type].bbox.x,
-      y: e.clientY - elements[type].bbox.y,
-    };
-    setSelected(type);
-    window.addEventListener("mousemove", onDragMove);
-    window.addEventListener("mouseup", onDragEnd);
-    function onDragMove(ev: MouseEvent) {
-      setElements((prev) => ({
-        ...prev,
+  const handleDragStart = (type: ElementType, e: React.MouseEvent) => {
+    const startX = e.clientX;
+    const startY = e.clientY;
+    const initialX = elements[type].bbox.x;
+    const initialY = elements[type].bbox.y;
+
+    onSelectElement?.(type);
+
+    const onDragMove = (ev: MouseEvent) => {
+      const dx = ev.clientX - startX;
+      const dy = ev.clientY - startY;
+      const newElements = {
+        ...elements,
         [type]: {
-          ...prev[type],
-          bbox: {
-            ...prev[type].bbox,
-            x: ev.clientX - dragOffset.current.x,
-            y: ev.clientY - dragOffset.current.y,
-          },
+          ...elements[type],
+          bbox: { ...elements[type].bbox, x: initialX + dx, y: initialY + dy },
         },
-      }));
-    }
-    function onDragEnd() {
+      };
+      setElements(newElements);
+      onElementsChange?.(newElements);
+    };
+
+    const onDragEnd = () => {
       window.removeEventListener("mousemove", onDragMove);
       window.removeEventListener("mouseup", onDragEnd);
-    }
+    };
+
+    window.addEventListener("mousemove", onDragMove);
+    window.addEventListener("mouseup", onDragEnd);
   };
 
   // Add a new handler for div drag
@@ -96,7 +107,7 @@ const AdLayoutSVG: React.FC<AdLayoutSVGProps> = ({ imageUrl, layout, width = 108
       x: e.clientX - elements[type].bbox.x,
       y: e.clientY - elements[type].bbox.y,
     };
-    setSelected(type);
+    onSelectElement?.(type);
     window.addEventListener("mousemove", onDragMove);
     window.addEventListener("mouseup", onDragEnd);
     function onDragMove(ev: MouseEvent) {
@@ -121,7 +132,7 @@ const AdLayoutSVG: React.FC<AdLayoutSVGProps> = ({ imageUrl, layout, width = 108
   // Resize handlers
   const handleResizeStart = (type: ElementType, e: React.MouseEvent<SVGRectElement, MouseEvent>) => {
     e.stopPropagation();
-    setSelected(type);
+    onSelectElement?.(type);
     dragOffset.current = {
       x: e.clientX - (elements[type].bbox.x + elements[type].bbox.width),
       y: e.clientY - (elements[type].bbox.y + elements[type].bbox.height),
@@ -153,58 +164,50 @@ const AdLayoutSVG: React.FC<AdLayoutSVGProps> = ({ imageUrl, layout, width = 108
 
   // Style change handler
   const handleStyleChange = (type: ElementType, key: keyof Styling, value: any) => {
-    setElements((prev) => ({
-      ...prev,
-      [type]: {
-        ...prev[type],
-        styling: {
-          ...prev[type].styling,
-          [key]: value,
-        },
-      },
-    }));
+    // This logic now needs to be in the parent, ContentPage
+    // For now, we pass a dummy function to AdLayoutControls
   };
 
+  // Helper to measure text size in SVG
+  const measureText = (text: string, fontSize: number, fontWeight: string, fontFamily: string) => {
+    if (typeof window === "undefined") return { width: 0, height: 0 };
+    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    const tempText = document.createElementNS("http://www.w3.org/2000/svg", "text");
+    tempText.setAttribute("font-size", fontSize.toString());
+    tempText.setAttribute("font-weight", fontWeight);
+    tempText.setAttribute("font-family", fontFamily);
+    tempText.textContent = text;
+    svg.appendChild(tempText);
+    document.body.appendChild(svg);
+    const bbox = tempText.getBBox();
+    document.body.removeChild(svg);
+    return { width: bbox.width, height: bbox.height };
+  };
+
+  // Font scaling factor: scale font size by crop area, not by final display size
+  const fontScale = Math.min(svgWidth, svgHeight) / 1080;
+
   return (
-    <div style={{ display: "flex", gap: 24 }}>
+    <div style={{ display: "flex", gap: 24, alignItems: "flex-start", pointerEvents: pointerEventsNone ? "none" : "auto" }}>
       <svg
         width={width}
         height={height}
-        style={{ border: "1px solid #ccc", pointerEvents: pointerEventsNone ? "none" : undefined }}
+        viewBox="0 0 1080 1080"
+        style={{ border: "1px solid #ccc", background: "#fff" }}
       >
-        <image href={imageUrl} x={0} y={0} width={width} height={height} />
+        <image href={imageUrl} width="1080" height="1080" preserveAspectRatio="xMidYMid slice" />
         {(["heading", "subheading", "cta"] as ElementType[]).map((type) => {
           const el = elements[type];
-          // scale positions and sizes
-          const scaleX = width / 1080;
-          const scaleY = height / 1080;
-          const boxX = el.bbox.x * scaleX;
-          const boxY = el.bbox.y * scaleY;
-          const boxW = el.bbox.width * scaleX;
-          const boxH = el.bbox.height * scaleY;
-          let justifyContent = "center";
-          if (el.styling.text_align === "left") justifyContent = "flex-start";
-          if (el.styling.text_align === "right") justifyContent = "flex-end";
+          const isSelected = type === selected;
           return (
             <g key={type}>
-              {/* Background rect */}
-              <rect
-                x={boxX}
-                y={boxY}
-                width={boxW}
-                height={boxH}
-                fill={el.styling.background_color}
-                rx={12 * scaleX}
-                style={{ cursor: showControls ? "move" : "default" }}
-                onMouseDown={showControls && !pointerEventsNone ? (e) => handleDragStart(type, e) : undefined}
-              />
-              {/* Text using foreignObject for wrapping and alignment */}
               <foreignObject
-                x={boxX}
-                y={boxY}
-                width={boxW}
-                height={boxH}
-                style={{ pointerEvents: showControls && !pointerEventsNone ? "auto" : "none" }}
+                x={el.bbox.x}
+                y={el.bbox.y}
+                width={el.bbox.width}
+                height={el.bbox.height}
+                onMouseDown={(e) => handleDragStart(type, e)}
+                style={{ cursor: "move" }}
               >
                 <div
                   style={{
@@ -212,74 +215,49 @@ const AdLayoutSVG: React.FC<AdLayoutSVGProps> = ({ imageUrl, layout, width = 108
                     height: "100%",
                     display: "flex",
                     alignItems: "center",
-                    justifyContent,
-                    fontSize: el.styling.font_size * scaleY,
+                    justifyContent: el.styling.text_align,
+                    fontSize: el.styling.font_size,
                     fontWeight: el.styling.font_weight,
-                    color: el.styling.color,
+                    color: hexToRgba(el.styling.color, el.styling.color_opacity),
                     fontFamily: el.styling.font_family || "Arial",
                     textAlign: el.styling.text_align,
+                    backgroundColor: hexToRgba(el.styling.background_color, el.styling.background_opacity),
+                    borderRadius: 8,
+                    padding: 5,
                     overflow: "hidden",
                     wordBreak: "break-word",
                     userSelect: "none",
-                    padding: 0,
-                    margin: 0,
+                    outline: isSelected ? '2px dashed #007bff' : 'none',
+                    outlineOffset: '-2px',
+                    letterSpacing: `${el.styling.letter_spacing || 0}px`,
+                    textTransform: el.styling.text_transform || 'none',
                   }}
-                  onMouseDown={showControls && !pointerEventsNone ? (e) => handleDivDragStart(type, e) : undefined}
+                  onMouseDown={(e) => handleDivDragStart(type, e)}
                 >
                   {el.text_content}
                 </div>
               </foreignObject>
-              {/* Resize handle (bottom right) */}
-              {showControls && !pointerEventsNone && selected === type && (
+              {isSelected && (
                 <rect
-                  x={boxX + boxW - 12 * scaleX}
-                  y={boxY + boxH - 12 * scaleY}
-                  width={12 * scaleX}
-                  height={12 * scaleY}
-                  fill="#333"
-                  style={{ cursor: "nwse-resize" }}
-                  onMouseDown={(e) => handleResizeStart(type, e)}
+                  x={el.bbox.x + el.bbox.width - 8}
+                  y={el.bbox.y + el.bbox.height - 8}
+                  width="16"
+                  height="16"
+                  fill="#007bff"
+                  stroke="#fff"
+                  strokeWidth="2"
+                  cursor="nwse-resize"
+                  onMouseDown={(e) => {
+                    e.stopPropagation();
+                    handleResizeStart(type, e);
+                  }}
                 />
               )}
             </g>
           );
         })}
       </svg>
-      {/* Controls */}
-      {showControls && !pointerEventsNone && selected && (
-        <div className="flex flex-col gap-4 min-w-[200px]">
-          <h3 className="font-bold mb-2 capitalize">Edit {selected}</h3>
-          <label className="text-sm">Color</label>
-          <input
-            type="color"
-            value={elements[selected].styling.color}
-            onChange={(e) => handleStyleChange(selected, "color", e.target.value)}
-          />
-          <label className="text-sm">Background</label>
-          <input
-            type="color"
-            value={elements[selected].styling.background_color}
-            onChange={(e) => handleStyleChange(selected, "background_color", e.target.value)}
-          />
-          <label className="text-sm">Font</label>
-          <select
-            value={elements[selected].styling.font_family || "Arial"}
-            onChange={(e) => handleStyleChange(selected, "font_family", e.target.value)}
-          >
-            {fonts.map((font) => (
-              <option key={font} value={font}>{font}</option>
-            ))}
-          </select>
-          <label className="text-sm">Font Size</label>
-          <input
-            type="number"
-            min={8}
-            max={200}
-            value={elements[selected].styling.font_size}
-            onChange={(e) => handleStyleChange(selected, "font_size", Number(e.target.value))}
-          />
-        </div>
-      )}
+      {/* Controls are now rendered by the parent */}
     </div>
   );
 };

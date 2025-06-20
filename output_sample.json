@@ -4,6 +4,7 @@
       "platform": "instagram",
       "post_type": "square",
       "design_style": "bold",
+      "post_dimensions": "4:3",
       "num_options": 3,
       "input_texts": {
         "heading": "Summer Sale",
