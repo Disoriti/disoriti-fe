@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Minus, Plus, Palette, Type, Maximize, Frame, AlignCenter, AlignLeft, AlignRight, Bold, Italic, Underline } from "lucide-react";
+import { Minus, Plus, Palette, Type, Maximize, Frame, AlignCenter, AlignLeft, AlignRight, Bold, Italic, Underline, Image as ImageIcon, Sun, SlidersHorizontal, Settings } from "lucide-react";
 import type { ElementData, Styling } from "./AdLayoutSVG";
 import {
   Select,
@@ -32,9 +32,11 @@ interface AdLayoutControlsProps {
   };
   selected: ElementType | null;
   onStyleChange: (type: ElementType, key: keyof Styling, value: string | number) => void;
+  onImageEdit?: (edits: { brightness: number; contrast: number; saturation: number }) => void;
+  onImageReplace?: (file: File) => void;
 }
 
-const AdLayoutControls: React.FC<AdLayoutControlsProps> = ({ elements, selected, onStyleChange }) => {
+const AdLayoutControls: React.FC<AdLayoutControlsProps> = ({ elements, selected, onStyleChange, onImageEdit, onImageReplace }) => {
   if (!selected) return (
     <Card className="w-full">
       <CardHeader>
@@ -49,6 +51,8 @@ const AdLayoutControls: React.FC<AdLayoutControlsProps> = ({ elements, selected,
   );
 
   const selectedStyling = elements[selected].styling;
+
+  const [imageEdits, setImageEdits] = useState({ brightness: 100, contrast: 100, saturation: 100 });
 
   const ColorInput = ({ label, value, opacity, onColorChange, onOpacityChange, icon: Icon }: { label: string, value: string, opacity: number, onColorChange: (val: string) => void, onOpacityChange: (val: number) => void, icon: React.ElementType }) => {
     const [sliderValue, setSliderValue] = useState(opacity * 100);
@@ -96,9 +100,55 @@ const AdLayoutControls: React.FC<AdLayoutControlsProps> = ({ elements, selected,
   return (
     <div>
       <h3 className="font-semibold text-lg capitalize text-foreground mb-4">Edit {selected}</h3>
-      <Accordion type="single" collapsible className="w-full" defaultValue="color">
+      {/* Controls Accordion */}
+      <Accordion type="single" collapsible className="w-full" defaultValue="image">
+        <AccordionItem value="image">
+          <AccordionTrigger className="text-base flex items-center gap-2 pl-2"><SlidersHorizontal className="w-4 h-4" />Image Adjustments</AccordionTrigger>
+          <AccordionContent className="space-y-4 pt-4">
+            <div className="space-y-2">
+              <Label className="flex items-center gap-2 text-sm font-medium text-muted-foreground"><Sun className="w-4 h-4" /> Brightness</Label>
+              <Slider
+                value={[imageEdits.brightness]}
+                min={0}
+                max={200}
+                step={1}
+                onValueChange={([val]) => {
+                  setImageEdits((prev) => { const next = { ...prev, brightness: val }; onImageEdit?.(next); return next; });
+                }}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label className="flex items-center gap-2 text-sm font-medium text-muted-foreground"><Sun className="w-4 h-4 rotate-45" /> Contrast</Label>
+              <Slider
+                value={[imageEdits.contrast]}
+                min={0}
+                max={200}
+                step={1}
+                onValueChange={([val]) => {
+                  setImageEdits((prev) => { const next = { ...prev, contrast: val }; onImageEdit?.(next); return next; });
+                }}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label className="flex items-center gap-2 text-sm font-medium text-muted-foreground"><Palette className="w-4 h-4" /> Saturation</Label>
+              <Slider
+                value={[imageEdits.saturation]}
+                min={0}
+                max={200}
+                step={1}
+                onValueChange={([val]) => {
+                  setImageEdits((prev) => { const next = { ...prev, saturation: val }; onImageEdit?.(next); return next; });
+                }}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label className="flex items-center gap-2 text-sm font-medium text-muted-foreground"><ImageIcon className="w-4 h-4" /> Replace Image</Label>
+              <Input type="file" accept="image/*" onChange={e => { if (e.target.files?.[0]) onImageReplace?.(e.target.files[0]); }} />
+            </div>
+          </AccordionContent>
+        </AccordionItem>
         <AccordionItem value="color">
-          <AccordionTrigger className="text-base">Color</AccordionTrigger>
+          <AccordionTrigger className="text-base flex items-center gap-2 pl-2"><Palette className="w-4 h-4" />Color</AccordionTrigger>
           <AccordionContent className="space-y-6 pt-4">
             <ColorInput 
               label="Text" 
@@ -119,7 +169,7 @@ const AdLayoutControls: React.FC<AdLayoutControlsProps> = ({ elements, selected,
           </AccordionContent>
         </AccordionItem>
         <AccordionItem value="typography">
-          <AccordionTrigger className="text-base">Typography</AccordionTrigger>
+          <AccordionTrigger className="text-base flex items-center gap-2 pl-2"><Type className="w-4 h-4" />Typography</AccordionTrigger>
           <AccordionContent className="space-y-4 pt-4">
             <div className="space-y-2">
               <Label className="flex items-center gap-2 text-sm font-medium text-muted-foreground"><Type className="w-4 h-4" /> Font Family</Label>
@@ -171,7 +221,7 @@ const AdLayoutControls: React.FC<AdLayoutControlsProps> = ({ elements, selected,
                   max={200}
                   value={selectedStyling.font_size}
                   onChange={(e) => onStyleChange(selected, "font_size", Number(e.target.value))}
-                  className="w-full text-center"
+                  className="w-full text-center no-spinner"
                 />
                 <Button
                   variant="outline"
@@ -185,14 +235,14 @@ const AdLayoutControls: React.FC<AdLayoutControlsProps> = ({ elements, selected,
           </AccordionContent>
         </AccordionItem>
         <AccordionItem value="formatting">
-          <AccordionTrigger className="text-base">Formatting</AccordionTrigger>
+          <AccordionTrigger className="text-base flex items-center gap-2 pl-2"><Settings className="w-4 h-4" />Formatting</AccordionTrigger>
           <AccordionContent className="space-y-4 pt-4">
             <div className="space-y-2">
-              <Label className="flex items-center gap-2 text-sm font-medium text-muted-foreground"><AlignCenter className="w-4 h-4" /> Text Align</Label>
-              <div className="grid grid-cols-3 gap-1 rounded-md bg-muted p-1">
-                <Button variant={selectedStyling.text_align === 'left' ? 'secondary' : 'ghost'} size="icon" onClick={() => onStyleChange(selected, 'text_align', 'left')}><AlignLeft className="w-4 h-4" /></Button>
-                <Button variant={selectedStyling.text_align === 'center' ? 'secondary' : 'ghost'} size="icon" onClick={() => onStyleChange(selected, 'text_align', 'center')}><AlignCenter className="w-4 h-4" /></Button>
-                <Button variant={selectedStyling.text_align === 'right' ? 'secondary' : 'ghost'} size="icon" onClick={() => onStyleChange(selected, 'text_align', 'right')}><AlignRight className="w-4 h-4" /></Button>
+              <Label className="flex items-center gap-2 text-sm font-medium text-muted-foreground">Text Align</Label>
+              <div className="flex gap-1 rounded-md bg-muted p-1">
+                <Button className="flex-1" variant={selectedStyling.text_align === 'left' ? 'secondary' : 'ghost'} size="icon" onClick={() => onStyleChange(selected, 'text_align', 'left')}><AlignLeft className="w-4 h-4" /></Button>
+                <Button className="flex-1" variant={selectedStyling.text_align === 'center' ? 'secondary' : 'ghost'} size="icon" onClick={() => onStyleChange(selected, 'text_align', 'center')}><AlignCenter className="w-4 h-4" /></Button>
+                <Button className="flex-1" variant={selectedStyling.text_align === 'right' ? 'secondary' : 'ghost'} size="icon" onClick={() => onStyleChange(selected, 'text_align', 'right')}><AlignRight className="w-4 h-4" /></Button>
               </div>
             </div>
 

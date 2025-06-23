@@ -35,13 +35,13 @@ function AccordionTrigger({
       <AccordionPrimitive.Trigger
         data-slot="accordion-trigger"
         className={cn(
-          "focus-visible:border-ring focus-visible:ring-ring/50 flex flex-1 items-start justify-between gap-4 rounded-md py-4 text-left text-sm font-medium transition-all outline-none hover:underline focus-visible:ring-[3px] disabled:pointer-events-none disabled:opacity-50 [&[data-state=open]>svg]:rotate-180",
+          "focus-visible:border-ring focus-visible:ring-ring/50 flex flex-1 items-center justify-between gap-2 rounded-md py-4 pl-2 pr-4 text-left text-sm font-medium transition-all outline-none disabled:pointer-events-none disabled:opacity-50 [&[data-state=open]]:bg-primary/5 [&[data-state=open]]:shadow-[0_0_8px_0_hsl(var(--primary)/0.15)] [&[data-state=open]]:text-primary [&[data-state=open]]:[text-shadow:0_0_6px_hsl(var(--primary)/0.3)] hover:text-primary hover:[text-shadow:0_0_8px_hsl(var(--primary)/0.8)] [&[data-state=open]>.chevron]:rotate-180",
           className
         )}
         {...props}
       >
-        {children}
-        <ChevronDownIcon className="text-muted-foreground pointer-events-none size-4 shrink-0 translate-y-0.5 transition-transform duration-200" />
+        <span className="flex items-center gap-2 flex-1">{children}</span>
+        <ChevronDownIcon className="chevron text-muted-foreground pointer-events-none size-4 shrink-0 translate-y-0.5 transition-transform duration-200" />
       </AccordionPrimitive.Trigger>
     </AccordionPrimitive.Header>
   )

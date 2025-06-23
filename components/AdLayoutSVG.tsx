@@ -18,6 +18,7 @@ interface AdLayoutSVGProps {
   onSelectElement?: (type: ElementType | null) => void;
   onElementsChange?: (elements: { heading: ElementData; subheading: ElementData; cta: ElementData }) => void;
   pointerEventsNone?: boolean;
+  style?: React.CSSProperties;
 }
 
 const svgWidth = 1080;
@@ -62,7 +63,7 @@ function hexToRgba(hex: string, alpha: number = 1): string {
   return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }
 
-const AdLayoutSVG: React.FC<AdLayoutSVGProps> = ({ imageUrl, layout, width = 1080, height = 1080, selected, onSelectElement, onElementsChange, pointerEventsNone }) => {
+const AdLayoutSVG: React.FC<AdLayoutSVGProps> = ({ imageUrl, layout, width = 1080, height = 1080, selected, onSelectElement, onElementsChange, pointerEventsNone, style }) => {
   const [elements, setElements] = useState(layout.elements);
   const dragOffset = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
 
@@ -188,12 +189,12 @@ const AdLayoutSVG: React.FC<AdLayoutSVGProps> = ({ imageUrl, layout, width = 108
   const fontScale = Math.min(svgWidth, svgHeight) / 1080;
 
   return (
-    <div style={{ display: "flex", gap: 24, alignItems: "flex-start", pointerEvents: pointerEventsNone ? "none" : "auto" }}>
+    <div style={{ display: "flex", gap: 24, alignItems: "flex-start", pointerEvents: pointerEventsNone ? "none" : "auto", ...style }}>
       <svg
         width={width}
         height={height}
         viewBox="0 0 1080 1080"
-        style={{ border: "1px solid #ccc", background: "#fff" }}
+        style={{ background: "#fff" }}
       >
         <image href={imageUrl} width="1080" height="1080" preserveAspectRatio="xMidYMid slice" />
         {(["heading", "subheading", "cta"] as ElementType[]).map((type) => {
