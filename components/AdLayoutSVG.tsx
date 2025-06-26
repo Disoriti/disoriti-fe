@@ -19,6 +19,10 @@ interface AdLayoutSVGProps {
   onElementsChange?: (elements: { heading: ElementData; subheading: ElementData; cta: ElementData }) => void;
   pointerEventsNone?: boolean;
   style?: React.CSSProperties;
+  logoPosition?: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right';
+  logoColor?: string;
+  showLogo?: boolean;
+  filter?: string;
 }
 
 const svgWidth = 1080;
@@ -63,43 +67,47 @@ function hexToRgba(hex: string, alpha: number = 1): string {
   return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }
 
-const AdLayoutSVG: React.FC<AdLayoutSVGProps> = ({ imageUrl, layout, width = 1080, height = 1080, selected, onSelectElement, onElementsChange, pointerEventsNone, style }) => {
+const AdLayoutSVG: React.FC<AdLayoutSVGProps> = ({ imageUrl, layout, width = 1080, height = 1080, selected, onSelectElement, onElementsChange, pointerEventsNone, style, logoPosition = 'top-left', logoColor, showLogo = true, filter }) => {
   const [elements, setElements] = useState(layout.elements);
   const dragOffset = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
+  const logoPos = logoPosition;
 
   useEffect(() => {
     setElements(layout.elements);
   }, [layout]);
 
   const handleDragStart = (type: ElementType, e: React.MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+    document.body.style.userSelect = 'none';
     const startX = e.clientX;
     const startY = e.clientY;
-    const initialX = elements[type].bbox.x;
-    const initialY = elements[type].bbox.y;
-
+    const initialX = layout.elements[type].bbox.x;
+    const initialY = layout.elements[type].bbox.y;
     onSelectElement?.(type);
-
     const onDragMove = (ev: MouseEvent) => {
       const dx = ev.clientX - startX;
       const dy = ev.clientY - startY;
       const newElements = {
-        ...elements,
+        ...layout.elements,
         [type]: {
-          ...elements[type],
-          bbox: { ...elements[type].bbox, x: initialX + dx, y: initialY + dy },
+          ...layout.elements[type],
+          bbox: {
+            ...layout.elements[type].bbox,
+            x: initialX + dx,
+            y: initialY + dy,
+          },
         },
       };
-      setElements(newElements);
       onElementsChange?.(newElements);
     };
-
     const onDragEnd = () => {
-      window.removeEventListener("mousemove", onDragMove);
-      window.removeEventListener("mouseup", onDragEnd);
+      window.removeEventListener('mousemove', onDragMove);
+      window.removeEventListener('mouseup', onDragEnd);
+      document.body.style.userSelect = '';
     };
-
-    window.addEventListener("mousemove", onDragMove);
-    window.addEventListener("mouseup", onDragEnd);
+    window.addEventListener('mousemove', onDragMove);
+    window.addEventListener('mouseup', onDragEnd);
   };
 
   // Add a new handler for div drag
@@ -188,77 +196,123 @@ const AdLayoutSVG: React.FC<AdLayoutSVGProps> = ({ imageUrl, layout, width = 108
   // Font scaling factor: scale font size by crop area, not by final display size
   const fontScale = Math.min(svgWidth, svgHeight) / 1080;
 
+  // Logo position styles
+  const logoStyles: Record<string, React.CSSProperties> = {
+    'top-left': { left: 24, top: 24, right: 'auto', bottom: 'auto', position: 'absolute' },
+    'top-right': { right: 24, top: 24, left: 'auto', bottom: 'auto', position: 'absolute' },
+    'bottom-left': { left: 24, bottom: 24, right: 'auto', top: 'auto', position: 'absolute' },
+    'bottom-right': { right: 24, bottom: 24, left: 'auto', top: 'auto', position: 'absolute' },
+  };
+
   return (
-    <div style={{ display: "flex", gap: 24, alignItems: "flex-start", pointerEvents: pointerEventsNone ? "none" : "auto", ...style }}>
-      <svg
-        width={width}
-        height={height}
-        viewBox="0 0 1080 1080"
-        style={{ background: "#fff" }}
-      >
-        <image href={imageUrl} width="1080" height="1080" preserveAspectRatio="xMidYMid slice" />
-        {(["heading", "subheading", "cta"] as ElementType[]).map((type) => {
-          const el = elements[type];
-          const isSelected = type === selected;
-          return (
-            <g key={type}>
-              <foreignObject
-                x={el.bbox.x}
-                y={el.bbox.y}
-                width={el.bbox.width}
-                height={el.bbox.height}
-                onMouseDown={(e) => handleDragStart(type, e)}
-                style={{ cursor: "move" }}
-              >
-                <div
-                  style={{
-                    width: "100%",
-                    height: "100%",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: el.styling.text_align,
-                    fontSize: el.styling.font_size,
-                    fontWeight: el.styling.font_weight,
-                    color: hexToRgba(el.styling.color, el.styling.color_opacity),
-                    fontFamily: el.styling.font_family || "Arial",
-                    textAlign: el.styling.text_align,
-                    backgroundColor: hexToRgba(el.styling.background_color, el.styling.background_opacity),
-                    borderRadius: 8,
-                    padding: 5,
-                    overflow: "hidden",
-                    wordBreak: "break-word",
-                    userSelect: "none",
-                    outline: isSelected ? '2px dashed #007bff' : 'none',
-                    outlineOffset: '-2px',
-                    letterSpacing: `${el.styling.letter_spacing || 0}px`,
-                    textTransform: el.styling.text_transform || 'none',
-                  }}
-                  onMouseDown={(e) => handleDivDragStart(type, e)}
-                >
-                  {el.text_content}
-                </div>
-              </foreignObject>
-              {isSelected && (
-                <rect
-                  x={el.bbox.x + el.bbox.width - 8}
-                  y={el.bbox.y + el.bbox.height - 8}
-                  width="16"
-                  height="16"
-                  fill="#007bff"
-                  stroke="#fff"
-                  strokeWidth="2"
-                  cursor="nwse-resize"
-                  onMouseDown={(e) => {
-                    e.stopPropagation();
-                    handleResizeStart(type, e);
-                  }}
-                />
-              )}
-            </g>
-          );
-        })}
-      </svg>
-      {/* Controls are now rendered by the parent */}
+    <div style={{ position: 'relative', width, height, ...style }}>
+      <img src={imageUrl} width={width} height={height} style={{ width, height, objectFit: 'cover', borderRadius: 12, filter }} alt="ad background" />
+      {/* Transparent overlay for deselection */}
+      <div
+        style={{ position: 'absolute', left: 0, top: 0, width, height, zIndex: 1, cursor: 'default', background: 'transparent' }}
+        onClick={() => onSelectElement?.(null)}
+      />
+      {(['heading', 'subheading', 'cta'] as ElementType[]).map((type) => {
+        const el = layout.elements[type];
+        const isSelected = type === selected;
+        const bgOpacity = type === 'cta' ? (el.styling.background_opacity ?? 1) : (el.styling.background_opacity ?? 0);
+        return (
+          <div
+            key={type}
+            style={{
+              position: 'absolute',
+              left: el.bbox.x * (width / 1080),
+              top: el.bbox.y * (height / 1080),
+              minWidth: 40,
+              maxWidth: width,
+              minHeight: 24,
+              maxHeight: height,
+              width: el.bbox.width * (width / 1080),
+              height: el.bbox.height * (height / 1080),
+              padding: '8px 16px',
+              fontSize: el.styling.font_size * (width / 1080),
+              fontWeight: el.styling.font_weight,
+              color: el.styling.color,
+              fontFamily: el.styling.font_family || 'Montserrat, Poppins, Lato, Arial',
+              textAlign: el.styling.text_align,
+              background: hexToRgba(el.styling.background_color, bgOpacity),
+              borderRadius: type === 'cta' ? 8 : 0,
+              boxShadow: type === 'cta' ? '0 2px 8px rgba(0,0,0,0.12)' : undefined,
+              letterSpacing: `${el.styling.letter_spacing || 0}px`,
+              textTransform: el.styling.text_transform || 'none',
+              whiteSpace: 'pre-line',
+              overflowWrap: 'break-word',
+              pointerEvents: 'auto',
+              outline: isSelected ? '2px dashed #00FFA9' : 'none',
+              outlineOffset: '-2px',
+              cursor: 'move',
+              zIndex: isSelected ? 2 : 1,
+              resize: 'none',
+              boxSizing: 'border-box',
+              overflow: 'hidden',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: el.styling.text_align,
+            }}
+            onMouseDown={(e) => handleDragStart(type, e)}
+            onClick={e => { e.stopPropagation(); onSelectElement?.(type); }}
+          >
+            {el.text_content}
+            {isSelected && (
+              <div
+                style={{
+                  position: 'absolute',
+                  right: 0,
+                  bottom: 0,
+                  width: 16,
+                  height: 16,
+                  background: '#00FFA9',
+                  borderRadius: 4,
+                  cursor: 'nwse-resize',
+                  zIndex: 10,
+                }}
+                onMouseDown={e => {
+                  e.stopPropagation();
+                  const startX = e.clientX;
+                  const startY = e.clientY;
+                  const initialW = el.bbox.width;
+                  const initialH = el.bbox.height;
+                  const onResize = (ev: MouseEvent) => {
+                    const dx = (ev.clientX - startX) * (1080 / width);
+                    const dy = (ev.clientY - startY) * (1080 / height);
+                    const newElements = {
+                      ...layout.elements,
+                      [type]: {
+                        ...el,
+                        bbox: {
+                          ...el.bbox,
+                          width: Math.max(40, initialW + dx),
+                          height: Math.max(24, initialH + dy),
+                        },
+                      },
+                    };
+                    onElementsChange?.(newElements);
+                  };
+                  const onResizeEnd = () => {
+                    window.removeEventListener('mousemove', onResize);
+                    window.removeEventListener('mouseup', onResizeEnd);
+                  };
+                  window.addEventListener('mousemove', onResize);
+                  window.addEventListener('mouseup', onResizeEnd);
+                }}
+              />
+            )}
+          </div>
+        );
+      })}
+      {/* Logo */}
+      {showLogo !== false && (
+        <div
+          style={{ ...logoStyles[logoPos], fontFamily: 'Montserrat, Poppins, Lato, Arial', fontWeight: 700, fontSize: 24, color: logoColor || '#fff', letterSpacing: 1, zIndex: 10, pointerEvents: 'none' }}
+        >
+          Disoriti
+        </div>
+      )}
     </div>
   );
 };

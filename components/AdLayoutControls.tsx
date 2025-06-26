@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Minus, Plus, Palette, Type, Maximize, Frame, AlignCenter, AlignLeft, AlignRight, Bold, Italic, Underline, Image as ImageIcon, Sun, SlidersHorizontal, Settings } from "lucide-react";
+import { Minus, Plus, Palette, Type, Maximize, Frame, AlignCenter, AlignLeft, AlignRight, Bold, Italic, Underline, Image as ImageIcon, Sun, SlidersHorizontal, Settings, BadgeCheck } from "lucide-react";
 import type { ElementData, Styling } from "./AdLayoutSVG";
 import {
   Select,
@@ -34,9 +34,13 @@ interface AdLayoutControlsProps {
   onStyleChange: (type: ElementType, key: keyof Styling, value: string | number) => void;
   onImageEdit?: (edits: { brightness: number; contrast: number; saturation: number }) => void;
   onImageReplace?: (file: File) => void;
+  onLogoPositionChange?: (pos: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right') => void;
+  logoPosition?: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right';
+  onLogoColorChange?: (color: string) => void;
+  logoColor?: string;
 }
 
-const AdLayoutControls: React.FC<AdLayoutControlsProps> = ({ elements, selected, onStyleChange, onImageEdit, onImageReplace }) => {
+const AdLayoutControls: React.FC<AdLayoutControlsProps> = ({ elements, selected, onStyleChange, onImageEdit, onImageReplace, onLogoPositionChange, logoPosition, onLogoColorChange, logoColor }) => {
   if (!selected) return (
     <Card className="w-full">
       <CardHeader>
@@ -51,6 +55,7 @@ const AdLayoutControls: React.FC<AdLayoutControlsProps> = ({ elements, selected,
   );
 
   const selectedStyling = elements[selected].styling;
+  const defaultBgOpacity = selected === 'cta' ? 1 : 0;
 
   const [imageEdits, setImageEdits] = useState({ brightness: 100, contrast: 100, saturation: 100 });
 
@@ -161,7 +166,7 @@ const AdLayoutControls: React.FC<AdLayoutControlsProps> = ({ elements, selected,
             <ColorInput 
               label="Background" 
               value={selectedStyling.background_color}
-              opacity={selectedStyling.background_opacity ?? 1}
+              opacity={selectedStyling.background_opacity ?? defaultBgOpacity}
               onColorChange={(val) => onStyleChange(selected, "background_color", val)}
               onOpacityChange={(val) => onStyleChange(selected, "background_opacity", val)}
               icon={Frame} 
@@ -248,12 +253,28 @@ const AdLayoutControls: React.FC<AdLayoutControlsProps> = ({ elements, selected,
 
             <div className="space-y-2">
               <Label className="flex items-center gap-2 text-sm font-medium text-muted-foreground">Letter Spacing</Label>
-              <Input
-                type="number"
-                value={selectedStyling.letter_spacing || 0}
-                onChange={(e) => onStyleChange(selected, "letter_spacing", Number(e.target.value))}
-                className="w-full"
-              />
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() => onStyleChange(selected, "letter_spacing", Math.max(0, (selectedStyling.letter_spacing || 0) - 1))}
+                >
+                  <Minus className="h-4 w-4" />
+                </Button>
+                <Input
+                  type="number"
+                  value={selectedStyling.letter_spacing || 0}
+                  onChange={(e) => onStyleChange(selected, "letter_spacing", Number(e.target.value))}
+                  className="w-full text-center no-spinner"
+                />
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() => onStyleChange(selected, "letter_spacing", (selectedStyling.letter_spacing || 0) + 1)}
+                >
+                  <Plus className="h-4 w-4" />
+                </Button>
+              </div>
             </div>
 
             <div className="space-y-2">
@@ -273,6 +294,34 @@ const AdLayoutControls: React.FC<AdLayoutControlsProps> = ({ elements, selected,
                 </SelectContent>
               </Select>
             </div>
+          </AccordionContent>
+        </AccordionItem>
+        <AccordionItem value="logo">
+          <AccordionTrigger className="text-base flex items-center gap-2 pl-2"><BadgeCheck className="w-4 h-4" />Logo/Watermark</AccordionTrigger>
+          <AccordionContent className="space-y-4 pt-4">
+            <Label className="flex items-center gap-2 text-sm font-medium text-muted-foreground">Logo Position</Label>
+            <Select
+              value={logoPosition || 'top-left'}
+              onValueChange={val => onLogoPositionChange?.(val as any)}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Logo Position" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="top-left">Top Left</SelectItem>
+                <SelectItem value="top-right">Top Right</SelectItem>
+                <SelectItem value="bottom-left">Bottom Left</SelectItem>
+                <SelectItem value="bottom-right">Bottom Right</SelectItem>
+              </SelectContent>
+            </Select>
+            <Label className="flex items-center gap-2 text-sm font-medium text-muted-foreground">Logo Color</Label>
+            <input
+              type="color"
+              value={logoColor || "#ffffff"}
+              onChange={e => onLogoColorChange?.(e.target.value)}
+              className="w-8 h-8 rounded border border-border bg-background cursor-pointer"
+              style={{ padding: 0 }}
+            />
           </AccordionContent>
         </AccordionItem>
       </Accordion>

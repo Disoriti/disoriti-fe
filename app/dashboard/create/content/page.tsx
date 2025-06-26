@@ -53,6 +53,8 @@ export default function ContentPage() {
   const [layouts, setLayouts] = useState(layoutData.layouts);
   const [selectedElement, setSelectedElement] = useState<"heading" | "subheading" | "cta" | null>(null);
   const [imageEdits, setImageEdits] = useState({ brightness: 100, contrast: 100, saturation: 100 });
+  const [logoPosition, setLogoPosition] = useState<'top-left' | 'top-right' | 'bottom-left' | 'bottom-right'>('top-left');
+  const [logoColor, setLogoColor] = useState<string>("#ffffff");
   const router = useRouter();
   const searchParams = useSearchParams();
   const type = searchParams.get("type");
@@ -80,7 +82,7 @@ export default function ContentPage() {
     // Simulate API call to generate image
     setTimeout(() => {
       // Replace with actual API response
-      setGeneratedImage("https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=80");
+      setGeneratedImage("/image.png");
       setGeneratingImage(false);
     }, 3000);
   };
@@ -162,12 +164,14 @@ export default function ContentPage() {
                     onClick={() => setSelectedLayoutIdx(idx)}
                   >
                     <AdLayoutSVG
-                      imageUrl={generatedImage}
+                      imageUrl={generatedImage || "/image.png"}
                       layout={layout}
                       width={140}
                       height={140}
                       selected={null}
                       pointerEventsNone={true}
+                      showLogo={false}
+                      filter={`brightness(${imageEdits.brightness}%) contrast(${imageEdits.contrast}%) saturate(${imageEdits.saturation}%)`}
                     />
                   </div>
                 ))}
@@ -178,16 +182,22 @@ export default function ContentPage() {
             
             {/* Main display area (center) */}
             <div className="flex-1 flex flex-col items-center justify-start gap-4">
-              <div ref={previewRef} className="w-full max-w-[500px] aspect-square bg-background/50 rounded-lg border border-primary/40 shadow-[0_0_20px_4px_hsl(var(--primary)/0.5)] overflow-hidden">
+              <div ref={previewRef} className="w-full max-w-[500px] aspect-square bg-background/50 rounded-lg border border-primary/40 shadow-[0_0_20px_4px_hsl(var(--primary)/0.5)] overflow-hidden"
+                onClick={e => {
+                  if (e.target === e.currentTarget) setSelectedElement(null);
+                }}
+              >
                 <AdLayoutSVG
-                  imageUrl={generatedImage}
+                  imageUrl={generatedImage || "/image.png"}
                   layout={layouts[selectedLayoutIdx]}
                   width={500}
                   height={500}
                   selected={selectedElement}
                   onSelectElement={setSelectedElement}
                   onElementsChange={handleElementChange}
-                  style={{ filter: `brightness(${imageEdits.brightness}%) contrast(${imageEdits.contrast}%) saturate(${imageEdits.saturation}%)` }}
+                  filter={`brightness(${imageEdits.brightness}%) contrast(${imageEdits.contrast}%) saturate(${imageEdits.saturation}%)`}
+                  logoPosition={logoPosition}
+                  logoColor={logoColor}
                 />
               </div>
               {/* Hidden export preview for image download */}
@@ -223,6 +233,10 @@ export default function ContentPage() {
                   const url = URL.createObjectURL(file);
                   setGeneratedImage(url);
                 }}
+                logoPosition={logoPosition}
+                onLogoPositionChange={setLogoPosition}
+                logoColor={logoColor}
+                onLogoColorChange={setLogoColor}
               />
             </div>
           </div>
@@ -234,29 +248,31 @@ export default function ContentPage() {
             <div className="flex gap-10 w-full justify-center">
               <Button
                 variant="outline"
-                className="flex flex-col items-center justify-center rounded-2xl border-2 transition-all duration-300 shadow-xl bg-background px-16 py-20 text-2xl font-bold w-[340px] h-56 hover:border-disoriti-primary/60 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-disoriti-primary/40 keep-text-visible"
+                className="flex flex-col items-center justify-center rounded-2xl border-2 transition-all duration-300 shadow-xl px-16 py-20 text-2xl font-bold w-[340px] h-56 hover:border-disoriti-primary/60 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-disoriti-primary/40 keep-text-visible"
+                style={{ backgroundColor: '#000' }}
                 onClick={() => setSelectedOption("ai")}
               >
-                <span className="mb-4 flex items-center justify-center">
+                <span className="mb-4 flex items-center justify-center text-white z-10">
                   <span className="relative flex items-center justify-center">
                     <span className="absolute inline-flex h-16 w-16 rounded-full bg-gradient-to-br from-disoriti-primary/30 to-disoriti-accent/30 blur-xl animate-pulse" />
                     <Bot className="h-12 w-12 text-disoriti-primary drop-shadow-lg relative z-10" />
                   </span>
                 </span>
-                <span className="mb-2">Let AI do the magic</span>
-                <span className="text-base font-normal text-disoriti-primary/70">
+                <span className="mb-2 text-white z-10">Let AI do the magic</span>
+                <span className="text-base font-normal text-white z-10">
                   Generate post content automatically
                 </span>
               </Button>
 
               <Button
                 variant="outline"
-                className="flex flex-col items-center justify-center rounded-2xl border-2 transition-all duration-300 shadow-xl bg-background px-16 py-20 text-2xl font-bold w-[340px] h-56 hover:border-disoriti-primary/60 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-disoriti-primary/40 keep-text-visible"
+                className="flex flex-col items-center justify-center rounded-2xl border-2 transition-all duration-300 shadow-xl px-16 py-20 text-2xl font-bold w-[340px] h-56 hover:border-disoriti-primary/60 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-disoriti-primary/40 keep-text-visible"
+                style={{ backgroundColor: '#000' }}
                 onClick={() => setSelectedOption("manual")}
               >
-                <Pencil className="h-12 w-12 mb-4" />
-                <span className="mb-2">Manual post configuration</span>
-                <span className="text-base font-normal text-disoriti-primary/70">
+                <Pencil className="h-12 w-12 mb-4 text-white z-10" />
+                <span className="mb-2 text-white z-10">Manual post configuration</span>
+                <span className="text-base font-normal text-white z-10">
                   Enter your own post content
                 </span>
               </Button>
