@@ -101,13 +101,13 @@
   --popover: oklch(0.25 0.01 280);
   --popover-foreground: oklch(1 0 0);
 
-  --primary: oklch(0.85 0.24 150); /* bright aqua */
+  --primary: oklch(0.9 0.23 190); /* electric aqua */
   --primary-foreground: oklch(0.2 0.01 280);
 
   --secondary: oklch(0.25 0 0);
   --secondary-foreground: oklch(1 0 0);
 
-  --accent: oklch(0.9 0.23 190); /* electric aqua */
+  --accent: oklch(0.85 0.24 150); /* bright aqua */
   --accent-foreground: oklch(0.2 0.01 280);
 
   --muted: oklch(0.25 0 0);
@@ -153,23 +153,4 @@
 
 .animate-glow {
   animation: glow 1s ease-in-out infinite alternate;
-}
-
-.keep-text-visible:hover {
-  color: inherit !important;
-}
-
-.keep-text-visible span {
-  color: inherit !important;
-}
-
-/* Hide number input arrows */
-.no-spinner::-webkit-outer-spin-button,
-.no-spinner::-webkit-inner-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
-}
-
-.no-spinner {
-  -moz-appearance: textfield; /* Firefox */
 }
