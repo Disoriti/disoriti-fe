@@ -154,3 +154,13 @@
 .animate-glow {
   animation: glow 1s ease-in-out infinite alternate;
 }
+
+/* Hide number input spinner for .no-spinner */
+.no-spinner::-webkit-inner-spin-button,
+.no-spinner::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+.no-spinner[type="number"] {
+  -moz-appearance: textfield;
+}

@@ -38,9 +38,11 @@ interface AdLayoutControlsProps {
   logoPosition?: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right';
   onLogoColorChange?: (color: string) => void;
   logoColor?: string;
+  onLogoReplace?: (file: File) => void;
+  logoImage?: string | null;
 }
 
-const AdLayoutControls: React.FC<AdLayoutControlsProps> = ({ elements, selected, onStyleChange, onImageEdit, onImageReplace, onLogoPositionChange, logoPosition, onLogoColorChange, logoColor }) => {
+const AdLayoutControls: React.FC<AdLayoutControlsProps> = ({ elements, selected, onStyleChange, onImageEdit, onImageReplace, onLogoPositionChange, logoPosition, onLogoColorChange, logoColor, onLogoReplace, logoImage }) => {
   if (!selected) return (
     <Card className="w-full">
       <CardHeader>
@@ -54,7 +56,10 @@ const AdLayoutControls: React.FC<AdLayoutControlsProps> = ({ elements, selected,
     </Card>
   );
 
-  const selectedStyling = elements[selected].styling;
+  const selectedStyling = {
+    ...elements[selected].styling,
+    text_align: elements[selected].styling.text_align || 'left',
+  };
   const defaultBgOpacity = selected === 'cta' ? 1 : 0;
 
   const [imageEdits, setImageEdits] = useState({ brightness: 100, contrast: 100, saturation: 100 });
@@ -245,9 +250,30 @@ const AdLayoutControls: React.FC<AdLayoutControlsProps> = ({ elements, selected,
             <div className="space-y-2">
               <Label className="flex items-center gap-2 text-sm font-medium text-muted-foreground">Text Align</Label>
               <div className="flex gap-1 rounded-md bg-muted p-1">
-                <Button className="flex-1" variant={selectedStyling.text_align === 'left' ? 'secondary' : 'ghost'} size="icon" onClick={() => onStyleChange(selected, 'text_align', 'left')}><AlignLeft className="w-4 h-4" /></Button>
-                <Button className="flex-1" variant={selectedStyling.text_align === 'center' ? 'secondary' : 'ghost'} size="icon" onClick={() => onStyleChange(selected, 'text_align', 'center')}><AlignCenter className="w-4 h-4" /></Button>
-                <Button className="flex-1" variant={selectedStyling.text_align === 'right' ? 'secondary' : 'ghost'} size="icon" onClick={() => onStyleChange(selected, 'text_align', 'right')}><AlignRight className="w-4 h-4" /></Button>
+                <Button
+                  className={`flex-1 ${selectedStyling.text_align === 'left' ? 'bg-green-600 text-white' : ''}`}
+                  variant={selectedStyling.text_align === 'left' ? 'secondary' : 'ghost'}
+                  size="icon"
+                  onClick={() => onStyleChange(selected, 'text_align', 'left')}
+                >
+                  <AlignLeft className="w-4 h-4" />
+                </Button>
+                <Button
+                  className={`flex-1 ${selectedStyling.text_align === 'center' ? 'bg-green-600 text-white' : ''}`}
+                  variant={selectedStyling.text_align === 'center' ? 'secondary' : 'ghost'}
+                  size="icon"
+                  onClick={() => onStyleChange(selected, 'text_align', 'center')}
+                >
+                  <AlignCenter className="w-4 h-4" />
+                </Button>
+                <Button
+                  className={`flex-1 ${selectedStyling.text_align === 'right' ? 'bg-green-600 text-white' : ''}`}
+                  variant={selectedStyling.text_align === 'right' ? 'secondary' : 'ghost'}
+                  size="icon"
+                  onClick={() => onStyleChange(selected, 'text_align', 'right')}
+                >
+                  <AlignRight className="w-4 h-4" />
+                </Button>
               </div>
             </div>
 
@@ -294,6 +320,35 @@ const AdLayoutControls: React.FC<AdLayoutControlsProps> = ({ elements, selected,
                 </SelectContent>
               </Select>
             </div>
+
+            <div className="space-y-2">
+              <Label className="flex items-center gap-2 text-sm font-medium text-muted-foreground">Line Height</Label>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() => onStyleChange(selected, "line_height", Math.max(0.8, (selectedStyling.line_height || 1.2) - 0.1))}
+                >
+                  <Minus className="h-4 w-4" />
+                </Button>
+                <Input
+                  type="number"
+                  step="0.05"
+                  min="0.8"
+                  max="3"
+                  value={((selectedStyling.line_height || 1.2).toFixed(1))}
+                  onChange={(e) => onStyleChange(selected, "line_height", Number(Number(e.target.value).toFixed(1)))}
+                  className="w-full text-center no-spinner"
+                />
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() => onStyleChange(selected, "line_height", Math.min(3, (selectedStyling.line_height || 1.2) + 0.1))}
+                >
+                  <Plus className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
           </AccordionContent>
         </AccordionItem>
         <AccordionItem value="logo">
@@ -322,6 +377,22 @@ const AdLayoutControls: React.FC<AdLayoutControlsProps> = ({ elements, selected,
               className="w-8 h-8 rounded border border-border bg-background cursor-pointer"
               style={{ padding: 0 }}
             />
+            <Label className="flex items-center gap-2 text-sm font-medium text-muted-foreground mt-2"><ImageIcon className="w-4 h-4" /> Change Logo</Label>
+            <div className="flex items-center gap-3 mt-2">
+              <label className="inline-flex items-center px-3 py-2 bg-primary text-primary-foreground rounded cursor-pointer hover:bg-primary/90 transition-colors">
+                <ImageIcon className="w-4 h-4 mr-2" />
+                Upload Logo
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={e => { if (e.target.files?.[0]) onLogoReplace?.(e.target.files[0]); }}
+                />
+              </label>
+              {logoImage && (
+                <img src={logoImage} alt="Logo preview" className="w-10 h-10 object-contain border rounded bg-white" />
+              )}
+            </div>
           </AccordionContent>
         </AccordionItem>
       </Accordion>

@@ -23,6 +23,7 @@ interface AdLayoutSVGProps {
   logoColor?: string;
   showLogo?: boolean;
   filter?: string;
+  logoImage?: string | null;
 }
 
 const svgWidth = 1080;
@@ -41,6 +42,7 @@ export interface Styling {
   background_opacity?: number;
   letter_spacing?: number;
   text_transform?: "none" | "uppercase" | "lowercase" | "capitalize";
+  line_height?: number;
 }
 
 export interface ElementData {
@@ -67,10 +69,12 @@ function hexToRgba(hex: string, alpha: number = 1): string {
   return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }
 
-const AdLayoutSVG: React.FC<AdLayoutSVGProps> = ({ imageUrl, layout, width = 1080, height = 1080, selected, onSelectElement, onElementsChange, pointerEventsNone, style, logoPosition = 'top-left', logoColor, showLogo = true, filter }) => {
+const AdLayoutSVG: React.FC<AdLayoutSVGProps> = ({ imageUrl, layout, width = 1080, height = 1080, selected, onSelectElement, onElementsChange, pointerEventsNone, style, logoPosition = 'top-left', logoColor, showLogo = true, filter, logoImage }) => {
   const [elements, setElements] = useState(layout.elements);
   const dragOffset = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
   const logoPos = logoPosition;
+  const [editingType, setEditingType] = useState<ElementType | null>(null);
+  const [editingValue, setEditingValue] = useState<string>("");
 
   useEffect(() => {
     setElements(layout.elements);
@@ -205,7 +209,7 @@ const AdLayoutSVG: React.FC<AdLayoutSVGProps> = ({ imageUrl, layout, width = 108
   };
 
   return (
-    <div style={{ position: 'relative', width, height, ...style }}>
+    <div style={{ position: 'relative', width, height, ...style, cursor: pointerEventsNone ? 'pointer' : undefined }}>
       <img src={imageUrl} width={width} height={height} style={{ width, height, objectFit: 'cover', borderRadius: 12, filter }} alt="ad background" />
       {/* Transparent overlay for deselection */}
       <div
@@ -240,12 +244,13 @@ const AdLayoutSVG: React.FC<AdLayoutSVGProps> = ({ imageUrl, layout, width = 108
               boxShadow: type === 'cta' ? '0 2px 8px rgba(0,0,0,0.12)' : undefined,
               letterSpacing: `${el.styling.letter_spacing || 0}px`,
               textTransform: el.styling.text_transform || 'none',
+              lineHeight: el.styling.line_height || 1.2,
               whiteSpace: 'pre-line',
               overflowWrap: 'break-word',
-              pointerEvents: 'auto',
+              pointerEvents: pointerEventsNone ? 'none' : 'auto',
               outline: isSelected ? '2px dashed #00FFA9' : 'none',
               outlineOffset: '-2px',
-              cursor: 'move',
+              cursor: pointerEventsNone ? 'default' : 'move',
               zIndex: isSelected ? 2 : 1,
               resize: 'none',
               boxSizing: 'border-box',
@@ -254,11 +259,62 @@ const AdLayoutSVG: React.FC<AdLayoutSVGProps> = ({ imageUrl, layout, width = 108
               alignItems: 'center',
               justifyContent: el.styling.text_align,
             }}
-            onMouseDown={(e) => handleDragStart(type, e)}
-            onClick={e => { e.stopPropagation(); onSelectElement?.(type); }}
+            onMouseDown={pointerEventsNone ? undefined : (e) => handleDragStart(type, e)}
+            onClick={pointerEventsNone ? undefined : (e) => { e.stopPropagation(); onSelectElement?.(type); }}
+            onDoubleClick={pointerEventsNone ? undefined : () => {
+              if (selected === type) {
+                setEditingType(type);
+                setEditingValue(el.text_content);
+              }
+            }}
           >
-            {el.text_content}
-            {isSelected && (
+            {editingType === type ? (
+              <textarea
+                autoFocus
+                value={editingValue}
+                onChange={e => setEditingValue(e.target.value)}
+                onBlur={() => {
+                  setEditingType(null);
+                  if (editingValue !== el.text_content) {
+                    const newElements = {
+                      ...layout.elements,
+                      [type]: {
+                        ...el,
+                        text_content: editingValue,
+                      },
+                    };
+                    onElementsChange?.(newElements);
+                  }
+                }}
+                onKeyDown={e => {
+                  if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    (e.target as HTMLTextAreaElement).blur();
+                  }
+                }}
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  background: 'transparent',
+                  color: el.styling.color,
+                  fontFamily: el.styling.font_family || 'Montserrat, Poppins, Lato, Arial',
+                  fontWeight: el.styling.font_weight,
+                  fontSize: el.styling.font_size * (width / 1080),
+                  border: 'none',
+                  outline: 'none',
+                  resize: 'none',
+                  textAlign: el.styling.text_align,
+                  letterSpacing: `${el.styling.letter_spacing || 0}px`,
+                  textTransform: el.styling.text_transform || 'none',
+                  padding: 0,
+                  margin: 0,
+                  overflow: 'hidden',
+                }}
+              />
+            ) : (
+              el.text_content
+            )}
+            {isSelected && !pointerEventsNone && (
               <div
                 style={{
                   position: 'absolute',
@@ -307,11 +363,27 @@ const AdLayoutSVG: React.FC<AdLayoutSVGProps> = ({ imageUrl, layout, width = 108
       })}
       {/* Logo */}
       {showLogo !== false && (
-        <div
-          style={{ ...logoStyles[logoPos], fontFamily: 'Montserrat, Poppins, Lato, Arial', fontWeight: 700, fontSize: 24, color: logoColor || '#fff', letterSpacing: 1, zIndex: 10, pointerEvents: 'none' }}
-        >
-          Disoriti
-        </div>
+        logoImage ? (
+          <img
+            src={logoImage}
+            alt="Logo"
+            style={{
+              ...logoStyles[logoPos],
+              width: 80,
+              height: 80,
+              objectFit: 'contain',
+              zIndex: 10,
+              pointerEvents: 'none',
+              background: 'transparent',
+            }}
+          />
+        ) : (
+          <div
+            style={{ ...logoStyles[logoPos], fontFamily: 'Montserrat, Poppins, Lato, Arial', fontWeight: 700, fontSize: 24, color: logoColor || '#fff', letterSpacing: 1, zIndex: 10, pointerEvents: 'none' }}
+          >
+            Disoriti
+          </div>
+        )
       )}
     </div>
   );

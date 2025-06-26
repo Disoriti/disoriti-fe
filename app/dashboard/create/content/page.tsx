@@ -22,6 +22,7 @@ import { Label } from "@/components/ui/label";
 import AdLayoutControls from "@/components/AdLayoutControls";
 import * as htmlToImage from "html-to-image";
 import AdLayoutPreview from "@/components/AdLayoutPreview";
+import { Switch } from "@/components/ui/switch";
 const layoutData = layoutDataRaw as { layouts: Layout[], metadata: any };
 
 // Parse aspect ratio from post_dimensions (e.g., "4:3")
@@ -55,6 +56,7 @@ export default function ContentPage() {
   const [imageEdits, setImageEdits] = useState({ brightness: 100, contrast: 100, saturation: 100 });
   const [logoPosition, setLogoPosition] = useState<'top-left' | 'top-right' | 'bottom-left' | 'bottom-right'>('top-left');
   const [logoColor, setLogoColor] = useState<string>("#ffffff");
+  const [logoImage, setLogoImage] = useState<string | null>(null);
   const router = useRouter();
   const searchParams = useSearchParams();
   const type = searchParams.get("type");
@@ -142,11 +144,6 @@ export default function ContentPage() {
         </BreadcrumbList>
       </Breadcrumb>
 
-      {/* Heading */}
-      <h1 className="text-3xl md:text-3xl font-bold text-disoriti-primary mb-4 text-center tracking-tight animate-glow">
-        Configure your post content
-      </h1>
-
       {generatingImage && <AdGenerationLoader />}
 
       {generatedImage ? (
@@ -198,6 +195,7 @@ export default function ContentPage() {
                   filter={`brightness(${imageEdits.brightness}%) contrast(${imageEdits.contrast}%) saturate(${imageEdits.saturation}%)`}
                   logoPosition={logoPosition}
                   logoColor={logoColor}
+                  logoImage={logoImage}
                 />
               </div>
               {/* Hidden export preview for image download */}
@@ -208,6 +206,9 @@ export default function ContentPage() {
                     layout={layouts[selectedLayoutIdx]}
                     width={500}
                     height={500}
+                    logoImage={logoImage}
+                    logoPosition={logoPosition}
+                    logoColor={logoColor}
                   />
                 </div>
               </div>
@@ -237,6 +238,11 @@ export default function ContentPage() {
                 onLogoPositionChange={setLogoPosition}
                 logoColor={logoColor}
                 onLogoColorChange={setLogoColor}
+                onLogoReplace={file => {
+                  const reader = new FileReader();
+                  reader.onload = e => setLogoImage(e.target?.result as string);
+                  reader.readAsDataURL(file);
+                }}
               />
             </div>
           </div>
@@ -332,12 +338,10 @@ export default function ContentPage() {
                   {/* Call to Action */}
                   <div>
                     <div className="flex items-center gap-3">
-                      <Input
-                        type="checkbox"
+                      <Switch
                         id="has-cta"
                         checked={hasCTA}
-                        onChange={(e) => setHasCTA(e.target.checked)}
-                        className="w-4 h-4 rounded border-disoriti-primary/20 focus:ring-2 focus:ring-disoriti-primary/40"
+                        onCheckedChange={setHasCTA}
                       />
                       <Label htmlFor="has-cta" className="text-sm font-medium">
                         Include Call to Action
