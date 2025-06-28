@@ -14,6 +14,84 @@
     },
     "layouts": [
       {
+        "id": "bold_diagonal_flow_2",
+        "style": "bold",
+        "confidence": 0.7,
+        "platform_optimized": "instagram_square",
+        "design_notes": "Complements centered image composition",
+        "elements": {
+          "heading": {
+            "bbox": {
+              "x": 10,
+              "y": 300,
+              "width": 800,
+              "height": 150
+            },
+            "position": {
+              "x1": 10,
+              "y1": 300,
+              "x2": 800,
+              "y2": 450
+            },
+            "styling": {
+              "font_size": 65,
+              "font_weight": "bold",
+              "text_align": "left",
+              "color": "#FFFFFF",
+              "background_color": "#FFFFFF80",
+              "margin": 20
+            },
+            "text_content": "Find your perfect summer look"
+          },
+          "subheading": {
+            "bbox": {
+              "x": 10,
+              "y": 400,
+              "width": 860,
+              "height": 150
+            },
+            "position": {
+              "x1": 10,
+              "y1": 400,
+              "x2": 928,
+              "y2": 572
+            },
+            "styling": {
+              "font_size": 50,
+              "font_weight": "normal",
+              "text_align": "left",
+              "color": "#FFFFFF",
+              "background_color": "#FFFFFF80",
+              "margin": 15
+            },
+            "text_content": "Discover our latest collection"
+          },
+          "cta": {
+            "bbox": {
+              "x": 40,
+              "y": 983,
+              "width": 250,
+              "height": 57
+            },
+            "position": {
+              "x1": 40,
+              "y1": 983,
+              "x2": 270,
+              "y2": 1040
+            },
+            "styling": {
+              "font_size":25,
+              "font_weight": "bold",
+              "text_align": "center",
+              "color": "#000000",
+              "background_color": "#FFFFFF80",
+              "margin": 10
+            },
+            "text_content": "CODE: SUMMER25"
+          }
+        }
+      },
+      {
         "id": "bold_impact_center_1",
         "style": "bold",
         "confidence": 1.0,
@@ -24,7 +102,7 @@
             "bbox": {
               "x": 5,
               "y": 30,
-              "width": 850,
+              "width": 700,
               "height": 154
             },
             "position": {
@@ -46,13 +124,13 @@
           "subheading": {
             "bbox": {
               "x": 5,
-              "y": 250,
-              "width": 950,
+              "y": 200,
+              "width": 870,
               "height": 200
             },
             "position": {
               "x1": 5,
-              "y1": 250,
+              "y1": 200,
               "x2": 972,
               "y2": 576
             },
@@ -68,13 +146,13 @@
           },
           "cta": {
             "bbox": {
-              "x": 411,
+              "x": 751,
               "y": 976,
               "width": 258,
               "height": 64
             },
             "position": {
-              "x1": 411,
+              "x1": 751,
               "y1": 976,
               "x2": 669,
               "y2": 1040
@@ -91,84 +169,7 @@
           }
         }
       },
-      {
-        "id": "bold_diagonal_flow_2",
-        "style": "bold",
-        "confidence": 0.7,
-        "platform_optimized": "instagram_square",
-        "design_notes": "Complements centered image composition",
-        "elements": {
-          "heading": {
-            "bbox": {
-              "x": 40,
-              "y": 40,
-              "width": 712,
-              "height": 129
-            },
-            "position": {
-              "x1": 40,
-              "y1": 40,
-              "x2": 752,
-              "y2": 169
-            },
-            "styling": {
-              "font_size": 65,
-              "font_weight": "bold",
-              "text_align": "left",
-              "color": "#000000",
-              "background_color": "#FFFFFF80",
-              "margin": 20
-            },
-            "text_content": "Summer Sale"
-          },
-          "subheading": {
-            "bbox": {
-              "x": 152,
-              "y": 508,
-              "width": 776,
-              "height": 64
-            },
-            "position": {
-              "x1": 152,
-              "y1": 508,
-              "x2": 928,
-              "y2": 572
-            },
-            "styling": {
-              "font_size": 45,
-              "font_weight": "normal",
-              "text_align": "right",
-              "color": "#000000",
-              "background_color": "#FFFFFF80",
-              "margin": 15
-            },
-            "text_content": "Up to 50% Off Everything"
-          },
-          "cta": {
-            "bbox": {
-              "x": 40,
-              "y": 983,
-              "width": 230,
-              "height": 57
-            },
-            "position": {
-              "x1": 40,
-              "y1": 983,
-              "x2": 270,
-              "y2": 1040
-            },
-            "styling": {
-              "font_size":25,
-              "font_weight": "bold",
-              "text_align": "left",
-              "color": "#000000",
-              "background_color": "#FFFFFF80",
-              "margin": 10
-            },
-            "text_content": "Shop Now"
-          }
-        }
-      },
+      
       {
         "id": "bold_corner_emphasis_3",
         "style": "bold",
@@ -181,7 +182,7 @@
               "x": 400,
               "y": 40,
               "width": 640,
-              "height": 116
+              "height": 150
             },
             "position": {
               "x1": 400,
@@ -192,8 +193,8 @@
             "styling": {
               "font_size": 65,
               "font_weight": "bold",
-              "text_align": "right",
-              "color": "#000000",
+              "text_align": "center",
+              "color": "#FFFFFF",
               "background_color": "#FFFFFF80",
               "margin": 20
             },
@@ -203,8 +204,8 @@
             "bbox": {
               "x": 152,
               "y": 508,
-              "width": 776,
-              "height": 64
+              "width": 800,
+              "height": 100
             },
             "position": {
               "x1": 152,
@@ -213,10 +214,10 @@
               "y2": 572
             },
             "styling": {
-              "font_size": 45,
+              "font_size": 50,
               "font_weight": "normal",
               "text_align": "left",
-              "color": "#000000",
+              "color": "#FFFFFF",
               "background_color": "#FFFFFF80",
               "margin": 15
             },

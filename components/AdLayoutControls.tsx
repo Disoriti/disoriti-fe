@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -24,6 +24,54 @@ import { Slider } from "@/components/ui/slider";
 const fonts = ["Arial", "Georgia", "Impact", "Verdana", "Tahoma", "Times New Roman"];
 type ElementType = "heading" | "subheading" | "cta";
 
+const ColorInput = ({ label, value, opacity, onColorChange, onOpacityChange, icon: Icon }: { label: string, value: string, opacity: number, onColorChange: (val: string) => void, onOpacityChange: (val: number) => void, icon: React.ElementType }) => {
+  const [sliderValue, setSliderValue] = useState(100);
+
+  // Update slider value when opacity prop changes
+  useEffect(() => {
+    setSliderValue(opacity * 100);
+  }, [opacity]);
+
+  return (
+    <div className="space-y-4">
+        <Label className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+            <Icon className="w-4 h-4" /> {label}
+        </Label>
+        <div className="relative flex items-center">
+            <Input
+                type="text"
+                value={value}
+                onChange={(e) => onColorChange(e.target.value)}
+                className="pr-10"
+            />
+            <div className="absolute right-0 mr-1 p-1 rounded-full hover:bg-muted">
+                <Input
+                    type="color"
+                    value={value}
+                    onChange={(e) => onColorChange(e.target.value)}
+                    className="w-6 h-6 cursor-pointer opacity-0"
+                    style={{ position: 'absolute', right: 0, top: '50%', transform: 'translateY(-50%)' }}
+                />
+                <div className="w-6 h-6 rounded-full border" style={{ backgroundColor: value }} />
+            </div>
+        </div>
+        <div className="grid gap-2">
+          <div className="flex justify-between items-center">
+            <Label className="text-xs text-muted-foreground">Opacity</Label>
+            <span className="text-xs font-mono text-muted-foreground">{Math.round(sliderValue)}%</span>
+          </div>
+          <Slider
+            value={[sliderValue]}
+            onValueChange={(vals) => setSliderValue(vals[0])}
+            onValueCommit={(vals) => onOpacityChange(vals[0] / 100)}
+            max={100}
+            step={1}
+          />
+        </div>
+    </div>
+  );
+}
+
 interface AdLayoutControlsProps {
   elements: {
     heading: ElementData;
@@ -47,48 +95,10 @@ interface AdLayoutControlsProps {
 const AdLayoutControls: React.FC<AdLayoutControlsProps> = ({ elements, selected, onStyleChange, onImageEdit, onImageReplace, onLogoPositionChange, logoPosition, onLogoColorChange, logoColor, onLogoReplace, logoImage, selectedLogo, onLogoSelect }) => {
   const [imageEdits, setImageEdits] = useState({ brightness: 100, contrast: 100, saturation: 100 });
 
-  const ColorInput = ({ label, value, opacity, onColorChange, onOpacityChange, icon: Icon }: { label: string, value: string, opacity: number, onColorChange: (val: string) => void, onOpacityChange: (val: number) => void, icon: React.ElementType }) => {
-    const [sliderValue, setSliderValue] = useState(opacity * 100);
-
-    return (
-      <div className="space-y-4">
-          <Label className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-              <Icon className="w-4 h-4" /> {label}
-          </Label>
-          <div className="relative flex items-center">
-              <Input
-                  type="text"
-                  value={value}
-                  onChange={(e) => onColorChange(e.target.value)}
-                  className="pr-10"
-              />
-              <div className="absolute right-0 mr-1 p-1 rounded-full hover:bg-muted">
-                  <Input
-                      type="color"
-                      value={value}
-                      onChange={(e) => onColorChange(e.target.value)}
-                      className="w-6 h-6 cursor-pointer opacity-0"
-                      style={{ position: 'absolute', right: 0, top: '50%', transform: 'translateY(-50%)' }}
-                  />
-                  <div className="w-6 h-6 rounded-full border" style={{ backgroundColor: value }} />
-              </div>
-          </div>
-          <div className="grid gap-2">
-            <div className="flex justify-between items-center">
-              <Label className="text-xs text-muted-foreground">Opacity</Label>
-              <span className="text-xs font-mono text-muted-foreground">{Math.round(sliderValue)}%</span>
-            </div>
-            <Slider
-              value={[sliderValue]}
-              onValueChange={(vals) => setSliderValue(vals[0])}
-              onValueCommit={(vals) => onOpacityChange(vals[0] / 100)}
-              max={100}
-              step={1}
-            />
-          </div>
-      </div>
-    );
-  }
+  // Call onImageEdit when imageEdits changes
+  useEffect(() => {
+    onImageEdit?.(imageEdits);
+  }, [imageEdits]);
 
   if (!selected && !selectedLogo) return (
     <Card className="w-full">
@@ -173,7 +183,7 @@ const AdLayoutControls: React.FC<AdLayoutControlsProps> = ({ elements, selected,
                   max={200}
                   step={1}
                   onValueChange={([val]) => {
-                    setImageEdits((prev) => { const next = { ...prev, brightness: val }; onImageEdit?.(next); return next; });
+                    setImageEdits((prev) => ({ ...prev, brightness: val }));
                   }}
                 />
               </div>
@@ -185,7 +195,7 @@ const AdLayoutControls: React.FC<AdLayoutControlsProps> = ({ elements, selected,
                   max={200}
                   step={1}
                   onValueChange={([val]) => {
-                    setImageEdits((prev) => { const next = { ...prev, contrast: val }; onImageEdit?.(next); return next; });
+                    setImageEdits((prev) => ({ ...prev, contrast: val }));
                   }}
                 />
               </div>
@@ -197,7 +207,7 @@ const AdLayoutControls: React.FC<AdLayoutControlsProps> = ({ elements, selected,
                   max={200}
                   step={1}
                   onValueChange={([val]) => {
-                    setImageEdits((prev) => { const next = { ...prev, saturation: val }; onImageEdit?.(next); return next; });
+                    setImageEdits((prev) => ({ ...prev, saturation: val }));
                   }}
                 />
               </div>
