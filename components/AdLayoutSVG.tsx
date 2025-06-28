@@ -24,6 +24,10 @@ interface AdLayoutSVGProps {
   showLogo?: boolean;
   filter?: string;
   logoImage?: string | null;
+  logoBbox?: { x: number; y: number; width: number; height: number };
+  onLogoBboxChange?: (bbox: { x: number; y: number; width: number; height: number }) => void;
+  selectedLogo?: boolean;
+  onLogoSelect?: (selected: boolean) => void;
 }
 
 const svgWidth = 1080;
@@ -69,7 +73,7 @@ function hexToRgba(hex: string, alpha: number = 1): string {
   return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }
 
-const AdLayoutSVG: React.FC<AdLayoutSVGProps> = ({ imageUrl, layout, width = 1080, height = 1080, selected, onSelectElement, onElementsChange, pointerEventsNone, style, logoPosition = 'top-left', logoColor, showLogo = true, filter, logoImage }) => {
+const AdLayoutSVG: React.FC<AdLayoutSVGProps> = ({ imageUrl, layout, width = 1080, height = 1080, selected, onSelectElement, onElementsChange, pointerEventsNone, style, logoPosition = 'top-left', logoColor, showLogo = true, filter, logoImage, logoBbox, onLogoBboxChange, selectedLogo, onLogoSelect }) => {
   const [elements, setElements] = useState(layout.elements);
   const dragOffset = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
   const logoPos = logoPosition;
@@ -181,6 +185,81 @@ const AdLayoutSVG: React.FC<AdLayoutSVGProps> = ({ imageUrl, layout, width = 108
     // For now, we pass a dummy function to AdLayoutControls
   };
 
+  // Logo drag handler
+  const handleLogoDragStart = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+    document.body.style.userSelect = 'none';
+    onLogoSelect?.(true);
+    const startX = e.clientX;
+    const startY = e.clientY;
+    const initialX = logoBbox?.x || 24;
+    const initialY = logoBbox?.y || 24;
+    
+    const onDragMove = (ev: MouseEvent) => {
+      const dx = (ev.clientX - startX) * (1080 / width);
+      const dy = (ev.clientY - startY) * (1080 / height);
+      const currentBbox = logoBbox || { x: 24, y: 24, width: 80, height: 80 };
+      const newBbox = {
+        ...currentBbox,
+        x: Math.max(0, Math.min(1080 - currentBbox.width, initialX + dx)),
+        y: Math.max(0, Math.min(1080 - currentBbox.height, initialY + dy)),
+      };
+      onLogoBboxChange?.(newBbox);
+    };
+    
+    const onDragEnd = () => {
+      window.removeEventListener('mousemove', onDragMove);
+      window.removeEventListener('mouseup', onDragEnd);
+      document.body.style.userSelect = '';
+    };
+    
+    window.addEventListener('mousemove', onDragMove);
+    window.addEventListener('mouseup', onDragEnd);
+  };
+
+  // Logo resize handler
+  const handleLogoResizeStart = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+    onLogoSelect?.(true);
+    const startX = e.clientX;
+    const startY = e.clientY;
+    const initialWidth = logoBbox?.width || 80;
+    const initialHeight = logoBbox?.height || 80;
+    const initialX = logoBbox?.x || 24;
+    const initialY = logoBbox?.y || 24;
+    
+    const onResizeMove = (ev: MouseEvent) => {
+      const dx = (ev.clientX - startX) * (1080 / width);
+      const dy = (ev.clientY - startY) * (1080 / height);
+      const newWidth = Math.max(20, Math.min(300, initialWidth + dx));
+      const newHeight = Math.max(20, Math.min(300, initialHeight + dy));
+      
+      // Ensure logo doesn't go outside bounds
+      const maxX = 1080 - newWidth;
+      const maxY = 1080 - newHeight;
+      const newX = Math.max(0, Math.min(maxX, initialX));
+      const newY = Math.max(0, Math.min(maxY, initialY));
+      
+      const newBbox = {
+        x: newX,
+        y: newY,
+        width: newWidth,
+        height: newHeight,
+      };
+      onLogoBboxChange?.(newBbox);
+    };
+    
+    const onResizeEnd = () => {
+      window.removeEventListener('mousemove', onResizeMove);
+      window.removeEventListener('mouseup', onResizeEnd);
+    };
+    
+    window.addEventListener('mousemove', onResizeMove);
+    window.addEventListener('mouseup', onResizeEnd);
+  };
+
   // Helper to measure text size in SVG
   const measureText = (text: string, fontSize: number, fontWeight: string, fontFamily: string) => {
     if (typeof window === "undefined") return { width: 0, height: 0 };
@@ -214,7 +293,10 @@ const AdLayoutSVG: React.FC<AdLayoutSVGProps> = ({ imageUrl, layout, width = 108
       {/* Transparent overlay for deselection */}
       <div
         style={{ position: 'absolute', left: 0, top: 0, width, height, zIndex: 1, cursor: 'default', background: 'transparent' }}
-        onClick={() => onSelectElement?.(null)}
+        onClick={() => {
+          onSelectElement?.(null);
+          onLogoSelect?.(false);
+        }}
       />
       {(['heading', 'subheading', 'cta'] as ElementType[]).map((type) => {
         const el = layout.elements[type];
@@ -363,27 +445,72 @@ const AdLayoutSVG: React.FC<AdLayoutSVGProps> = ({ imageUrl, layout, width = 108
       })}
       {/* Logo */}
       {showLogo !== false && (
-        logoImage ? (
-          <img
-            src={logoImage}
-            alt="Logo"
-            style={{
-              ...logoStyles[logoPos],
-              width: 80,
-              height: 80,
-              objectFit: 'contain',
-              zIndex: 10,
-              pointerEvents: 'none',
-              background: 'transparent',
-            }}
-          />
-        ) : (
-          <div
-            style={{ ...logoStyles[logoPos], fontFamily: 'Montserrat, Poppins, Lato, Arial', fontWeight: 700, fontSize: 24, color: logoColor || '#fff', letterSpacing: 1, zIndex: 10, pointerEvents: 'none' }}
-          >
-            Disoriti
-          </div>
-        )
+        <div
+          style={{
+            position: 'absolute',
+            left: (logoBbox?.x || 24) * (width / 1080),
+            top: (logoBbox?.y || 24) * (height / 1080),
+            width: (logoBbox?.width || 80) * (width / 1080),
+            height: (logoBbox?.height || 80) * (height / 1080),
+            pointerEvents: pointerEventsNone ? 'none' : 'auto',
+            outline: selectedLogo && !pointerEventsNone ? '2px dashed #00FFA9' : 'none',
+            outlineOffset: '-2px',
+            cursor: pointerEventsNone ? 'default' : 'move',
+            zIndex: selectedLogo ? 2 : 1,
+          }}
+          onMouseDown={pointerEventsNone ? undefined : handleLogoDragStart}
+          onClick={pointerEventsNone ? undefined : (e) => { e.stopPropagation(); onLogoSelect?.(true); }}
+        >
+          {logoImage ? (
+            <img
+              src={logoImage}
+              alt="Logo"
+              style={{
+                width: '100%',
+                height: '100%',
+                objectFit: 'contain',
+                background: 'transparent',
+              }}
+            />
+          ) : (
+            <div
+              style={{
+                width: '100%',
+                height: '100%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontFamily: 'Montserrat, Poppins, Lato, Arial',
+                fontWeight: 700,
+                fontSize: Math.min((logoBbox?.width || 80) * (width / 1080) * 0.3, 24),
+                color: logoColor || '#fff',
+                letterSpacing: 1,
+                background: 'transparent',
+              }}
+            >
+              Disoriti
+            </div>
+          )}
+          {selectedLogo && !pointerEventsNone && (
+            <div
+              style={{
+                position: 'absolute',
+                right: 0,
+                bottom: 0,
+                width: 16,
+                height: 16,
+                background: '#00FFA9',
+                borderRadius: 4,
+                cursor: 'nwse-resize',
+                zIndex: 10,
+              }}
+              onMouseDown={e => {
+                e.stopPropagation();
+                handleLogoResizeStart(e);
+              }}
+            />
+          )}
+        </div>
       )}
     </div>
   );

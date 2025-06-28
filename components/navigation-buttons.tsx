@@ -1,10 +1,10 @@
-import React from "react";
+import React, { ReactNode } from "react";
 
 interface NavigationButtonsProps {
   onPrevious?: () => void;
   onNext?: () => void;
-  previousLabel?: string;
-  nextLabel?: string;
+  previousLabel?: ReactNode;
+  nextLabel?: ReactNode;
   disablePrevious?: boolean;
   disableNext?: boolean;
   isNextLoading?: boolean;

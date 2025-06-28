@@ -57,6 +57,8 @@ export default function ContentPage() {
   const [logoPosition, setLogoPosition] = useState<'top-left' | 'top-right' | 'bottom-left' | 'bottom-right'>('top-left');
   const [logoColor, setLogoColor] = useState<string>("#ffffff");
   const [logoImage, setLogoImage] = useState<string | null>(null);
+  const [logoBbox, setLogoBbox] = useState({ x: 24, y: 24, width: 80, height: 80 });
+  const [selectedLogo, setSelectedLogo] = useState<boolean>(false);
   const router = useRouter();
   const searchParams = useSearchParams();
   const type = searchParams.get("type");
@@ -169,6 +171,10 @@ export default function ContentPage() {
                       pointerEventsNone={true}
                       showLogo={false}
                       filter={`brightness(${imageEdits.brightness}%) contrast(${imageEdits.contrast}%) saturate(${imageEdits.saturation}%)`}
+                      logoBbox={logoBbox}
+                      onLogoBboxChange={setLogoBbox}
+                      selectedLogo={selectedLogo}
+                      onLogoSelect={setSelectedLogo}
                     />
                   </div>
                 ))}
@@ -181,7 +187,10 @@ export default function ContentPage() {
             <div className="flex-1 flex flex-col items-center justify-start gap-4">
               <div ref={previewRef} className="w-full max-w-[500px] aspect-square bg-background/50 rounded-lg border border-primary/40 shadow-[0_0_20px_4px_hsl(var(--primary)/0.5)] overflow-hidden"
                 onClick={e => {
-                  if (e.target === e.currentTarget) setSelectedElement(null);
+                  if (e.target === e.currentTarget) {
+                    setSelectedElement(null);
+                    setSelectedLogo(false);
+                  }
                 }}
               >
                 <AdLayoutSVG
@@ -196,6 +205,10 @@ export default function ContentPage() {
                   logoPosition={logoPosition}
                   logoColor={logoColor}
                   logoImage={logoImage}
+                  logoBbox={logoBbox}
+                  onLogoBboxChange={setLogoBbox}
+                  selectedLogo={selectedLogo}
+                  onLogoSelect={setSelectedLogo}
                 />
               </div>
               {/* Hidden export preview for image download */}
@@ -209,6 +222,7 @@ export default function ContentPage() {
                     logoImage={logoImage}
                     logoPosition={logoPosition}
                     logoColor={logoColor}
+                    logoBbox={logoBbox}
                   />
                 </div>
               </div>
@@ -243,6 +257,8 @@ export default function ContentPage() {
                   reader.onload = e => setLogoImage(e.target?.result as string);
                   reader.readAsDataURL(file);
                 }}
+                selectedLogo={selectedLogo}
+                onLogoSelect={setSelectedLogo}
               />
             </div>
           </div>

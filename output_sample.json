@@ -22,14 +22,14 @@
         "elements": {
           "heading": {
             "bbox": {
-              "x": 115,
-              "y": 40,
+              "x": 5,
+              "y": 30,
               "width": 850,
               "height": 154
             },
             "position": {
-              "x1": 115,
-              "y1": 40,
+              "x1": 5,
+              "y1": 30,
               "x2": 965,
               "y2": 194
             },
@@ -37,30 +37,30 @@
               "font_size": 80,
               "font_weight": "bold",
               "text_align": "center",
-              "color": "#000000",
+              "color": "#FFFFFF",
               "background_color": "#FFFFFF80",
-              "margin": 20
+              "margin": 30
             },
             "text_content": "Summer Sale"
           },
           "subheading": {
             "bbox": {
-              "x": 108,
-              "y": 504,
-              "width": 864,
-              "height": 72
+              "x": 5,
+              "y": 250,
+              "width": 950,
+              "height": 200
             },
             "position": {
-              "x1": 108,
-              "y1": 504,
+              "x1": 5,
+              "y1": 250,
               "x2": 972,
               "y2": 576
             },
             "styling": {
-              "font_size": 70,
+              "font_size": 60,
               "font_weight": "normal",
               "text_align": "center",
-              "color": "#000000",
+              "color": "#FFFFFF",
               "background_color": "#FFFFFF80",
               "margin": 15
             },

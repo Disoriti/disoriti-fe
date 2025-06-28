@@ -9,9 +9,10 @@ interface AdLayoutPreviewProps {
   logoImage?: string | null;
   logoPosition?: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right';
   logoColor?: string;
+  logoBbox?: { x: number; y: number; width: number; height: number };
 }
 
-const AdLayoutPreview: React.FC<AdLayoutPreviewProps> = ({ imageUrl, layout, width = 500, height = 500, logoImage, logoPosition, logoColor }) => {
+const AdLayoutPreview: React.FC<AdLayoutPreviewProps> = ({ imageUrl, layout, width = 500, height = 500, logoImage, logoPosition, logoColor, logoBbox }) => {
   const { heading, subheading, cta } = layout.elements;
   const elements: { key: string; data: ElementData }[] = [
     { key: "heading", data: heading },
@@ -81,22 +82,18 @@ const AdLayoutPreview: React.FC<AdLayoutPreviewProps> = ({ imageUrl, layout, wid
       })}
       {/* Logo/Watermark */}
       {(() => {
-        const logoStyles: Record<string, React.CSSProperties> = {
-          'top-left': { left: 24, top: 24, right: 'auto', bottom: 'auto', position: 'absolute' },
-          'top-right': { right: 24, top: 24, left: 'auto', bottom: 'auto', position: 'absolute' },
-          'bottom-left': { left: 24, bottom: 24, right: 'auto', top: 'auto', position: 'absolute' },
-          'bottom-right': { right: 24, bottom: 24, left: 'auto', top: 'auto', position: 'absolute' },
-        };
-        if (!logoPosition) return null;
+        if (!logoBbox) return null;
         if (logoImage) {
           return (
             <img
               src={logoImage}
               alt="Logo"
               style={{
-                ...logoStyles[logoPosition],
-                width: 80,
-                height: 80,
+                position: 'absolute',
+                left: logoBbox.x * (width / 1080),
+                top: logoBbox.y * (height / 1080),
+                width: logoBbox.width * (width / 1080),
+                height: logoBbox.height * (width / 1080),
                 objectFit: 'contain',
                 zIndex: 10,
                 pointerEvents: 'none',
@@ -107,7 +104,23 @@ const AdLayoutPreview: React.FC<AdLayoutPreviewProps> = ({ imageUrl, layout, wid
         }
         return (
           <div
-            style={{ ...logoStyles[logoPosition], fontFamily: 'Montserrat, Poppins, Lato, Arial', fontWeight: 700, fontSize: 24, color: logoColor || '#fff', letterSpacing: 1, zIndex: 10, pointerEvents: 'none' }}
+            style={{
+              position: 'absolute',
+              left: logoBbox.x * (width / 1080),
+              top: logoBbox.y * (height / 1080),
+              width: logoBbox.width * (width / 1080),
+              height: logoBbox.height * (width / 1080),
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontFamily: 'Montserrat, Poppins, Lato, Arial',
+              fontWeight: 700,
+              fontSize: Math.min(logoBbox.width * (width / 1080) * 0.3, 24),
+              color: logoColor || '#fff',
+              letterSpacing: 1,
+              zIndex: 10,
+              pointerEvents: 'none',
+            }}
           >
             Disoriti
           </div>
