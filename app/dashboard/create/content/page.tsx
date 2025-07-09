@@ -8,7 +8,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import { useState, useRef, Suspense } from "react";
+import { useState, useRef, Suspense, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Sparkles, Pencil, Bot, Download, ChevronLeft, Save } from "lucide-react";
 import AdGenerationLoader from "@/components/ad-generation-loader";
@@ -59,6 +59,7 @@ function ContentPageInner() {
   const [logoImage, setLogoImage] = useState<string | null>(null);
   const [logoBbox, setLogoBbox] = useState({ x: 24, y: 24, width: 80, height: 80 });
   const [selectedLogo, setSelectedLogo] = useState<boolean>(false);
+  const [isClient, setIsClient] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
   const type = searchParams.get("type");
@@ -68,6 +69,11 @@ function ContentPageInner() {
   const settings = searchParams.get("settings");
   const previewRef = useRef<HTMLDivElement>(null);
   const exportRef = useRef<HTMLDivElement>(null);
+
+  // Prevent hydration mismatch
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   const handleDownload = async () => {
     if (exportRef.current) {
@@ -110,6 +116,22 @@ function ContentPageInner() {
     newLayouts[selectedLayoutIdx].elements = newElements;
     setLayouts(newLayouts);
   };
+
+  // Don't render until client-side hydration is complete
+  if (!isClient) {
+    return (
+      <div className="space-y-8 p-6">
+        <div className="h-6 bg-gray-200 rounded animate-pulse mb-4"></div>
+        <div className="flex justify-center">
+          <div className="w-full max-w-2xl bg-gray-100 rounded-2xl p-8">
+            <div className="h-8 bg-gray-200 rounded animate-pulse mb-4"></div>
+            <div className="h-4 bg-gray-200 rounded animate-pulse mb-2"></div>
+            <div className="h-4 bg-gray-200 rounded animate-pulse w-3/4"></div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8 p-6">
