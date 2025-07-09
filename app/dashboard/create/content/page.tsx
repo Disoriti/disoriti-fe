@@ -8,7 +8,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import { useState, useRef, Suspense, useEffect } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Sparkles, Pencil, Bot, Download, ChevronLeft, Save } from "lucide-react";
 import AdGenerationLoader from "@/components/ad-generation-loader";
@@ -61,12 +61,14 @@ function ContentPageInner() {
   const [selectedLogo, setSelectedLogo] = useState<boolean>(false);
   const [isClient, setIsClient] = useState(false);
   const router = useRouter();
+  
+  // Safely get search params with fallbacks
   const searchParams = useSearchParams();
-  const type = searchParams.get("type");
-  const media = searchParams.get("media");
-  const platform = searchParams.get("platform");
-  const postType = searchParams.get("postType");
-  const settings = searchParams.get("settings");
+  const type = searchParams?.get("type") || "";
+  const media = searchParams?.get("media") || "";
+  const platform = searchParams?.get("platform") || "";
+  const postType = searchParams?.get("postType") || "";
+  const settings = searchParams?.get("settings") || "";
   const previewRef = useRef<HTMLDivElement>(null);
   const exportRef = useRef<HTMLDivElement>(null);
 
@@ -147,17 +149,17 @@ function ContentPageInner() {
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
-            <BreadcrumbLink href={`/dashboard/create/media?type=${type}`}>Media Type</BreadcrumbLink>
+            <BreadcrumbLink href={type ? `/dashboard/create/media?type=${type}` : "/dashboard/create/media"}>Media Type</BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
-            <BreadcrumbLink href={`/dashboard/create/upload?type=${type}&media=${media}`}>
+            <BreadcrumbLink href={type && media ? `/dashboard/create/upload?type=${type}&media=${media}` : "/dashboard/create/upload"}>
               Post Type
             </BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
-            <BreadcrumbLink href={`/dashboard/create/editor?type=${type}&media=${media}&platform=${platform}&postType=${postType}`}>
+            <BreadcrumbLink href={type && media && platform && postType ? `/dashboard/create/editor?type=${type}&media=${media}&platform=${platform}&postType=${postType}` : "/dashboard/create/editor"}>
               Settings
             </BreadcrumbLink>
           </BreadcrumbItem>
@@ -437,9 +439,5 @@ function ContentPageInner() {
 }
 
 export default function ContentPage() {
-  return (
-    <Suspense fallback={<div>Loading...</div>}>
-      <ContentPageInner />
-    </Suspense>
-  );
+  return <ContentPageInner />;
 } 
