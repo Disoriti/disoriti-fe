@@ -8,11 +8,38 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Sparkles, Pencil, Bot, Download } from "lucide-react";
+import { Sparkles, Pencil, Bot, Download, ChevronLeft, Save } from "lucide-react";
 import AdGenerationLoader from "@/components/ad-generation-loader";
 import NavigationButtons from "@/components/navigation-buttons";
+import AdLayoutSVG from "@/components/AdLayoutSVG";
+import type { Layout, ElementData, Styling } from "@/components/AdLayoutSVG";
+import layoutDataRaw from "../../../../output_sample.json";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import AdLayoutControls from "@/components/AdLayoutControls";
+import * as htmlToImage from "html-to-image";
+import AdLayoutPreview from "@/components/AdLayoutPreview";
+import { Switch } from "@/components/ui/switch";
+const layoutData = layoutDataRaw as { layouts: Layout[], metadata: any };
+
+// Parse aspect ratio from post_dimensions (e.g., "4:3")
+function getAspectRatio(dim: string | undefined): [number, number] {
+  if (!dim) return [1, 1];
+  const match = dim.match(/(\d+):(\d+)/);
+  if (match) {
+    return [parseInt(match[1], 10), parseInt(match[2], 10)];
+  }
+  return [1, 1];
+}
+
+const [aspectW, aspectH] = getAspectRatio(layoutData.metadata?.post_dimensions);
+const MAIN_DISPLAY_WIDTH = 500;
+const MAIN_DISPLAY_HEIGHT = Math.round((MAIN_DISPLAY_WIDTH * aspectH) / aspectW);
+const TILE_WIDTH = 120;
+const TILE_HEIGHT = Math.round((TILE_WIDTH * aspectH) / aspectW);
 
 export default function ContentPage() {
   const [selectedOption, setSelectedOption] = useState<"ai" | "manual" | null>(null);
@@ -23,6 +50,15 @@ export default function ContentPage() {
   const [extraText, setExtraText] = useState("");
   const [generatingImage, setGeneratingImage] = useState(false);
   const [generatedImage, setGeneratedImage] = useState<string | null>(null);
+  const [selectedLayoutIdx, setSelectedLayoutIdx] = useState(0);
+  const [layouts, setLayouts] = useState(layoutData.layouts);
+  const [selectedElement, setSelectedElement] = useState<"heading" | "subheading" | "cta" | null>(null);
+  const [imageEdits, setImageEdits] = useState({ brightness: 100, contrast: 100, saturation: 100 });
+  const [logoPosition, setLogoPosition] = useState<'top-left' | 'top-right' | 'bottom-left' | 'bottom-right'>('top-left');
+  const [logoColor, setLogoColor] = useState<string>("#ffffff");
+  const [logoImage, setLogoImage] = useState<string | null>(null);
+  const [logoBbox, setLogoBbox] = useState({ x: 24, y: 24, width: 80, height: 80 });
+  const [selectedLogo, setSelectedLogo] = useState<boolean>(false);
   const router = useRouter();
   const searchParams = useSearchParams();
   const type = searchParams.get("type");
@@ -30,26 +66,49 @@ export default function ContentPage() {
   const platform = searchParams.get("platform");
   const postType = searchParams.get("postType");
   const settings = searchParams.get("settings");
+  const previewRef = useRef<HTMLDivElement>(null);
+  const exportRef = useRef<HTMLDivElement>(null);
+
+  const handleDownload = async () => {
+    if (exportRef.current) {
+      const dataUrl = await htmlToImage.toPng(exportRef.current, { cacheBust: true });
+      const link = document.createElement('a');
+      link.href = dataUrl;
+      link.download = 'generated-ad.png';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+  };
 
   const handleGenerateImage = async () => {
     setGeneratingImage(true);
     // Simulate API call to generate image
     setTimeout(() => {
       // Replace with actual API response
-      setGeneratedImage("https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=80");
+      setGeneratedImage("/image.png");
       setGeneratingImage(false);
     }, 3000);
   };
 
-  const handleDownloadImage = () => {
-    if (generatedImage) {
-      const link = document.createElement('a');
-      link.href = generatedImage;
-      link.download = 'generated-ad.png';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    }
+  const handleLayoutChange = (newLayout: Layout, index: number) => {
+    const newLayouts = [...layouts];
+    newLayouts[index] = newLayout;
+    setLayouts(newLayouts);
+  };
+
+  const handleStyleChange = (type: "heading" | "subheading" | "cta", key: keyof Styling, value: string | number) => {
+    const newLayouts = [...layouts];
+    const newLayout = { ...newLayouts[selectedLayoutIdx] };
+    (newLayout.elements[type].styling as any)[key] = value;
+    newLayouts[selectedLayoutIdx] = newLayout;
+    setLayouts(newLayouts);
+  };
+
+  const handleElementChange = (newElements: { heading: ElementData; subheading: ElementData; cta: ElementData }) => {
+    const newLayouts = [...layouts];
+    newLayouts[selectedLayoutIdx].elements = newElements;
+    setLayouts(newLayouts);
   };
 
   return (
@@ -87,34 +146,121 @@ export default function ContentPage() {
         </BreadcrumbList>
       </Breadcrumb>
 
-      {/* Heading */}
-      <h1 className="text-3xl md:text-3xl font-bold text-disoriti-primary mb-8 text-center tracking-tight animate-glow">
-        Configure your post content
-      </h1>
-
-
       {generatingImage && <AdGenerationLoader />}
 
       {generatedImage ? (
-        <div className="w-full max-w-2xl mx-auto bg-gradient-to-br from-disoriti-primary/5 to-disoriti-accent/5 p-8 rounded-2xl border border-disoriti-primary/20">
-          <h2 className="text-2xl font-bold mb-6">Your Generated Ad</h2>
-          <div className="relative aspect-w-16 aspect-h-9 rounded-xl overflow-hidden mb-6">
-            <img src={generatedImage} alt="Generated Ad" className="w-full h-full object-cover" />
-          </div>
-          <div className="flex justify-between items-center">
-            <button
-              onClick={() => setGeneratedImage(null)}
-              className="px-6 py-2 rounded-xl border border-disoriti-primary/30 text-disoriti-primary bg-disoriti-primary/10 font-medium hover:bg-disoriti-primary/20 transition-all"
-            >
-              ← Back to Content
-            </button>
-            <button
-              onClick={handleDownloadImage}
-              className="flex items-center gap-2 px-6 py-2 rounded-xl bg-disoriti-primary text-white font-medium hover:bg-disoriti-primary/90 transition-all"
-            >
-              <Download className="w-4 h-4" />
-              Download Image
-            </button>
+        <div className="w-full max-w-7xl mx-auto flex-1">
+          <div className="bg-background p-6 rounded-2xl border border-border shadow-lg flex flex-row gap-4 items-start justify-center">
+            {/* Tiles on the left (catalogue) */}
+            <div className="flex flex-col gap-4 items-center w-[150px] flex-shrink-0">
+              <h3 className="font-semibold text-lg text-foreground mb-2 pt-1 w-full">Layouts</h3>
+              <div className="flex flex-col gap-4 items-center w-full">
+                {layoutData.layouts.map((layout, idx) => (
+                  <div
+                    key={layout.id || idx}
+                    className={`rounded-lg border-2 cursor-pointer transition-all duration-300 transform hover:scale-105 ${selectedLayoutIdx === idx ? "border-primary shadow-primary/30 shadow-lg" : "border-border"}`}
+                    style={{ background: "#fff", width: 140, height: 140, overflow: "hidden" }}
+                    onClick={() => setSelectedLayoutIdx(idx)}
+                  >
+                    <AdLayoutSVG
+                      imageUrl={generatedImage || "/image.png"}
+                      layout={layout}
+                      width={140}
+                      height={140}
+                      selected={null}
+                      pointerEventsNone={true}
+                      showLogo={false}
+                      filter={`brightness(${imageEdits.brightness}%) contrast(${imageEdits.contrast}%) saturate(${imageEdits.saturation}%)`}
+                      logoBbox={logoBbox}
+                      onLogoBboxChange={setLogoBbox}
+                      selectedLogo={selectedLogo}
+                      onLogoSelect={setSelectedLogo}
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="w-px bg-border self-stretch my-4" />
+            
+            {/* Main display area (center) */}
+            <div className="flex-1 flex flex-col items-center justify-start gap-4">
+              <div ref={previewRef} className="w-full max-w-[500px] aspect-square bg-background/50 rounded-lg border border-primary/40 shadow-[0_0_20px_4px_hsl(var(--primary)/0.5)] overflow-hidden"
+                onClick={e => {
+                  if (e.target === e.currentTarget) {
+                    setSelectedElement(null);
+                    setSelectedLogo(false);
+                  }
+                }}
+              >
+                <AdLayoutSVG
+                  imageUrl={generatedImage || "/image.png"}
+                  layout={layouts[selectedLayoutIdx]}
+                  width={500}
+                  height={500}
+                  selected={selectedElement}
+                  onSelectElement={setSelectedElement}
+                  onElementsChange={handleElementChange}
+                  filter={`brightness(${imageEdits.brightness}%) contrast(${imageEdits.contrast}%) saturate(${imageEdits.saturation}%)`}
+                  logoPosition={logoPosition}
+                  logoColor={logoColor}
+                  logoImage={logoImage}
+                  logoBbox={logoBbox}
+                  onLogoBboxChange={setLogoBbox}
+                  selectedLogo={selectedLogo}
+                  onLogoSelect={setSelectedLogo}
+                />
+              </div>
+              {/* Hidden export preview for image download */}
+              <div style={{ position: 'absolute', left: '-9999px', top: 0 }}>
+                <div ref={exportRef}>
+                  <AdLayoutPreview
+                    imageUrl={generatedImage || ""}
+                    layout={layouts[selectedLayoutIdx]}
+                    width={500}
+                    height={500}
+                    logoImage={logoImage}
+                    logoPosition={logoPosition}
+                    logoColor={logoColor}
+                    logoBbox={logoBbox}
+                  />
+                </div>
+              </div>
+              <div className="w-full max-w-[500px]">
+                <NavigationButtons
+                  onPrevious={() => setGeneratedImage(null)}
+                  onNext={handleDownload}
+                  nextLabel={<><Save className="w-4 h-4 mr-2" />Save</>}
+                />
+              </div>
+            </div>
+
+            <div className="w-px bg-border self-stretch my-4" />
+
+            {/* Controls on the right */}
+            <div className="w-[280px] flex-shrink-0">
+              <AdLayoutControls
+                elements={layouts[selectedLayoutIdx].elements}
+                selected={selectedElement}
+                onStyleChange={handleStyleChange}
+                onImageEdit={setImageEdits}
+                onImageReplace={file => {
+                  const url = URL.createObjectURL(file);
+                  setGeneratedImage(url);
+                }}
+                logoPosition={logoPosition}
+                onLogoPositionChange={setLogoPosition}
+                logoColor={logoColor}
+                onLogoColorChange={setLogoColor}
+                onLogoReplace={file => {
+                  const reader = new FileReader();
+                  reader.onload = e => setLogoImage(e.target?.result as string);
+                  reader.readAsDataURL(file);
+                }}
+                selectedLogo={selectedLogo}
+                onLogoSelect={setSelectedLogo}
+              />
+            </div>
           </div>
         </div>
       ) : (
@@ -122,34 +268,36 @@ export default function ContentPage() {
           {/* Option Selection */}
           {!selectedOption ? (
             <div className="flex gap-10 w-full justify-center">
-              <button
-                className="flex flex-col items-center justify-center rounded-2xl border-2 transition-all duration-300 shadow-xl bg-gradient-to-br from-disoriti-primary/10 to-disoriti-accent/10 px-16 py-20 text-2xl font-bold w-[340px] h-56 hover:border-disoriti-primary/60 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-disoriti-primary/40"
+              <Button
+                variant="outline"
+                className="flex flex-col items-center justify-center rounded-2xl border-2 transition-all duration-300 shadow-xl px-16 py-20 text-2xl font-bold w-[340px] h-56 hover:border-disoriti-primary/60 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-disoriti-primary/40 keep-text-visible"
+                style={{ backgroundColor: '#000' }}
                 onClick={() => setSelectedOption("ai")}
-                type="button"
               >
-                <span className="mb-4 flex items-center justify-center">
+                <span className="mb-4 flex items-center justify-center text-white z-10">
                   <span className="relative flex items-center justify-center">
                     <span className="absolute inline-flex h-16 w-16 rounded-full bg-gradient-to-br from-disoriti-primary/30 to-disoriti-accent/30 blur-xl animate-pulse" />
                     <Bot className="h-12 w-12 text-disoriti-primary drop-shadow-lg relative z-10" />
                   </span>
                 </span>
-                <span className="mb-2">Let AI do the magic</span>
-                <span className="text-base font-normal text-disoriti-primary/70">
+                <span className="mb-2 text-white z-10">Let AI do the magic</span>
+                <span className="text-base font-normal text-white z-10">
                   Generate post content automatically
                 </span>
-              </button>
+              </Button>
 
-              <button
-                className="flex flex-col items-center justify-center rounded-2xl border-2 transition-all duration-300 shadow-xl bg-gradient-to-br from-disoriti-primary/10 to-disoriti-accent/10 px-16 py-20 text-2xl font-bold w-[340px] h-56 hover:border-disoriti-primary/60 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-disoriti-primary/40"
+              <Button
+                variant="outline"
+                className="flex flex-col items-center justify-center rounded-2xl border-2 transition-all duration-300 shadow-xl px-16 py-20 text-2xl font-bold w-[340px] h-56 hover:border-disoriti-primary/60 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-disoriti-primary/40 keep-text-visible"
+                style={{ backgroundColor: '#000' }}
                 onClick={() => setSelectedOption("manual")}
-                type="button"
               >
-                <Pencil className="h-12 w-12 mb-4" />
-                <span className="mb-2">Manual post configuration</span>
-                <span className="text-base font-normal text-disoriti-primary/70">
+                <Pencil className="h-12 w-12 mb-4 text-white z-10" />
+                <span className="mb-2 text-white z-10">Manual post configuration</span>
+                <span className="text-base font-normal text-white z-10">
                   Enter your own post content
                 </span>
-              </button>
+              </Button>
             </div>
           ) : selectedOption === "ai" ? (
             <div className="flex justify-center">
@@ -160,26 +308,30 @@ export default function ContentPage() {
                     <Bot className="h-16 w-16 text-disoriti-primary drop-shadow-lg relative z-10" />
                   </span>
                 </span>
-                <h2 className="text-2xl font-bold mb-4">AI Magic Coming Soon!</h2>
-                <p className="text-base text-disoriti-primary/70 mb-6 text-center">This feature will generate your post content automatically based on your previous selections.</p>
-                <button
-                  className="mt-2 px-6 py-2 rounded-xl border border-disoriti-primary/30 text-disoriti-primary bg-disoriti-primary/10 font-medium hover:bg-disoriti-primary/20 transition-all"
-                  onClick={() => setSelectedOption(null)}
+                <h2 className="text-2xl font-bold mb-4">Let AI do the magic</h2>
+                <p className="text-disoriti-primary/70 mb-6 text-center">
+                  Our AI will generate the perfect post content for you based on the media and settings you provided.
+                </p>
+                <Button
+                  onClick={handleGenerateImage}
+                  className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold shadow-md px-8 py-6 text-lg rounded-full transition-transform transform hover:scale-105"
                 >
-                  ← Back
-                </button>
-              </div>
+                  <Sparkles className="w-6 h-6 mr-3" />
+                  Generate Post
+                </Button>
             </div>
-           
+            </div>
           ) : (
-            // Manual post content form
+            // Manual form
             <div className="flex justify-center">
-              <div className="w-full max-w-2xl bg-gradient-to-br from-disoriti-primary/5 to-disoriti-accent/5 p-8 rounded-2xl border border-disoriti-primary/20">
+              <div className="w-full max-w-2xl bg-background p-8 rounded-2xl border border-disoriti-primary/20">
+                <h2 className="text-2xl font-bold mb-6 text-center">Manual Post Configuration</h2>
                 <div className="space-y-6">
                   {/* Post Heading */}
                   <div>
-                    <label className="block text-sm font-medium mb-2">Post Heading</label>
-                    <input
+                    <Label htmlFor="post-heading" className="mb-2 block">Post Heading</Label>
+                    <Input
+                      id="post-heading"
                       type="text"
                       value={postHeading}
                       onChange={(e) => setPostHeading(e.target.value)}
@@ -189,8 +341,9 @@ export default function ContentPage() {
                   </div>
                   {/* Post Subheading */}
                   <div>
-                    <label className="block text-sm font-medium mb-2">Post Subheading</label>
-                    <input
+                    <Label htmlFor="post-subheading" className="mb-2 block">Post Subheading</Label>
+                    <Input
+                      id="post-subheading"
                       type="text"
                       value={postSubheading}
                       onChange={(e) => setPostSubheading(e.target.value)}
@@ -201,19 +354,17 @@ export default function ContentPage() {
                   {/* Call to Action */}
                   <div>
                     <div className="flex items-center gap-3">
-                      <input
-                        type="checkbox"
+                      <Switch
                         id="has-cta"
                         checked={hasCTA}
-                        onChange={(e) => setHasCTA(e.target.checked)}
-                        className="w-4 h-4 rounded border-disoriti-primary/20 focus:ring-2 focus:ring-disoriti-primary/40"
+                        onCheckedChange={setHasCTA}
                       />
-                      <label htmlFor="has-cta" className="text-sm font-medium">
+                      <Label htmlFor="has-cta" className="text-sm font-medium">
                         Include Call to Action
-                      </label>
+                      </Label>
                     </div>
                     {hasCTA && (
-                      <input
+                      <Input
                         type="text"
                         value={ctaText}
                         onChange={(e) => setCtaText(e.target.value)}
@@ -224,8 +375,10 @@ export default function ContentPage() {
                   </div>
                   {/* Extra Text/Information */}
                   <div>
-                    <label className="block text-sm font-medium mb-2">Extra Information (Optional)</label>
-                    <textarea
+                    <Label htmlFor="extra-text" className="mb-2 block">Extra Text</Label>
+                    <Input
+                      id="extra-text"
+                      type="text"
                       value={extraText}
                       onChange={(e) => setExtraText(e.target.value)}
                       className="w-full p-3 bg-white/5 rounded-lg border border-disoriti-primary/20 focus:outline-none focus:ring-2 focus:ring-disoriti-primary/40 min-h-[100px] resize-y"
@@ -235,7 +388,6 @@ export default function ContentPage() {
                 </div>
               </div>
             </div>
-            
           )}
 
           {/* Navigation Buttons */}
