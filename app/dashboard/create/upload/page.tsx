@@ -8,7 +8,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Facebook, Instagram, Linkedin, Music2 } from "lucide-react";
 import NavigationButtons from "@/components/navigation-buttons";
@@ -16,7 +16,7 @@ import { PostType, socialMediaTypes } from "@/app/dashboard/create/upload/types"
 
 
 
-export default function UploadPage() {
+function UploadPageInner() {
   const [selectedPlatform, setSelectedPlatform] = useState<string | null>(null);
   const [selectedPostType, setSelectedPostType] = useState<PostType | null>(null);
   const router = useRouter();
@@ -129,5 +129,13 @@ export default function UploadPage() {
         />
       </div>
     </div>
+  );
+}
+
+export default function UploadPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <UploadPageInner />
+    </Suspense>
   );
 } 

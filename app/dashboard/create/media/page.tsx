@@ -8,12 +8,12 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Image, Video } from "lucide-react";
 import NavigationButtons from "@/components/navigation-buttons";
 
-export default function MediaPage() {
+function MediaPageInner() {
   const [selected, setSelected] = useState<"image" | "video">();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -92,5 +92,13 @@ export default function MediaPage() {
         />
       </div>
     </div>
+  );
+}
+
+export default function MediaPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <MediaPageInner />
+    </Suspense>
   );
 } 

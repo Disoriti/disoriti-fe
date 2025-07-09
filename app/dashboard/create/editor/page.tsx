@@ -8,7 +8,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Settings, Plus, X } from "lucide-react";
 import { HexColorPicker } from "react-colorful";
@@ -21,7 +21,7 @@ const mockSettings = {
   colorPalette: ["#FF6B6B", "#4ECDC4", "#45B7D1", "#96CEB4"],
 };
 
-export default function EditorPage() {
+function EditorPageInner() {
   const [selectedOption, setSelectedOption] = useState<"import" | "new" | null>(null);
   const [brandName, setBrandName] = useState("");
   const [logo, setLogo] = useState<File | null>(null);
@@ -289,5 +289,13 @@ export default function EditorPage() {
         />
       </div>
     </div>
+  );
+}
+
+export default function EditorPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <EditorPageInner />
+    </Suspense>
   );
 } 
