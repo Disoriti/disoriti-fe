@@ -8,7 +8,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Settings, Plus, X } from "lucide-react";
 import { HexColorPicker } from "react-colorful";
@@ -33,7 +33,6 @@ function EditorPageInner() {
   const [hasCTA, setHasCTA] = useState(false);
   const [ctaText, setCtaText] = useState("");
   const [extraText, setExtraText] = useState("");
-  const [isClient, setIsClient] = useState(false);
   const router = useRouter();
   
   // Safely get search params with fallbacks
@@ -43,10 +42,7 @@ function EditorPageInner() {
   const platform = searchParams?.get("platform") || "";
   const postType = searchParams?.get("postType") || "";
 
-  // Prevent hydration mismatch
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
+
 
   const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -82,21 +78,7 @@ function EditorPageInner() {
     }
   };
 
-  // Don't render until client-side hydration is complete
-  if (!isClient) {
-    return (
-      <div className="space-y-8 p-6">
-        <div className="h-6 bg-gray-200 rounded animate-pulse mb-4"></div>
-        <div className="flex justify-center">
-          <div className="w-full max-w-2xl bg-gray-100 rounded-2xl p-8">
-            <div className="h-8 bg-gray-200 rounded animate-pulse mb-4"></div>
-            <div className="h-4 bg-gray-200 rounded animate-pulse mb-2"></div>
-            <div className="h-4 bg-gray-200 rounded animate-pulse w-3/4"></div>
-          </div>
-        </div>
-      </div>
-    );
-  }
+
 
   return (
     <div className="space-y-8 p-6">
@@ -317,5 +299,20 @@ function EditorPageInner() {
 }
 
 export default function EditorPage() {
-  return <EditorPageInner />;
+  return (
+    <Suspense fallback={
+      <div className="space-y-8 p-6">
+        <div className="h-6 bg-gray-200 rounded animate-pulse mb-4"></div>
+        <div className="flex justify-center">
+          <div className="w-full max-w-2xl bg-gray-100 rounded-2xl p-8">
+            <div className="h-8 bg-gray-200 rounded animate-pulse mb-4"></div>
+            <div className="h-4 bg-gray-200 rounded animate-pulse mb-2"></div>
+            <div className="h-4 bg-gray-200 rounded animate-pulse w-3/4"></div>
+          </div>
+        </div>
+      </div>
+    }>
+      <EditorPageInner />
+    </Suspense>
+  );
 } 
