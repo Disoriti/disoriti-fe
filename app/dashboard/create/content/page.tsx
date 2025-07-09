@@ -8,7 +8,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import { useState, useRef } from "react";
+import { useState, useRef, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Sparkles, Pencil, Bot, Download, ChevronLeft, Save } from "lucide-react";
 import AdGenerationLoader from "@/components/ad-generation-loader";
@@ -41,7 +41,7 @@ const MAIN_DISPLAY_HEIGHT = Math.round((MAIN_DISPLAY_WIDTH * aspectH) / aspectW)
 const TILE_WIDTH = 120;
 const TILE_HEIGHT = Math.round((TILE_WIDTH * aspectH) / aspectW);
 
-export default function ContentPage() {
+function ContentPageInner() {
   const [selectedOption, setSelectedOption] = useState<"ai" | "manual" | null>(null);
   const [postHeading, setPostHeading] = useState("");
   const [postSubheading, setPostSubheading] = useState("");
@@ -411,5 +411,13 @@ export default function ContentPage() {
         </>
       )}
     </div>
+  );
+}
+
+export default function ContentPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <ContentPageInner />
+    </Suspense>
   );
 } 
