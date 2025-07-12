@@ -22,6 +22,129 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Slider } from "@/components/ui/slider";
 
 const fonts = ["Arial", "Georgia", "Impact", "Verdana", "Tahoma", "Times New Roman"];
+
+// Image Drop Zone Component
+const ImageDropZone = ({ onImageSelect }: { onImageSelect?: (file: File) => void }) => {
+  const [isDragOver, setIsDragOver] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
+
+  const handleFile = (file: File) => {
+    if (file && file.type.startsWith('image/')) {
+      onImageSelect?.(file);
+      // Create preview URL
+      const url = URL.createObjectURL(file);
+      setPreviewUrl(url);
+    }
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(false);
+    const files = e.dataTransfer.files;
+    if (files.length > 0) {
+      handleFile(files[0]);
+    }
+  };
+
+  const handleFileInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (files && files.length > 0) {
+      handleFile(files[0]);
+    }
+  };
+
+  const handleClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  return (
+    <div className="space-y-3">
+      <div
+        className={`relative border-2 border-dashed rounded-lg p-6 transition-all duration-200 cursor-pointer group ${
+          isDragOver 
+            ? 'border-primary bg-primary/5 scale-105' 
+            : 'border-muted-foreground/25 hover:border-primary/50 hover:bg-muted/50'
+        }`}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
+        onClick={handleClick}
+      >
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          onChange={handleFileInput}
+          className="hidden"
+        />
+        
+        <div className="flex flex-col items-center justify-center space-y-3 text-center">
+          <div className={`p-3 rounded-full transition-colors ${
+            isDragOver ? 'bg-primary/10' : 'bg-muted'
+          }`}>
+            <ImageIcon className={`w-6 h-6 transition-colors ${
+              isDragOver ? 'text-primary' : 'text-muted-foreground'
+            }`} />
+          </div>
+          
+          <div className="space-y-1">
+            <p className={`text-sm font-medium transition-colors ${
+              isDragOver ? 'text-primary' : 'text-foreground'
+            }`}>
+              {isDragOver ? 'Drop your image here' : 'Click to upload or drag and drop'}
+            </p>
+            <p className="text-xs text-muted-foreground">
+              PNG, JPG, GIF up to 10MB
+            </p>
+          </div>
+        </div>
+
+        {/* Preview */}
+        {previewUrl && (
+          <div className="absolute inset-0 bg-background/95 backdrop-blur-sm rounded-lg flex items-center justify-center">
+            <div className="text-center space-y-2">
+              <img 
+                src={previewUrl} 
+                alt="Preview" 
+                className="w-16 h-16 object-cover rounded border"
+              />
+              <p className="text-xs text-muted-foreground">Image selected</p>
+            </div>
+          </div>
+        )}
+      </div>
+      
+      {/* Alternative upload button */}
+      <div className="flex items-center gap-2">
+        {previewUrl && (
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={() => {
+              setPreviewUrl(null);
+              if (fileInputRef.current) fileInputRef.current.value = '';
+            }}
+            className="text-destructive hover:text-destructive"
+          >
+            Clear
+          </Button>
+        )}
+      </div>
+    </div>
+  );
+};
 type ElementType = "heading" | "subheading" | "cta";
 
 const ColorInput = ({ label, value, opacity, onColorChange, onOpacityChange, icon: Icon }: { label: string, value: string, opacity: number, onColorChange: (val: string) => void, onOpacityChange: (val: number) => void, icon: React.ElementType }) => {
@@ -90,9 +213,11 @@ interface AdLayoutControlsProps {
   logoImage?: string | null;
   selectedLogo?: boolean;
   onLogoSelect?: (selected: boolean) => void;
+  showGrid?: boolean;
+  onShowGridChange?: (show: boolean) => void;
 }
 
-const AdLayoutControls: React.FC<AdLayoutControlsProps> = ({ elements, selected, onStyleChange, onImageEdit, onImageReplace, onLogoPositionChange, logoPosition, onLogoColorChange, logoColor, onLogoReplace, logoImage, selectedLogo, onLogoSelect }) => {
+const AdLayoutControls: React.FC<AdLayoutControlsProps> = ({ elements, selected, onStyleChange, onImageEdit, onImageReplace, onLogoPositionChange, logoPosition, onLogoColorChange, logoColor, onLogoReplace, logoImage, selectedLogo, onLogoSelect, showGrid, onShowGridChange }) => {
   const [imageEdits, setImageEdits] = useState({ brightness: 100, contrast: 100, saturation: 100 });
 
   // Call onImageEdit when imageEdits changes
@@ -101,16 +226,47 @@ const AdLayoutControls: React.FC<AdLayoutControlsProps> = ({ elements, selected,
   }, [imageEdits]);
 
   if (!selected && !selectedLogo) return (
-    <Card className="w-full">
-      <CardHeader>
-        <CardTitle className="text-lg font-semibold">Edit Properties</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="text-center text-muted-foreground py-10">
-          <p>Select an element or logo on the ad to edit its properties.</p>
-        </div>
-      </CardContent>
-    </Card>
+    <>
+      <Card className="w-full">
+        <CardHeader className="bg-gradient-to-r from-primary/10 to-accent/10 rounded-t-xl">
+          <CardTitle className="text-lg font-semibold">Edit Properties</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            <div className="text-center text-muted-foreground py-6">
+              <p>Select an element or logo on the ad to edit its properties.</p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+      {/* Tips Section */}
+      <Card className="w-full mt-4 border-primary/40">
+        <CardHeader className="bg-gradient-to-r from-primary/10 to-accent/10 rounded-t-xl">
+          <CardTitle className="text-base font-semibold text-primary flex items-center gap-2">
+            <span role="img" aria-label="lightbulb">💡</span> Tips
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="bg-transparent p-4">
+          <ul className="list-none pl-0 space-y-2 text-base">
+            <li className="flex items-center gap-2 text-primary font-medium">
+              <span role="img" aria-label="editor">📝</span> This is the editor page
+            </li>
+            <li className="flex items-center gap-2 text-primary font-medium">
+              <span role="img" aria-label="lock">🔒</span> You may choose the layout only once
+            </li>
+            <li className="flex items-center gap-2 text-primary font-medium">
+              <span role="img" aria-label="library">📚</span> After that, the image will be edited from the library
+            </li>
+            <li className="flex items-center gap-2 text-primary font-medium">
+              <span role="img" aria-label="sliders">🎚️</span> Use the controls to adjust text, colors, and more
+            </li>
+            <li className="flex items-center gap-2 text-primary font-medium">
+              <span role="img" aria-label="pointer">👆</span> Click on elements to edit their properties
+            </li>
+          </ul>
+        </CardContent>
+      </Card>
+    </>
   );
 
   // Show logo controls when logo is selected
@@ -213,7 +369,7 @@ const AdLayoutControls: React.FC<AdLayoutControlsProps> = ({ elements, selected,
               </div>
               <div className="space-y-2">
                 <Label className="flex items-center gap-2 text-sm font-medium text-muted-foreground"><ImageIcon className="w-4 h-4" /> Replace Image</Label>
-                <Input type="file" accept="image/*" onChange={e => { if (e.target.files?.[0]) onImageReplace?.(e.target.files[0]); }} />
+                <ImageDropZone onImageSelect={onImageReplace} />
               </div>
             </AccordionContent>
           </AccordionItem>

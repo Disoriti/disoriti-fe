@@ -59,6 +59,7 @@ function ContentPageInner() {
   const [logoImage, setLogoImage] = useState<string | null>(null);
   const [logoBbox, setLogoBbox] = useState({ x: 24, y: 24, width: 80, height: 80 });
   const [selectedLogo, setSelectedLogo] = useState<boolean>(false);
+  const [showGrid, setShowGrid] = useState<boolean>(false);
   const router = useRouter();
   
   // Safely get search params with fallbacks
@@ -155,32 +156,48 @@ function ContentPageInner() {
       {generatingImage && <AdGenerationLoader />}
 
       {generatedImage ? (
-        <div className="w-full max-w-7xl mx-auto flex-1">
-          <div className="bg-background p-6 rounded-2xl border border-border shadow-lg flex flex-row gap-4 items-start justify-center">
+        <div className="w-full max-w-[1700px] mx-auto flex-1">
+          <div className="bg-background p-6 rounded-2xl border border-border shadow-lg flex flex-row gap-6 items-start justify-center">
             {/* Tiles on the left (catalogue) */}
-            <div className="flex flex-col gap-4 items-center w-[150px] flex-shrink-0">
+            <div className="flex flex-col gap-4 items-center w-[180px] flex-shrink-0">
               <h3 className="font-semibold text-lg text-foreground mb-2 pt-1 w-full">Layouts</h3>
               <div className="flex flex-col gap-4 items-center w-full">
-                {layoutData.layouts.map((layout, idx) => (
+                {[1, 2, 3].map((number, idx) => (
                   <div
-                    key={layout.id || idx}
-                    className={`rounded-lg border-2 cursor-pointer transition-all duration-300 transform hover:scale-105 ${selectedLayoutIdx === idx ? "border-primary shadow-primary/30 shadow-lg" : "border-border"}`}
-                    style={{ background: "#fff", width: 140, height: 140, overflow: "hidden" }}
+                    key={idx}
+                    className={`rounded-lg border-2 cursor-pointer transition-all duration-300 transform hover:scale-105 ${selectedLayoutIdx === idx ? "border-primary shadow-primary/50 shadow-lg" : "border-border"}`}
+                    style={{ 
+                      background: "linear-gradient(135deg, rgba(0,0,0,0.8) 0%, rgba(20,20,20,0.9) 100%)", 
+                      width: 160, 
+                      height: 160, 
+                      overflow: "hidden",
+                      position: "relative"
+                    }}
                     onClick={() => setSelectedLayoutIdx(idx)}
                   >
-                    <AdLayoutSVG
-                      imageUrl={generatedImage || "/image.png"}
-                      layout={layout}
-                      width={140}
-                      height={140}
-                      selected={null}
-                      pointerEventsNone={true}
-                      showLogo={false}
-                      filter={`brightness(${imageEdits.brightness}%) contrast(${imageEdits.contrast}%) saturate(${imageEdits.saturation}%)`}
-                      logoBbox={logoBbox}
-                      onLogoBboxChange={setLogoBbox}
-                      selectedLogo={selectedLogo}
-                      onLogoSelect={setSelectedLogo}
+                    <div className="w-full h-full flex items-center justify-center">
+                      <span 
+                        className={`text-6xl font-bold transition-all duration-300 ${
+                          selectedLayoutIdx === idx 
+                            ? "text-primary drop-shadow-[0_0_20px_hsl(var(--primary))] animate-pulse" 
+                            : "text-primary/60 drop-shadow-[0_0_10px_hsl(var(--primary)/0.3)]"
+                        }`}
+                        style={{
+                          textShadow: selectedLayoutIdx === idx 
+                            ? "0 0 20px hsl(var(--primary)), 0 0 40px hsl(var(--primary)), 0 0 60px hsl(var(--primary))"
+                            : "0 0 10px hsl(var(--primary)/0.3), 0 0 20px hsl(var(--primary)/0.2)"
+                        }}
+                      >
+                        {number}
+                      </span>
+                    </div>
+                    {/* Subtle glow effect */}
+                    <div 
+                      className={`absolute inset-0 rounded-lg transition-all duration-300 ${
+                        selectedLayoutIdx === idx 
+                          ? "bg-gradient-to-br from-primary/10 to-transparent" 
+                          : "bg-transparent"
+                      }`}
                     />
                   </div>
                 ))}
@@ -191,7 +208,7 @@ function ContentPageInner() {
             
             {/* Main display area (center) */}
             <div className="flex-1 flex flex-col items-center justify-start gap-4">
-              <div ref={previewRef} className="w-full max-w-[500px] aspect-square bg-background/50 rounded-lg border border-primary/40 shadow-[0_0_20px_4px_hsl(var(--primary)/0.5)] overflow-hidden"
+              <div ref={previewRef} className="w-full max-w-[700px] aspect-square bg-background/50 rounded-lg border border-primary/40 shadow-[0_0_20px_4px_hsl(var(--primary)/0.5)] overflow-hidden"
                 onClick={e => {
                   if (e.target === e.currentTarget) {
                     setSelectedElement(null);
@@ -202,8 +219,8 @@ function ContentPageInner() {
                 <AdLayoutSVG
                   imageUrl={generatedImage || "/image.png"}
                   layout={layouts[selectedLayoutIdx]}
-                  width={500}
-                  height={500}
+                  width={700}
+                  height={700}
                   selected={selectedElement}
                   onSelectElement={setSelectedElement}
                   onElementsChange={handleElementChange}
@@ -223,16 +240,17 @@ function ContentPageInner() {
                   <AdLayoutPreview
                     imageUrl={generatedImage || ""}
                     layout={layouts[selectedLayoutIdx]}
-                    width={500}
-                    height={500}
+                    width={700}
+                    height={700}
                     logoImage={logoImage}
                     logoPosition={logoPosition}
                     logoColor={logoColor}
                     logoBbox={logoBbox}
+                    filter={`brightness(${imageEdits.brightness}%) contrast(${imageEdits.contrast}%) saturate(${imageEdits.saturation}%)`}
                   />
                 </div>
               </div>
-              <div className="w-full max-w-[500px]">
+              <div className="w-full max-w-[700px]">
                 <NavigationButtons
                   onPrevious={() => setGeneratedImage(null)}
                   onNext={handleDownload}
@@ -244,7 +262,7 @@ function ContentPageInner() {
             <div className="w-px bg-border self-stretch my-4" />
 
             {/* Controls on the right */}
-            <div className="w-[280px] flex-shrink-0">
+            <div className="w-[320px] flex-shrink-0">
               <AdLayoutControls
                 elements={layouts[selectedLayoutIdx].elements}
                 selected={selectedElement}
@@ -265,6 +283,8 @@ function ContentPageInner() {
                 }}
                 selectedLogo={selectedLogo}
                 onLogoSelect={setSelectedLogo}
+                showGrid={showGrid}
+                onShowGridChange={setShowGrid}
               />
             </div>
           </div>

@@ -10,9 +10,10 @@ interface AdLayoutPreviewProps {
   logoPosition?: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right';
   logoColor?: string;
   logoBbox?: { x: number; y: number; width: number; height: number };
+  filter?: string;
 }
 
-const AdLayoutPreview: React.FC<AdLayoutPreviewProps> = ({ imageUrl, layout, width = 500, height = 500, logoImage, logoPosition, logoColor, logoBbox }) => {
+const AdLayoutPreview: React.FC<AdLayoutPreviewProps> = ({ imageUrl, layout, width = 500, height = 500, logoImage, logoPosition, logoColor, logoBbox, filter }) => {
   const { heading, subheading, cta } = layout.elements;
   const elements: { key: string; data: ElementData }[] = [
     { key: "heading", data: heading },
@@ -36,6 +37,7 @@ const AdLayoutPreview: React.FC<AdLayoutPreviewProps> = ({ imageUrl, layout, wid
         height,
         background: `url(${imageUrl}) center/cover no-repeat`,
         overflow: "hidden",
+        filter: filter || undefined,
       }}
     >
       {elements.map(({ key, data }) => {
@@ -74,6 +76,7 @@ const AdLayoutPreview: React.FC<AdLayoutPreviewProps> = ({ imageUrl, layout, wid
               textTransform: data.styling.text_transform || 'none',
               lineHeight: data.styling.line_height || 1.2,
               whiteSpace: 'pre-line',
+              zIndex: 2,
             }}
           >
             {data.text_content}
