@@ -9,7 +9,9 @@ import {
   PieChart,
   Settings2,
   SquareTerminal,
-  LayoutDashboard
+  LayoutDashboard,
+  MessageSquare,
+  Calendar
 } from "lucide-react"
 
 import { NavMain } from "@/components/nav-main"
@@ -54,6 +56,21 @@ const data = {
       url: "/dashboard/library",
       icon: Bot,
     },
+    {
+      title: "Disoriti Chat",
+      url: "/dashboard/chat",
+      icon: MessageSquare,
+    },
+    {
+      title: "Scheduler",
+      url: "/dashboard/scheduler",
+      icon: Calendar,
+    },
+    {
+      title: "Settings",
+      url: "/dashboard/settings",
+      icon: Settings2,
+    },
   ],
 
 }
@@ -73,7 +90,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           />
         </div>
       </SidebarHeader>
-      <SidebarContent>
+      <SidebarContent className="px-3 py-4 group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:flex group-data-[collapsible=icon]:justify-center">
         <NavMain items={data.navMain} />
       </SidebarContent>
       <SidebarFooter>

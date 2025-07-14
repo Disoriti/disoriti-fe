@@ -34,7 +34,7 @@ export function NavMain({
 }) {
   return (
     <SidebarGroup>
-      <SidebarMenu>
+      <SidebarMenu className="space-y-2">
         {items.map((item) => (
           item.items && item.items.length > 0 ? (
             <Collapsible

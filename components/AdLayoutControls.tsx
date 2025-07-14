@@ -23,6 +23,76 @@ import { Slider } from "@/components/ui/slider";
 
 const fonts = ["Arial", "Georgia", "Impact", "Verdana", "Tahoma", "Times New Roman"];
 
+// Enhanced Slider Component
+const EnhancedSlider = ({ 
+  label, 
+  value, 
+  min = 0, 
+  max = 100, 
+  step = 1, 
+  onValueChange, 
+  icon: Icon,
+  unit = "",
+  showValue = true,
+  className = ""
+}: { 
+  label: string; 
+  value: number; 
+  min?: number; 
+  max?: number; 
+  step?: number; 
+  onValueChange: (value: number) => void; 
+  icon?: React.ElementType;
+  unit?: string;
+  showValue?: boolean;
+  className?: string;
+}) => {
+  const percentage = ((value - min) / (max - min)) * 100;
+  
+  return (
+    <div className={`space-y-3 ${className}`}>
+      <div className="flex items-center justify-between">
+        <Label className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+          {Icon && <Icon className="w-4 h-4" />}
+          {label}
+        </Label>
+        {showValue && (
+          <div className="flex items-center gap-1">
+            <span className="text-sm font-mono font-medium text-foreground">{value}</span>
+            {unit && <span className="text-xs text-muted-foreground">{unit}</span>}
+          </div>
+        )}
+      </div>
+      
+      <div className="space-y-2">
+        <div className="relative">
+          <Slider
+            value={[value]}
+            min={min}
+            max={max}
+            step={step}
+            onValueChange={([val]) => onValueChange(val)}
+            className="w-full"
+          />
+          {/* Custom track styling */}
+          <div className="absolute inset-0 pointer-events-none">
+            <div 
+              className="h-2 bg-gradient-to-r from-primary/20 to-primary/40 rounded-full transition-all duration-200"
+              style={{ width: `${percentage}%` }}
+            />
+          </div>
+        </div>
+        
+        {/* Min/Max labels */}
+        <div className="flex justify-between text-xs text-muted-foreground">
+          <span>{min}{unit}</span>
+          <span>{max}{unit}</span>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 // Image Drop Zone Component
 const ImageDropZone = ({ onImageSelect }: { onImageSelect?: (file: File) => void }) => {
   const [isDragOver, setIsDragOver] = useState(false);
@@ -178,19 +248,20 @@ const ColorInput = ({ label, value, opacity, onColorChange, onOpacityChange, ico
                 <div className="w-6 h-6 rounded-full border" style={{ backgroundColor: value }} />
             </div>
         </div>
-        <div className="grid gap-2">
-          <div className="flex justify-between items-center">
-            <Label className="text-xs text-muted-foreground">Opacity</Label>
-            <span className="text-xs font-mono text-muted-foreground">{Math.round(sliderValue)}%</span>
-          </div>
-          <Slider
-            value={[sliderValue]}
-            onValueChange={(vals) => setSliderValue(vals[0])}
-            onValueCommit={(vals) => onOpacityChange(vals[0] / 100)}
-            max={100}
-            step={1}
-          />
-        </div>
+        <EnhancedSlider
+          label="Opacity"
+          value={sliderValue}
+          min={0}
+          max={100}
+          step={1}
+          onValueChange={(val) => {
+            setSliderValue(val);
+            onOpacityChange(val / 100);
+          }}
+          unit="%"
+          showValue={true}
+          className="mt-4"
+        />
     </div>
   );
 }
@@ -281,15 +352,73 @@ const AdLayoutControls: React.FC<AdLayoutControlsProps> = ({ elements, selected,
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div>
-              <Label className="flex items-center gap-2 text-sm font-medium text-muted-foreground">Logo Color</Label>
-              <input
-                type="color"
-                value={logoColor || "#ffffff"}
-                onChange={e => onLogoColorChange?.(e.target.value)}
-                className="w-8 h-8 rounded border border-border bg-background cursor-pointer"
-                style={{ padding: 0 }}
-              />
+            <div className="space-y-3">
+              <Label className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+                <Palette className="w-4 h-4" />
+                Logo Color
+              </Label>
+              
+              {/* Color Presets */}
+              <div className="space-y-2">
+                <p className="text-xs text-muted-foreground">Quick Colors</p>
+                <div className="grid grid-cols-6 gap-2">
+                  {['#ffffff', '#000000', '#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#06b6d4', '#84cc16', '#f97316', '#6366f1'].map((color) => (
+                    <button
+                      key={color}
+                      onClick={() => onLogoColorChange?.(color)}
+                      className={`w-8 h-8 rounded-lg border-2 transition-all duration-200 hover:scale-110 ${
+                        (logoColor || "#ffffff") === color 
+                          ? 'border-primary ring-2 ring-primary/20' 
+                          : 'border-border hover:border-primary/50'
+                      }`}
+                      style={{ backgroundColor: color }}
+                      title={color}
+                    />
+                  ))}
+                </div>
+              </div>
+
+              {/* Custom Color Picker */}
+              <div className="space-y-2">
+                <p className="text-xs text-muted-foreground">Custom Color</p>
+                <div className="flex items-center gap-3">
+                  <div className="relative">
+                    <input
+                      type="color"
+                      value={logoColor || "#ffffff"}
+                      onChange={e => onLogoColorChange?.(e.target.value)}
+                      className="w-12 h-12 rounded-lg border-2 border-border bg-background cursor-pointer transition-all duration-200 hover:border-primary/50 hover:scale-105"
+                      style={{ padding: 0 }}
+                    />
+                    <div className="absolute inset-0 rounded-lg border-2 border-white/20 pointer-events-none" />
+                  </div>
+                  
+                  <div className="flex-1">
+                    <Input
+                      type="text"
+                      value={logoColor || "#ffffff"}
+                      onChange={e => onLogoColorChange?.(e.target.value)}
+                      className="font-mono text-sm"
+                      placeholder="#ffffff"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Color Preview */}
+              <div className="space-y-2">
+                <p className="text-xs text-muted-foreground">Preview</p>
+                <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
+                  <div 
+                    className="w-8 h-8 rounded-lg border-2 border-border shadow-sm"
+                    style={{ backgroundColor: logoColor || "#ffffff" }}
+                  />
+                  <div className="flex-1">
+                    <p className="text-sm font-medium">Logo Color</p>
+                    <p className="text-xs text-muted-foreground font-mono">{logoColor || "#ffffff"}</p>
+                  </div>
+                </div>
+              </div>
             </div>
             <div>
               <Label className="flex items-center gap-2 text-sm font-medium text-muted-foreground mt-2"><ImageIcon className="w-4 h-4" /> Change Logo</Label>
@@ -330,43 +459,37 @@ const AdLayoutControls: React.FC<AdLayoutControlsProps> = ({ elements, selected,
         <Accordion type="single" collapsible className="w-full" defaultValue="image">
           <AccordionItem value="image">
             <AccordionTrigger className="text-base flex items-center gap-2 pl-2"><SlidersHorizontal className="w-4 h-4" />Image Adjustments</AccordionTrigger>
-            <AccordionContent className="space-y-4 pt-4">
-              <div className="space-y-2">
-                <Label className="flex items-center gap-2 text-sm font-medium text-muted-foreground"><Sun className="w-4 h-4" /> Brightness</Label>
-                <Slider
-                  value={[imageEdits.brightness]}
-                  min={0}
-                  max={200}
-                  step={1}
-                  onValueChange={([val]) => {
-                    setImageEdits((prev) => ({ ...prev, brightness: val }));
-                  }}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label className="flex items-center gap-2 text-sm font-medium text-muted-foreground"><Sun className="w-4 h-4 rotate-45" /> Contrast</Label>
-                <Slider
-                  value={[imageEdits.contrast]}
-                  min={0}
-                  max={200}
-                  step={1}
-                  onValueChange={([val]) => {
-                    setImageEdits((prev) => ({ ...prev, contrast: val }));
-                  }}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label className="flex items-center gap-2 text-sm font-medium text-muted-foreground"><Palette className="w-4 h-4" /> Saturation</Label>
-                <Slider
-                  value={[imageEdits.saturation]}
-                  min={0}
-                  max={200}
-                  step={1}
-                  onValueChange={([val]) => {
-                    setImageEdits((prev) => ({ ...prev, saturation: val }));
-                  }}
-                />
-              </div>
+            <AccordionContent className="space-y-6 pt-4">
+              <EnhancedSlider
+                label="Brightness"
+                value={imageEdits.brightness}
+                min={0}
+                max={200}
+                step={1}
+                onValueChange={(val) => setImageEdits((prev) => ({ ...prev, brightness: val }))}
+                icon={Sun}
+                unit="%"
+              />
+              <EnhancedSlider
+                label="Contrast"
+                value={imageEdits.contrast}
+                min={0}
+                max={200}
+                step={1}
+                onValueChange={(val) => setImageEdits((prev) => ({ ...prev, contrast: val }))}
+                icon={Sun}
+                unit="%"
+              />
+              <EnhancedSlider
+                label="Saturation"
+                value={imageEdits.saturation}
+                min={0}
+                max={200}
+                step={1}
+                onValueChange={(val) => setImageEdits((prev) => ({ ...prev, saturation: val }))}
+                icon={Palette}
+                unit="%"
+              />
               <div className="space-y-2">
                 <Label className="flex items-center gap-2 text-sm font-medium text-muted-foreground"><ImageIcon className="w-4 h-4" /> Replace Image</Label>
                 <ImageDropZone onImageSelect={onImageReplace} />
@@ -397,38 +520,133 @@ const AdLayoutControls: React.FC<AdLayoutControlsProps> = ({ elements, selected,
           <AccordionItem value="typography">
             <AccordionTrigger className="text-base flex items-center gap-2 pl-2"><Type className="w-4 h-4" />Typography</AccordionTrigger>
             <AccordionContent className="space-y-4 pt-4">
-              <div className="space-y-2">
-                <Label className="flex items-center gap-2 text-sm font-medium text-muted-foreground"><Type className="w-4 h-4" /> Font Family</Label>
-                <Select
-                  value={selectedStyling?.font_family || "Arial"}
-                  onValueChange={(val: string) => onStyleChange(selected, "font_family", val)}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select a font" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {fonts.map((font) => (
-                      <SelectItem key={font} value={font}>{font}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+              <div className="space-y-3">
+                <Label className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+                  <Type className="w-4 h-4" /> Font Family
+                </Label>
+                
+                {/* Font Preview */}
+                <div className="p-3 rounded-lg bg-muted/30 border border-border/50">
+                  <p 
+                    className="text-lg leading-tight"
+                    style={{ 
+                      fontFamily: selectedStyling?.font_family || "Arial",
+                      fontWeight: selectedStyling?.font_weight || "normal"
+                    }}
+                  >
+                    The quick brown fox jumps over the lazy dog
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {selectedStyling?.font_family || "Arial"}
+                  </p>
+                </div>
+
+                {/* Font Selection */}
+                <div className="grid grid-cols-2 gap-2">
+                  {fonts.map((font) => (
+                    <button
+                      key={font}
+                      onClick={() => onStyleChange(selected, "font_family", font)}
+                      className={`p-3 rounded-lg border-2 transition-all duration-200 text-left hover:border-primary/50 hover:bg-muted/50 ${
+                        (selectedStyling?.font_family || "Arial") === font 
+                          ? 'border-primary bg-primary/5 ring-2 ring-primary/20' 
+                          : 'border-border bg-background'
+                      }`}
+                    >
+                      <p 
+                        className="text-sm font-medium truncate"
+                        style={{ fontFamily: font }}
+                      >
+                        {font}
+                      </p>
+                      <p 
+                        className="text-xs text-muted-foreground mt-1 truncate"
+                        style={{ fontFamily: font }}
+                      >
+                        Aa Bb Cc
+                      </p>
+                    </button>
+                  ))}
+                </div>
+
+                {/* More Fonts Coming Soon Info */}
+                <div className="mt-4 p-4 rounded-lg bg-gradient-to-r from-primary/5 to-accent/5 border border-primary/20">
+                  <div className="flex items-start gap-3">
+                    <div className="flex-shrink-0 p-2 rounded-full bg-primary/10">
+                      <span role="img" aria-label="sparkles" className="text-lg">✨</span>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h4 className="text-sm font-semibold text-primary mb-1">
+                        More Fonts Coming Soon!
+                      </h4>
+                      <p className="text-xs text-muted-foreground leading-relaxed">
+                        We're constantly expanding our font library with beautiful, professional typefaces. 
+                        Stay tuned for new additions including Google Fonts, premium fonts, and custom options.
+                      </p>
+                      <div className="flex items-center gap-2 mt-2">
+                        <div className="flex gap-1">
+                          <div className="w-2 h-2 rounded-full bg-primary/40 animate-pulse"></div>
+                          <div className="w-2 h-2 rounded-full bg-primary/40 animate-pulse" style={{ animationDelay: '0.2s' }}></div>
+                          <div className="w-2 h-2 rounded-full bg-primary/40 animate-pulse" style={{ animationDelay: '0.4s' }}></div>
+                        </div>
+                        <span className="text-xs text-primary/70 font-medium">In Development</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
 
-              <div className="space-y-2">
-                <Label className="flex items-center gap-2 text-sm font-medium text-muted-foreground"><Bold className="w-4 h-4" /> Font Weight</Label>
-                <Select
-                  value={selectedStyling?.font_weight}
-                  onValueChange={(val: string) => onStyleChange(selected, "font_weight", val)}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select weight" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="normal">Normal</SelectItem>
-                    <SelectItem value="bold">Bold</SelectItem>
-                    <SelectItem value="lighter">Lighter</SelectItem>
-                  </SelectContent>
-                </Select>
+              <div className="space-y-3">
+                <Label className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+                  <Bold className="w-4 h-4" /> Font Weight
+                </Label>
+                
+                {/* Weight Preview */}
+                <div className="p-3 rounded-lg bg-muted/30 border border-border/50">
+                  <p 
+                    className="text-lg leading-tight"
+                    style={{ 
+                      fontFamily: selectedStyling?.font_family || "Arial",
+                      fontWeight: selectedStyling?.font_weight || "normal"
+                    }}
+                  >
+                    {selectedStyling?.font_weight === 'bold' ? 'Bold Text' : 
+                     selectedStyling?.font_weight === 'lighter' ? 'Light Text' : 'Normal Text'}
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-1 capitalize">
+                    {selectedStyling?.font_weight || "normal"} weight
+                  </p>
+                </div>
+
+                {/* Weight Selection */}
+                <div className="grid grid-cols-3 gap-2">
+                  {[
+                    { value: 'lighter', label: 'Light', icon: 'L' },
+                    { value: 'normal', label: 'Normal', icon: 'N' },
+                    { value: 'bold', label: 'Bold', icon: 'B' }
+                  ].map((weight) => (
+                    <button
+                      key={weight.value}
+                      onClick={() => onStyleChange(selected, "font_weight", weight.value)}
+                      className={`p-3 rounded-lg border-2 transition-all duration-200 text-center hover:border-primary/50 hover:bg-muted/50 ${
+                        (selectedStyling?.font_weight || "normal") === weight.value 
+                          ? 'border-primary bg-primary/5 ring-2 ring-primary/20' 
+                          : 'border-border bg-background'
+                      }`}
+                    >
+                      <div 
+                        className="text-lg font-bold mb-1"
+                        style={{ 
+                          fontFamily: selectedStyling?.font_family || "Arial",
+                          fontWeight: weight.value
+                        }}
+                      >
+                        {weight.icon}
+                      </div>
+                      <p className="text-xs font-medium">{weight.label}</p>
+                    </button>
+                  ))}
+                </div>
               </div>
 
               <div className="space-y-2">

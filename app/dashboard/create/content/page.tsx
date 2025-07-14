@@ -8,7 +8,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import { useState, useRef, useEffect, Suspense } from "react";
+import { useEffect, useState, useRef, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Sparkles, Pencil, Bot, Download, ChevronLeft, Save } from "lucide-react";
 import AdGenerationLoader from "@/components/ad-generation-loader";
@@ -40,6 +40,18 @@ const MAIN_DISPLAY_WIDTH = 500;
 const MAIN_DISPLAY_HEIGHT = Math.round((MAIN_DISPLAY_WIDTH * aspectH) / aspectW);
 const TILE_WIDTH = 120;
 const TILE_HEIGHT = Math.round((TILE_WIDTH * aspectH) / aspectW);
+
+function DateClient({ iso, options }: { iso: string; options?: Intl.DateTimeFormatOptions }) {
+  const [date, setDate] = useState("");
+  useEffect(() => {
+    setDate(new Date(iso).toLocaleDateString("en-US", options));
+  }, [iso, options]);
+  return <span>{date}</span>;
+}
+
+// If you render any dates/times in this file, use <DateClient iso={...} /> instead of new Date().toLocaleDateString().
+// Store all dates as ISO strings in state/props, not as Date objects.
+// If you need to display a time, use a similar TimeClient component.
 
 function ContentPageInner() {
   const [selectedOption, setSelectedOption] = useState<"ai" | "manual" | null>(null);
@@ -201,6 +213,31 @@ function ContentPageInner() {
                     />
                   </div>
                 ))}
+                
+                {/* More Layouts Coming Soon Info */}
+                <div className="mt-4 p-3 rounded-lg bg-gradient-to-r from-primary/5 to-accent/5 border border-primary/20 w-full">
+                  <div className="flex items-start gap-2">
+                    <div className="flex-shrink-0 p-1.5 rounded-full bg-primary/10">
+                      <span role="img" aria-label="sparkles" className="text-sm">🎨</span>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h4 className="text-xs font-semibold text-primary mb-1 leading-tight">
+                        More Layouts Coming!
+                      </h4>
+                      <p className="text-xs text-muted-foreground leading-relaxed">
+                        We're adding beautiful new layouts including modern, minimalist, and creative designs.
+                      </p>
+                      <div className="flex items-center gap-1.5 mt-1.5">
+                        <div className="flex gap-0.5">
+                          <div className="w-1.5 h-1.5 rounded-full bg-primary/40 animate-pulse"></div>
+                          <div className="w-1.5 h-1.5 rounded-full bg-primary/40 animate-pulse" style={{ animationDelay: '0.2s' }}></div>
+                          <div className="w-1.5 h-1.5 rounded-full bg-primary/40 animate-pulse" style={{ animationDelay: '0.4s' }}></div>
+                        </div>
+                        <span className="text-xs text-primary/70 font-medium">Soon</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
 
