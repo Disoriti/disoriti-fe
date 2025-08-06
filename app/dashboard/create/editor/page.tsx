@@ -8,32 +8,31 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Settings, Plus, X } from "lucide-react";
-import { HexColorPicker } from "react-colorful";
+import { Sparkles, Wand2, ArrowRight, Loader2 } from "lucide-react";
 import NavigationButtons from "@/components/navigation-buttons";
+import { API_URLS } from "@/lib/api";
+import { getToken } from "@/lib/auth";
+import { useAuth } from "@/contexts/auth-context";
+import { toast } from "sonner";
 
-// Mock settings data - In real app, this would come from your settings store/API
-const mockSettings = {
-  brandName: "Disoriti",
-  logo: "/logo.png",
-  colorPalette: ["#FF6B6B", "#4ECDC4", "#45B7D1", "#96CEB4"],
-};
-
-function EditorPageInner() {
-  const [selectedOption, setSelectedOption] = useState<"import" | "new" | null>(null);
-  const [brandName, setBrandName] = useState("");
-  const [logo, setLogo] = useState<File | null>(null);
-  const [colors, setColors] = useState<string[]>(["#FF6B6B", "#4ECDC4", "#45B7D1"]);
-  const [showColorPicker, setShowColorPicker] = useState<number | null>(null);
-  const [hexInput, setHexInput] = useState("");
-  const [postHeading, setPostHeading] = useState("");
-  const [postSubheading, setPostSubheading] = useState("");
-  const [hasCTA, setHasCTA] = useState(false);
-  const [ctaText, setCtaText] = useState("");
-  const [extraText, setExtraText] = useState("");
+function EnhancePromptPageInner() {
+  const [prompt, setPrompt] = useState("");
+  const [isEnhancing, setIsEnhancing] = useState(false);
+  const [enhancedText, setEnhancedText] = useState("");
+  const [showEnhanced, setShowEnhanced] = useState(false);
+  const [animationStep, setAnimationStep] = useState(0);
+  const [savedPrompts, setSavedPrompts] = useState<Array<{prompt: string, enhanced: string, timestamp: string}>>([]);
+  const [creditsUsed, setCreditsUsed] = useState(0);
+  const [selectedPromptIndex, setSelectedPromptIndex] = useState(0);
+  const maxCredits = 5;
   const router = useRouter();
+  const { logout } = useAuth();
   
   // Safely get search params with fallbacks
   const searchParams = useSearchParams();
@@ -42,43 +41,110 @@ function EditorPageInner() {
   const platform = searchParams?.get("platform") || "";
   const postType = searchParams?.get("postType") || "";
 
-
-
-  const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      setLogo(e.target.files[0]);
-    }
-  };
-
-  const handleColorChange = (color: string, index: number) => {
-    const newColors = [...colors];
-    newColors[index] = color;
-    setColors(newColors);
-  };
-
-  const addColor = () => {
-    if (colors.length < 4) {
-      setColors([...colors, "#FF6B6B"]);
-    }
-  };
-
-  const removeColor = (index: number) => {
-    const newColors = colors.filter((_, i) => i !== index);
-    setColors(newColors);
-  };
-
-  const handleHexInput = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setHexInput(value);
+  const handleEnhance = async () => {
+    if (!prompt.trim()) return;
     
-    // Validate hex color format
-    if (/^#[0-9A-Fa-f]{6}$/.test(value)) {
-      setColors([...colors, value]);
-      setHexInput("");
+    setIsEnhancing(true);
+    setShowEnhanced(false);
+    setAnimationStep(0);
+    
+    try {
+      const token = getToken();
+      if (!token) {
+        toast.error('Authentication required');
+        setIsEnhancing(false);
+        return;
+      }
+
+      // Build the URL with the prompt as a query parameter
+      const url = `${API_URLS.ENHANCE_PROMPT_URL}?prompt=${encodeURIComponent(prompt)}`;
+      
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        
+        // Handle 401 Unauthorized - redirect to login
+        if (response.status === 401) {
+          toast.error('Session expired. Please log in again.');
+          // Clear authentication and redirect to login
+          logout();
+          return;
+        }
+        
+        // Show the message field as the primary error message for other errors
+        const errorMessage = errorData.message || 'Failed to enhance prompt';
+        toast.error(errorMessage);
+        setIsEnhancing(false);
+        return;
+      }
+
+      const data = await response.json();
+      
+      if (data.data?.prompt) {
+        const enhancedPrompt = data.data.prompt;
+        
+        setEnhancedText(enhancedPrompt);
+        setIsEnhancing(false);
+        setShowEnhanced(true);
+        
+        // Increment credits used
+        setCreditsUsed(prev => prev + 1);
+        
+        // Save the prompt and enhanced text to state
+        const newSavedPrompt = {
+          prompt: prompt,
+          enhanced: enhancedPrompt,
+          timestamp: new Date().toISOString()
+        };
+        setSavedPrompts(prev => [newSavedPrompt, ...prev.slice(0, 4)]); // Keep last 5 prompts
+        
+        // Set the newly generated prompt as selected
+        setSelectedPromptIndex(0);
+        
+        // Start animation sequence
+        setTimeout(() => setAnimationStep(1), 100);
+        setTimeout(() => setAnimationStep(2), 300);
+        setTimeout(() => setAnimationStep(3), 500);
+        
+        toast.success('Prompt enhanced successfully!');
+      } else {
+        toast.error('No enhanced prompt returned from server');
+        setIsEnhancing(false);
+      }
+    } catch (error) {
+      console.error('Enhance prompt error:', error);
+      toast.error('Network or server error');
+      setIsEnhancing(false);
     }
   };
 
+  const handleContinue = () => {
+    // Use the selected prompt's data
+    const selectedPrompt = savedPrompts[selectedPromptIndex];
+    
+    // Store the enhanced prompt in localStorage to avoid URL length issues
+    localStorage.setItem('selectedEnhancedPrompt', selectedPrompt.enhanced);
+    localStorage.setItem('selectedOriginalPrompt', selectedPrompt.prompt);
+    
+    router.push(
+      `/dashboard/create/content?type=${type}&media=${media}&platform=${platform}&postType=${postType}`
+    );
+  };
 
+  const loadSavedPrompt = (savedPrompt: {prompt: string, enhanced: string, timestamp: string}, index: number) => {
+    setPrompt(savedPrompt.prompt);
+    setEnhancedText(savedPrompt.enhanced);
+    setSelectedPromptIndex(index);
+    setShowEnhanced(true);
+    setAnimationStep(3); // Skip to final animation step since content is already loaded
+  };
 
   return (
     <div className="space-y-8 p-6">
@@ -103,202 +169,270 @@ function EditorPageInner() {
             </BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator />
-          <BreadcrumbItem>
-            <BreadcrumbPage>Settings</BreadcrumbPage>
-          </BreadcrumbItem>
+                <BreadcrumbItem>
+        <BreadcrumbPage>Image Prompt</BreadcrumbPage>
+      </BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>
 
       {/* Heading */}
-      <h1 className="text-3xl md:text-3xl font-bold text-disoriti-primary mb-8 text-center tracking-tight animate-glow">
-        Configure your post settings
-      </h1>
-
-      {/* Main Selection + Navigation Buttons */}
-      <div className="flex flex-col items-center gap-8">
-        {!selectedOption ? (
-          // Initial Options
-          <div className="flex gap-10 w-full justify-center">
-            <button
-              className="flex flex-col items-center justify-center rounded-2xl border-2 transition-all duration-300 shadow-xl bg-gradient-to-br from-disoriti-primary/10 to-disoriti-accent/10 px-16 py-20 text-2xl font-bold w-[340px] h-56 hover:border-disoriti-primary/60 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-disoriti-primary/40"
-              onClick={() => setSelectedOption("import")}
-              type="button"
-            >
-              <Settings className="h-12 w-12 mb-4" />
-              <span className="mb-2">Import from Settings</span>
-              <span className="text-base font-normal text-disoriti-primary/70">
-                Use your saved brand settings
-              </span>
-            </button>
-
-            <button
-              className="flex flex-col items-center justify-center rounded-2xl border-2 transition-all duration-300 shadow-xl bg-gradient-to-br from-disoriti-primary/10 to-disoriti-accent/10 px-16 py-20 text-2xl font-bold w-[340px] h-56 hover:border-disoriti-primary/60 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-disoriti-primary/40"
-              onClick={() => setSelectedOption("new")}
-              type="button"
-            >
-              <Plus className="h-12 w-12 mb-4" />
-              <span className="mb-2">Define New Settings</span>
-              <span className="text-base font-normal text-disoriti-primary/70">
-                Create custom settings for this post
-              </span>
-            </button>
+      <div className="text-center space-y-4">
+        <div className="flex items-center justify-center gap-3 mb-4">
+          <div className="p-3 rounded-full bg-gradient-to-r from-disoriti-primary/20 to-disoriti-accent/20">
+            <Sparkles className="h-8 w-8 text-disoriti-primary" />
           </div>
-        ) : selectedOption === "import" ? (
-          // Import Settings View
-          <div className="w-full max-w-2xl bg-gradient-to-br from-disoriti-primary/5 to-disoriti-accent/5 p-8 rounded-2xl border border-disoriti-primary/20">
-            <h2 className="text-2xl font-bold mb-6">Current Settings</h2>
-            <div className="space-y-6">
-              <div>
-                <label className="block text-sm font-medium mb-2">Brand Name</label>
-                <div className="p-3 bg-white/5 rounded-lg">{mockSettings.brandName}</div>
+        </div>
+        <h1 className="text-3xl font-bold tracking-tight">Create Image Generation Prompt</h1>
+        <p className="text-muted-foreground max-w-2xl mx-auto">
+          Describe what you want in your image and we'll enhance it into a detailed 
+          prompt that will generate the perfect visual for your post.
+        </p>
+        
+        {/* Credits Counter */}
+        <div className="flex justify-center mt-6">
+          <div className="bg-gradient-to-r from-disoriti-primary/10 to-disoriti-accent/10 border border-disoriti-primary/20 rounded-full px-6 py-3 backdrop-blur-sm">
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 rounded-full bg-disoriti-primary animate-pulse"></div>
+                <span className="text-sm font-medium text-disoriti-primary">Credits</span>
               </div>
-              <div>
-                <label className="block text-sm font-medium mb-2">Logo</label>
-                <div className="p-3 bg-white/5 rounded-lg">
-                  <img src={mockSettings.logo} alt="Brand Logo" className="h-12" />
-                </div>
+              <div className="flex items-center gap-2">
+                <span className="text-lg font-bold text-disoriti-primary">{maxCredits - creditsUsed}</span>
+                <span className="text-sm text-muted-foreground">/ {maxCredits}</span>
               </div>
-              <div>
-                <label className="block text-sm font-medium mb-2">Color Palette</label>
-                <div className="flex gap-3">
-                  {mockSettings.colorPalette.map((color, index) => (
-                    <div
-                      key={index}
-                      className="w-12 h-12 rounded-lg"
-                      style={{ backgroundColor: color }}
-                    />
-                  ))}
-                </div>
+              <div className="w-16 h-2 rounded-full overflow-hidden" style={{ backgroundColor: 'var(--secondary)' }}>
+                <div 
+                  className="h-full rounded-full transition-all duration-500 ease-out"
+                  style={{ 
+                    width: `${((maxCredits - creditsUsed) / maxCredits) * 100}%`,
+                    backgroundColor: 'var(--primary)'
+                  }}
+                ></div>
               </div>
             </div>
           </div>
-        ) : (
-          // New Settings Form
-          <div className="w-full max-w-2xl bg-gradient-to-br from-disoriti-primary/5 to-disoriti-accent/5 p-8 rounded-2xl border border-disoriti-primary/20">
-            <h2 className="text-2xl font-bold mb-6">New Settings</h2>
-            <div className="space-y-6">
-              <div>
-                <label className="block text-sm font-medium mb-2">Brand Name</label>
-                <input
-                  type="text"
-                  value={brandName}
-                  onChange={(e) => setBrandName(e.target.value)}
-                  className="w-full p-3 bg-white/5 rounded-lg border border-disoriti-primary/20 focus:outline-none focus:ring-2 focus:ring-disoriti-primary/40"
-                  placeholder="Enter brand name"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-2">Logo</label>
-                <div className="flex items-center gap-4">
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleLogoUpload}
-                    className="hidden"
-                    id="logo-upload"
-                  />
-                  <label
-                    htmlFor="logo-upload"
-                    className="px-4 py-2 bg-disoriti-primary/10 rounded-lg cursor-pointer hover:bg-disoriti-primary/20 transition-colors"
-                  >
-                    Upload Logo
-                  </label>
-                  {logo && (
-                    <span className="text-sm text-disoriti-primary/70">
-                      {logo.name}
-                    </span>
-                  )}
-                </div>
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-2">Color Palette</label>
-                <div className="space-y-4">
-                  <div className="flex gap-3 mb-4">
-                    {colors.map((color, index) => (
-                      <div key={index} className="relative group">
-                        <div
-                          className="w-12 h-12 rounded-lg cursor-pointer"
-                          style={{ backgroundColor: color }}
-                          onClick={() => setShowColorPicker(index)}
-                        />
-                        <button
-                          onClick={() => removeColor(index)}
-                          className="absolute -top-2 -right-2 bg-red-500 rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
-                        >
-                          <X className="h-3 w-3 text-white" />
-                        </button>
-                        {showColorPicker === index && (
-                          <div className="absolute z-10 mt-2">
-                            <div
-                              className="fixed inset-0"
-                              onClick={() => setShowColorPicker(null)}
-                            />
-                            <HexColorPicker
-                              color={color}
-                              onChange={(color) => handleColorChange(color, index)}
-                            />
-                          </div>
-                        )}
+        </div>
+      </div>
+
+            {/* Main Content */}
+      <div className="max-w-4xl mx-auto space-y-6">
+        {!showEnhanced ? (
+          // Input Section
+          <Card className="shadow-lg border-0 bg-gradient-to-br from-background to-muted/20">
+                         <CardHeader>
+               <CardTitle className="flex items-center gap-2">
+                 <Wand2 className="h-5 w-5 text-disoriti-primary" />
+                 Describe Your Image
+               </CardTitle>
+             </CardHeader>
+            <CardContent className="space-y-4">
+                             <div className="space-y-2">
+                 <Label htmlFor="prompt" className="text-sm font-medium">
+                   What do you want in your image?
+                 </Label>
+                 <Textarea
+                   id="prompt"
+                   placeholder="e.g., A modern fitness app interface showing workout tracking, progress charts, and motivational elements. Clean design with vibrant colors, showing a person using the app on their phone..."
+                   value={prompt}
+                   onChange={(e) => setPrompt(e.target.value)}
+                   className="min-h-[120px] resize-none border-2 focus:border-disoriti-primary/50 focus:ring-disoriti-primary/20"
+                   disabled={isEnhancing}
+                 />
+                 <p className="text-xs text-muted-foreground">
+                   Be as detailed as possible about the visual elements you want. Include style, colors, 
+                   composition, mood, and any specific objects or scenes you'd like to see.
+                 </p>
+               </div>
+              
+                             <div className="flex justify-center">
+                               <Button 
+                                 onClick={handleEnhance} 
+                                 disabled={!prompt.trim() || isEnhancing || creditsUsed >= maxCredits}
+                                 className="bg-gradient-to-r from-disoriti-primary to-disoriti-accent hover:from-disoriti-primary/90 hover:to-disoriti-accent/90 hover:text-black text-white disabled:opacity-50 disabled:cursor-not-allowed px-8"
+                                 size="lg"
+                               >
+                                 {isEnhancing ? (
+                   <>
+                     <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                     Creating Image Prompt...
+                   </>
+                 ) : creditsUsed >= maxCredits ? (
+                   <>
+                     <Sparkles className="w-4 h-4 mr-2" />
+                     No Credits Left
+                   </>
+                 ) : (
+                   <>
+                     <Sparkles className="w-4 h-4 mr-2" />
+                     Generate Image Prompt ({maxCredits - creditsUsed} left)
+                   </>
+                 )}
+                               </Button>
+                             </div>
+
+                             {/* Credits Warning */}
+               {creditsUsed >= maxCredits && (
+                 <div className="mt-4 p-4 bg-orange-500/10 border border-orange-500/20 rounded-lg">
+                   <div className="flex items-center gap-2">
+                     <div className="w-2 h-2 rounded-full bg-orange-500 animate-pulse"></div>
+                     <p className="text-sm text-orange-700 dark:text-orange-300">
+                       You've used all your credits for this session. You can still view and use your previously generated prompts.
+                     </p>
+                   </div>
+                 </div>
+               )}
+
+               {/* Saved Prompts Section */}
+               {savedPrompts.length > 0 && (
+                 <div className="mt-6 pt-6 border-t border-border/50">
+                   <h3 className="text-sm font-medium mb-3 text-muted-foreground">Recent Image Prompts</h3>
+                  <div className="space-y-2">
+                    {savedPrompts.map((savedPrompt, index) => (
+                                             <div 
+                         key={index}
+                         className="p-3 bg-muted/30 rounded-lg cursor-pointer hover:bg-muted/50 transition-colors"
+                         onClick={() => loadSavedPrompt(savedPrompt, index)}
+                       >
+                        <div className="flex justify-between items-start mb-1">
+                          <p className="text-sm font-medium line-clamp-1">{savedPrompt.prompt}</p>
+                          <span className="text-xs text-muted-foreground">
+                            {new Date(savedPrompt.timestamp).toLocaleDateString()}
+                          </span>
+                        </div>
+                        <p className="text-xs text-muted-foreground line-clamp-2">
+                          {savedPrompt.enhanced}
+                        </p>
                       </div>
                     ))}
-                    {colors.length < 4 && (
-                      <button
-                        onClick={addColor}
-                        className="w-12 h-12 rounded-lg border-2 border-dashed border-disoriti-primary/20 flex items-center justify-center hover:border-disoriti-primary/40 transition-colors"
-                      >
-                        <Plus className="h-6 w-6" />
-                      </button>
-                    )}
                   </div>
-                  {colors.length < 4 && (
-                    <div className="flex gap-2 items-center">
-                      <input
-                        type="text"
-                        value={hexInput}
-                        onChange={handleHexInput}
-                        placeholder="#RRGGBB"
-                        className="w-32 p-2 bg-white/5 rounded-lg border border-disoriti-primary/20 focus:outline-none focus:ring-2 focus:ring-disoriti-primary/40 text-sm"
-                        maxLength={7}
-                      />
-                      {/* <span className="text-sm text-disoriti-primary/70">
-                        Enter hex color code
-                      </span> */}
-                    </div>
-                  )}
                 </div>
-              </div>
-            </div>
+              )}
+            </CardContent>
+          </Card>
+        ) : (
+          // Enhanced Result Section
+          <div className="space-y-6">
+                                      {/* Original Prompt */}
+             <Card className="shadow-lg border-0 bg-gradient-to-br from-background to-muted/20">
+               <CardHeader>
+                 <CardTitle className="text-lg">Your Image Description</CardTitle>
+               </CardHeader>
+               <CardContent>
+                 <div className="p-4 bg-muted/30 rounded-lg">
+                   <p className="text-sm text-muted-foreground">{prompt}</p>
+                 </div>
+               </CardContent>
+             </Card>
+
+             {/* Enhanced Content */}
+             <Card className="shadow-lg border-0 bg-gradient-to-br from-disoriti-primary/5 to-disoriti-accent/5 border-disoriti-primary/20">
+               <CardHeader>
+                 <CardTitle className="flex items-center gap-2 text-disoriti-primary">
+                   <Sparkles className="h-5 w-5" />
+                   Generated Image Prompt
+                   {savedPrompts.length > 1 && (
+                     <span className="text-sm font-normal text-muted-foreground ml-2">
+                       (Selected: {selectedPromptIndex + 1} of {savedPrompts.length})
+                     </span>
+                   )}
+                 </CardTitle>
+               </CardHeader>
+               <CardContent>
+                 <div className="relative">
+                   {/* Animated background effect */}
+                   <div className={`absolute inset-0 bg-gradient-to-r from-disoriti-primary/10 to-disoriti-accent/10 rounded-lg transition-all duration-1000 ${
+                     animationStep >= 1 ? 'opacity-100' : 'opacity-0'
+                   }`} />
+                   
+                   {/* Enhanced text with typing animation */}
+                   <div className={`p-4 bg-background/80 backdrop-blur-sm rounded-lg border border-disoriti-primary/20 transition-all duration-500 ${
+                     animationStep >= 2 ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+                   }`}>
+                     <div className={`whitespace-pre-wrap text-sm leading-relaxed transition-all duration-1000 ${
+                       animationStep >= 3 ? 'opacity-100' : 'opacity-0'
+                     }`}>
+                       {enhancedText}
+                     </div>
+                   </div>
+                   
+                   {/* Success indicator */}
+                   <div className={`absolute -top-2 -right-2 p-2 bg-green-500 rounded-full transition-all duration-500 ${
+                     animationStep >= 3 ? 'opacity-100 scale-100' : 'opacity-0 scale-0'
+                   }`}>
+                     <Sparkles className="h-4 w-4 text-white" />
+                   </div>
+                 </div>
+               </CardContent>
+             </Card>
+
+                         {/* Action Buttons */}
+             <div className="flex justify-center">
+               <Button 
+                 variant="outline" 
+                 onClick={() => {
+                   setShowEnhanced(false);
+                   setEnhancedText("");
+                   setAnimationStep(0);
+                 }}
+                 className="flex items-center gap-2 hover:text-foreground"
+               >
+                 <Wand2 className="w-4 h-4" />
+                 Generate New Prompt
+               </Button>
+             </div>
+
+                                           {/* Saved Prompts Section - Show when enhanced content is displayed */}
+               {savedPrompts.length > 1 && (
+                 <Card className="shadow-lg border-0 bg-gradient-to-br from-background to-muted/20">
+                   <CardHeader>
+                     <CardTitle className="text-lg">Choose Image Prompt</CardTitle>
+                   </CardHeader>
+                   <CardContent>
+                     <div className="space-y-3">
+                       {savedPrompts.map((savedPrompt, index) => (
+                         <div 
+                           key={index}
+                           className={`p-3 rounded-lg cursor-pointer hover:bg-muted/50 transition-all duration-200 ${
+                             index === selectedPromptIndex 
+                               ? 'bg-muted/50 border-2' 
+                               : 'bg-muted/30 border border-border/30'
+                           }`}
+                           style={{
+                             borderColor: index === selectedPromptIndex ? 'var(--accent)' : undefined
+                           }}
+                           onClick={() => loadSavedPrompt(savedPrompt, index)}
+                         >
+                         <div className="flex justify-between items-start mb-2">
+                           <p className="text-sm font-medium line-clamp-1">{savedPrompt.prompt}</p>
+                           <span className="text-xs text-muted-foreground">
+                             {new Date(savedPrompt.timestamp).toLocaleDateString()}
+                           </span>
+                         </div>
+                         <p className="text-xs text-muted-foreground line-clamp-2">
+                           {savedPrompt.enhanced}
+                         </p>
+                       </div>
+                     ))}
+                   </div>
+                 </CardContent>
+               </Card>
+             )}
           </div>
         )}
-
-        <NavigationButtons
-          onPrevious={() => {
-            if (selectedOption) {
-              setSelectedOption(null);
-            } else {
-              router.back();
-            }
-          }}
-          onNext={() => {
-            if (selectedOption === "import") {
-              router.push(
-                `/dashboard/create/content?type=${type}&media=${media}&platform=${platform}&postType=${postType}&settings=imported`
-              );
-            } else if (selectedOption === "new") {
-              router.push(
-                `/dashboard/create/content?type=${type}&media=${media}&platform=${platform}&postType=${postType}&settings=new`
-              );
-            }
-          }}
-          disablePrevious={false}
-          disableNext={!selectedOption}
-        />
       </div>
+
+      {/* Navigation */}
+      <NavigationButtons
+        onPrevious={() => router.back()}
+        onNext={handleContinue}
+        disablePrevious={false}
+        disableNext={!showEnhanced}
+      />
     </div>
   );
 }
 
-export default function EditorPage() {
+export default function EnhancePromptPage() {
   return (
     <Suspense fallback={
       <div className="space-y-8 p-6">
@@ -312,7 +446,7 @@ export default function EditorPage() {
         </div>
       </div>
     }>
-      <EditorPageInner />
+      <EnhancePromptPageInner />
     </Suspense>
   );
 } 

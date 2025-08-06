@@ -1,9 +1,11 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import { useRouter } from "next/navigation"
 import { SignupForm } from "@/components/signup-form"
-
-import { API_SIGNUP_URL } from "@/lib/links"
+import { useAuth } from "@/contexts/auth-context"
+import { API_URLS } from "@/lib/api"
+import { toast } from "sonner"
 
 export default function SignupPage() {
   const [email, setEmail] = useState("")
@@ -11,25 +13,55 @@ export default function SignupPage() {
   const [username, setUsername] = useState("")
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
+  const { isAuthenticated, logout } = useAuth()
+  const router = useRouter()
+
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      router.push('/dashboard')
+    }
+  }, [isAuthenticated, router])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
     setError("")
     try {
-      const res = await fetch(API_SIGNUP_URL, {
+      const res = await fetch(API_URLS.SIGNUP_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password, username }),
       })
-      if (!res.ok) throw new Error("Error in signing up")
+      
+      if (!res.ok) {
+        const errorData = await res.json()
+        
+        // Handle 401 Unauthorized - redirect to login
+        if (res.status === 401) {
+          toast.error('Session expired. Please log in again.');
+          // Clear authentication and redirect to login
+          logout();
+          return;
+        }
+        
+        // Show the message field as the primary error message for other errors
+        const errorMessage = errorData.message || "Error in signing up"
+        toast.error(errorMessage)
+        return
+      }
+      
       const result = await res.json()
       const token = result.data?.access_token
-      if (!token) throw new Error("No access token returned")
-      localStorage.setItem("token", token)
-      // Optionally store user info: result.data.user
-      // Redirect or update UI as needed
+      if (!token) {
+        toast.error("No access token returned")
+        return
+      }
+      
+      toast.success("Signup successful! Please log in.")
+      router.push('/login')
     } catch (err: any) {
+      toast.error("Network or server error")
       setError(err.message)
     } finally {
       setLoading(false)

@@ -1,4 +1,5 @@
 
 
-export const API_LOGIN_URL = "http://127.0.0.1:8000/api/v1/auth/login";
-export const API_SIGNUP_URL = "http://127.0.0.1:8000/api/v1/auth/signup"; 
+// This file is deprecated. Use lib/api.ts instead.
+// Keeping for backward compatibility
+export { API_LOGIN_URL, API_SIGNUP_URL } from './api'; 

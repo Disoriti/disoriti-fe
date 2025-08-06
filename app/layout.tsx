@@ -5,6 +5,7 @@ import { Poppins } from "next/font/google";
 import { Geist_Mono } from "next/font/google";
 
 import { Toaster } from "@/components/ui/sonner";
+import { AuthProvider } from "@/contexts/auth-context";
 
 
 
@@ -27,6 +28,11 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Disoriti - AI-powered ad generator",
   description: "Frontend powered by Next.js and Shadcn UI",
+  icons: {
+    icon: '/favicon.ico',
+    shortcut: '/favicon.ico',
+    apple: '/favicon.ico',
+  },
 };
 
 export default function RootLayout({
@@ -40,8 +46,10 @@ export default function RootLayout({
       <body
         className={`${poppins.variable} ${geistMono.variable} antialiased font-sans`}
       >
-        <main>{children}</main>
-        <Toaster />
+        <AuthProvider>
+          <main>{children}</main>
+          <Toaster />
+        </AuthProvider>
       </body>
     </html>
   );

@@ -1,252 +1,251 @@
 {
-    "success": true,
-    "metadata": {
-      "platform": "instagram",
-      "post_type": "square",
-      "design_style": "bold",
-      "post_dimensions": "4:3",
-      "num_options": 3,
-      "input_texts": {
-        "heading": "Summer Sale",
-        "subheading": "Up to 50% Off Everything",
-        "cta": "Shop Now"
+  "success": true,
+  "metadata": {
+    "platform": "instagram",
+    "post_type": "square",
+    "design_style": "bold",
+    "post_dimensions": "1:1",
+    "num_options": 3,
+    "input_texts": {
+      "heading": "Transform Your Body",
+      "subheading": "Get Fit with Our Expert Trainers",
+      "cta": "Sign Up Now"
+    }
+  },
+  "layouts": [
+    {
+      "id": "bold_center",
+      "style": "bold",
+      "confidence": 0.9,
+      "platform_optimized": "instagram_square",
+      "design_notes": "Uses center area to draw attention.",
+      "elements": {
+        "heading": {
+          "bbox": {
+            "x": 50,
+            "y": 100,
+            "width": 1024,
+            "height": 150
+          },
+          "position": {
+            "x1": 50,
+            "y1": 100,
+            "x2": 1074,
+            "y2": 250
+          },
+          "styling": {
+            "font_size": 80,
+            "font_weight": "bold",
+            "text_align": "center",
+            "color": "#FFFFFF",
+            "background_color": "#FFFFFF80",
+            "margin": 20
+          },
+          "text_content": "Transform Your Body"
+        },
+        "subheading": {
+          "bbox": {
+            "x": 50,
+            "y": 250,
+            "width": 800,
+            "height": 100
+          },
+          "position": {
+            "x1": 50,
+            "y1": 250,
+            "x2": 850,
+            "y2": 350
+          },
+          "styling": {
+            "font_size": 50,
+            "font_weight": "normal",
+            "text_align": "center",
+            "color": "#FFFFFF",
+            "background_color": "#FFFFFF80",
+            "margin": 15
+          },
+          "text_content": "Get Fit with Our Expert Trainers"
+        },
+        "cta": {
+          "bbox": {
+            "x": 50,
+            "y": 400,
+            "width": 300,
+            "height": 70
+          },
+          "position": {
+            "x1": 50,
+            "y1": 400,
+            "x2": 350,
+            "y2": 470
+          },
+          "styling": {
+            "font_size": 35,
+            "font_weight": "bold",
+            "text_align": "center",
+            "color": "#000000",
+            "background_color": "#FFFFFF80",
+            "margin": 10
+          },
+          "text_content": "Sign Up Now"
+        }
       }
     },
-    "layouts": [
-      {
-        "id": "bold_diagonal_flow_2",
-        "style": "bold",
-        "confidence": 0.7,
-        "platform_optimized": "instagram_square",
-        "design_notes": "Complements centered image composition",
-        "elements": {
-          "heading": {
-            "bbox": {
-              "x": 10,
-              "y": 300,
-              "width": 800,
-              "height": 150
-            },
-            "position": {
-              "x1": 10,
-              "y1": 300,
-              "x2": 800,
-              "y2": 450
-            },
-            "styling": {
-              "font_size": 65,
-              "font_weight": "bold",
-              "text_align": "left",
-              "color": "#FFFFFF",
-              "background_color": "#FFFFFF80",
-              "margin": 20
-            },
-            "text_content": "Find your perfect summer look"
+    {
+      "id": "bold_bottom_right",
+      "style": "bold",
+      "confidence": 0.9,
+      "platform_optimized": "instagram_square",
+      "design_notes": "Uses bottom-right area to create visual interest.",
+      "elements": {
+        "heading": {
+          "bbox": {
+            "x": 50,
+            "y": 100,
+            "width": 800,
+            "height": 120
           },
-          "subheading": {
-            "bbox": {
-              "x": 10,
-              "y": 400,
-              "width": 860,
-              "height": 150
-            },
-            "position": {
-              "x1": 10,
-              "y1": 400,
-              "x2": 928,
-              "y2": 572
-            },
-            "styling": {
-              "font_size": 50,
-              "font_weight": "normal",
-              "text_align": "left",
-              "color": "#FFFFFF",
-              "background_color": "#FFFFFF80",
-              "margin": 15
-            },
-            "text_content": "Discover our latest collection"
+          "position": {
+            "x1": 50,
+            "y1": 100,
+            "x2": 850,
+            "y2": 220
           },
-          "cta": {
-            "bbox": {
-              "x": 40,
-              "y": 983,
-              "width": 250,
-              "height": 57
-            },
-            "position": {
-              "x1": 40,
-              "y1": 983,
-              "x2": 270,
-              "y2": 1040
-            },
-            "styling": {
-              "font_size":25,
-              "font_weight": "bold",
-              "text_align": "center",
-              "color": "#000000",
-              "background_color": "#FFFFFF80",
-              "margin": 10
-            },
-            "text_content": "CODE: SUMMER25"
-          }
-        }
-      },
-      {
-        "id": "bold_impact_center_1",
-        "style": "bold",
-        "confidence": 1.0,
-        "platform_optimized": "instagram_square",
-        "design_notes": "Centered layout creates strong focal point; Complements centered image composition",
-        "elements": {
-          "heading": {
-            "bbox": {
-              "x": 5,
-              "y": 30,
-              "width": 700,
-              "height": 154
-            },
-            "position": {
-              "x1": 5,
-              "y1": 30,
-              "x2": 965,
-              "y2": 194
-            },
-            "styling": {
-              "font_size": 80,
-              "font_weight": "bold",
-              "text_align": "center",
-              "color": "#FFFFFF",
-              "background_color": "#FFFFFF80",
-              "margin": 30
-            },
-            "text_content": "Summer Sale"
+          "styling": {
+            "font_size": 70,
+            "font_weight": "bold",
+            "text_align": "right",
+            "color": "#FFFFFF",
+            "background_color": "#FFFFFF80",
+            "margin": 20
           },
-          "subheading": {
-            "bbox": {
-              "x": 5,
-              "y": 200,
-              "width": 870,
-              "height": 200
-            },
-            "position": {
-              "x1": 5,
-              "y1": 200,
-              "x2": 972,
-              "y2": 576
-            },
-            "styling": {
-              "font_size": 60,
-              "font_weight": "normal",
-              "text_align": "center",
-              "color": "#FFFFFF",
-              "background_color": "#FFFFFF80",
-              "margin": 15
-            },
-            "text_content": "Up to 50% Off Everything"
+          "text_content": "Transform Your Body"
+        },
+        "subheading": {
+          "bbox": {
+            "x": 50,
+            "y": 250,
+            "width": 600,
+            "height": 100
           },
-          "cta": {
-            "bbox": {
-              "x": 751,
-              "y": 976,
-              "width": 258,
-              "height": 64
-            },
-            "position": {
-              "x1": 751,
-              "y1": 976,
-              "x2": 669,
-              "y2": 1040
-            },
-            "styling": {
-              "font_size": 35,
-              "font_weight": "bold",
-              "text_align": "center",
-              "color": "#000000",
-              "background_color": "#FFFFFF80",
-              "margin": 10
-            },
-            "text_content": "Shop Now"
-          }
-        }
-      },
-      
-      {
-        "id": "bold_corner_emphasis_3",
-        "style": "bold",
-        "confidence": 0.7,
-        "platform_optimized": "instagram_square",
-        "design_notes": "Complements centered image composition",
-        "elements": {
-          "heading": {
-            "bbox": {
-              "x": 400,
-              "y": 40,
-              "width": 640,
-              "height": 150
-            },
-            "position": {
-              "x1": 400,
-              "y1": 40,
-              "x2": 1040,
-              "y2": 156
-            },
-            "styling": {
-              "font_size": 65,
-              "font_weight": "bold",
-              "text_align": "center",
-              "color": "#FFFFFF",
-              "background_color": "#FFFFFF80",
-              "margin": 20
-            },
-            "text_content": "Summer Sale"
+          "position": {
+            "x1": 50,
+            "y1": 250,
+            "x2": 650,
+            "y2": 350
           },
-          "subheading": {
-            "bbox": {
-              "x": 152,
-              "y": 508,
-              "width": 800,
-              "height": 100
-            },
-            "position": {
-              "x1": 152,
-              "y1": 508,
-              "x2": 928,
-              "y2": 572
-            },
-            "styling": {
-              "font_size": 50,
-              "font_weight": "normal",
-              "text_align": "left",
-              "color": "#FFFFFF",
-              "background_color": "#FFFFFF80",
-              "margin": 15
-            },
-            "text_content": "Up to 50% Off Everything"
+          "styling": {
+            "font_size": 50,
+            "font_weight": "normal",
+            "text_align": "right",
+            "color": "#FFFFFF",
+            "background_color": "#FFFFFF80",
+            "margin": 15
           },
-          "cta": {
-            "bbox": {
-              "x": 437,
-              "y": 989,
-              "width": 206,
-              "height": 51
-            },
-            "position": {
-              "x1": 437,
-              "y1": 989,
-              "x2": 643,
-              "y2": 1040
-            },
-            "styling": {
-              "font_size": 25,
-              "font_weight": "bold",
-              "text_align": "center",
-              "color": "#000000",
-              "background_color": "#FFFFFF80",
-              "margin": 10
-            },
-            "text_content": "Shop Now"
-          }
+          "text_content": "Get Fit with Our Expert Trainers"
+        },
+        "cta": {
+          "bbox": {
+            "x": 50,
+            "y": 500,
+            "width": 300,
+            "height": 70
+          },
+          "position": {
+            "x1": 50,
+            "y1": 500,
+            "x2": 350,
+            "y2": 570
+          },
+          "styling": {
+            "font_size": 35,
+            "font_weight": "bold",
+            "text_align": "right",
+            "color": "#000000",
+            "background_color": "#FFFFFF80",
+            "margin": 10
+          },
+          "text_content": "Sign Up Now"
         }
       }
-    ]
-  }
+    },
+    {
+      "id": "bold_top_left",
+      "style": "bold",
+      "confidence": 0.9,
+      "platform_optimized": "instagram_square",
+      "design_notes": "Uses top-left area to avoid centered subject.",
+      "elements": {
+        "heading": {
+          "bbox": {
+            "x": 100,
+            "y": 50,
+            "width": 800,
+            "height": 120
+          },
+          "position": {
+            "x1": 100,
+            "y1": 50,
+            "x2": 900,
+            "y2": 170
+          },
+          "styling": {
+            "font_size": 70,
+            "font_weight": "bold",
+            "text_align": "left",
+            "color": "#FFFFFF",
+            "background_color": "#FFFFFF80",
+            "margin": 20
+          },
+          "text_content": "Transform Your Body"
+        },
+        "subheading": {
+          "bbox": {
+            "x": 100,
+            "y": 200,
+            "width": 600,
+            "height": 100
+          },
+          "position": {
+            "x1": 100,
+            "y1": 200,
+            "x2": 700,
+            "y2": 300
+          },
+          "styling": {
+            "font_size": 50,
+            "font_weight": "normal",
+            "text_align": "left",
+            "color": "#FFFFFF",
+            "background_color": "#FFFFFF80",
+            "margin": 15
+          },
+          "text_content": "Get Fit with Our Expert Trainers"
+        },
+        "cta": {
+          "bbox": {
+            "x": 100,
+            "y": 350,
+            "width": 300,
+            "height": 70
+          },
+          "position": {
+            "x1": 100,
+            "y1": 350,
+            "x2": 400,
+            "y2": 420
+          },
+          "styling": {
+            "font_size": 35,
+            "font_weight": "bold",
+            "text_align": "left",
+            "color": "#000000",
+            "background_color": "#FFFFFF80",
+            "margin": 10
+          },
+          "text_content": "Sign Up Now"
+        }
+      }
+    }
+  ]
+}

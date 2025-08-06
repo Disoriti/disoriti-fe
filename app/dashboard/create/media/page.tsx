@@ -63,21 +63,25 @@ function MediaPageInner() {
             </span>
           </button>
 
-          <button
-            className={`flex flex-col items-center justify-center rounded-2xl border-2 transition-all duration-300 shadow-xl bg-gradient-to-br from-disoriti-primary/10 to-disoriti-accent/10 px-16 py-20 text-2xl font-bold w-[340px] h-56 hover:border-disoriti-primary/60 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-disoriti-primary/40 ${
-              selected === "video"
-                ? "border-secondary/80 ring-4 ring-primary/30 scale-105"
-                : "border-secondary/60"
-            }`}
-            onClick={() => setSelected("video")}
-            type="button"
-          >
-            <Video className="h-12 w-12 mb-4" />
-            <span className="mb-2">Video</span>
-            <span className="text-base font-normal text-disoriti-primary/70">
-              Upload or create a video
-            </span>
-          </button>
+          <div className="relative">
+            <button
+              className="flex flex-col items-center justify-center rounded-2xl border-2 transition-all duration-300 shadow-xl bg-gradient-to-br from-disoriti-primary/10 to-disoriti-accent/10 px-16 py-20 text-2xl font-bold w-[340px] h-56 border-secondary/60 opacity-60 cursor-not-allowed"
+              disabled
+              type="button"
+            >
+              <Video className="h-12 w-12 mb-4" />
+              <span className="mb-2">Video</span>
+              <span className="text-base font-normal text-disoriti-primary/70">
+                Upload or create a video
+              </span>
+            </button>
+            {/* Coming Soon Overlay */}
+            <div className="absolute inset-0 flex items-center justify-center bg-black/20 rounded-2xl">
+              <div className="bg-disoriti-primary text-white px-4 py-2 rounded-lg font-semibold text-sm">
+                Coming Soon!
+              </div>
+            </div>
+          </div>
         </div>
 
         <NavigationButtons

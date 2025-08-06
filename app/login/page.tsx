@@ -1,47 +1,36 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import { useRouter } from "next/navigation"
 import { LoginForm } from "@/app/login/login-form"
-import { toast } from "sonner"
-
-import { API_LOGIN_URL } from "@/lib/links"
+import { useAuth } from "@/contexts/auth-context"
 
 export default function LoginPage() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
+  const { login, isAuthenticated } = useAuth()
+  const router = useRouter()
+
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      router.push('/dashboard')
+    }
+  }, [isAuthenticated, router])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
     setError("")
-    try {
-      const res = await fetch(API_LOGIN_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      })
-      if (!res.ok) {
-        toast.error("Invalid credentials")
-        return
-      }
-      const result = await res.json()
-      const token = result.data?.access_token
-      if (!token) {
-        toast.error("No token returned from server")
-        return
-      }
-      toast.success("Login successful!")
-      localStorage.setItem("token", token)
-      // Optionally store user info: result.data.user
-      // Redirect or update UI as needed
-    } catch (err: any) {
-      toast.error("Network or server error")
-      setError(err.message)
-    } finally {
-      setLoading(false)
+    
+    const success = await login({ email, password })
+    if (success) {
+      router.push('/dashboard')
     }
+    
+    setLoading(false)
   }
 
   return (
