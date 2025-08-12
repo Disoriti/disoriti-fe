@@ -12,6 +12,8 @@ import { useEffect, useState } from "react";
 import { MessageSquare, Send, Bot, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { API_URLS } from "@/lib/api";
+import { authenticatedFetch } from "@/lib/auth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 function TimeClient({ iso }: { iso: string }) {
@@ -55,17 +57,47 @@ export default function ChatPage() {
     setInputValue("");
     setIsLoading(true);
 
-    // Simulate AI response
-    setTimeout(() => {
+    try {
+      const url = `${API_URLS.DISORITI_CHAT_URL}?prompt=${encodeURIComponent(userMessage.content)}`;
+      const response = await authenticatedFetch(url, {
+        method: 'POST',
+        headers: {
+          accept: 'application/json',
+        },
+        body: '',
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        const botMessage: Message = {
+          id: (Date.now() + 1).toString(),
+          content: `Error: ${response.status} ${response.statusText} - ${errorText}`,
+          sender: 'bot',
+          timestamp: new Date().toISOString(),
+        };
+        setMessages(prev => [...prev, botMessage]);
+      } else {
+        const data = await response.json();
+        const answer = data?.data ?? 'No response';
+        const botMessage: Message = {
+          id: (Date.now() + 1).toString(),
+          content: answer,
+          sender: 'bot',
+          timestamp: new Date().toISOString(),
+        };
+        setMessages(prev => [...prev, botMessage]);
+      }
+    } catch (e) {
       const botMessage: Message = {
         id: (Date.now() + 1).toString(),
-        content: "I'm here to help you with your creative projects! This is a simulated response. In the real implementation, this would be connected to an LLM API.",
-        sender: "bot",
+        content: e instanceof Error ? `Network error: ${e.message}` : 'Network error',
+        sender: 'bot',
         timestamp: new Date().toISOString(),
       };
       setMessages(prev => [...prev, botMessage]);
+    } finally {
       setIsLoading(false);
-    }, 1500);
+    }
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {

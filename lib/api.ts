@@ -1,44 +1,36 @@
 // Get current environment
 export const getEnvironment = (): 'development' | 'production' | 'test' => {
-  // Force production environment
-  return 'production';
-  
-  // Check if we're in a browser environment
-  if (typeof window !== 'undefined') {
-    // In browser, check the hostname to determine environment
-    const hostname = window.location.hostname;
-    if (hostname === 'localhost' || hostname === '127.0.0.1') {
-      return 'development';
-    }
-    return 'production';
-  }
-  
-  // Server-side environment detection
-  if (process.env.NODE_ENV === 'production') {
-    return 'production';
-  }
-  if (process.env.NODE_ENV === 'test') {
-    return 'test';
-  }
+  const rawEnv = (process.env.NEXT_PUBLIC_APP_ENV || process.env.NODE_ENV || 'development').toLowerCase();
+  if (rawEnv.startsWith('prod')) return 'production';
+  if (rawEnv.startsWith('test')) return 'test';
   return 'development';
 };
 
 // Get API base URL with fallbacks
 export const getApiBaseUrl = (): string => {
-  // Try to get from environment variable first
-  if (process.env.NEXT_PUBLIC_API_BASE_URL) {
-    return process.env.NEXT_PUBLIC_API_BASE_URL;
-  }
-  
-  // Fallback based on environment
   const env = getEnvironment();
-  if (env === 'development') {
-    return 'http://127.0.0.1:8000';
-  }
+
   if (env === 'production') {
+    if (process.env.NEXT_PUBLIC_API_BASE_URL) {
+      return process.env.NEXT_PUBLIC_API_BASE_URL;
+    }
     return 'https://disoriti-be.onrender.com';
   }
-  return 'http://localhost:8000';
+
+  if (env === 'development') {
+    // In development, prefer local API regardless of NEXT_PUBLIC_API_BASE_URL to avoid accidentally hitting production
+    if (
+      typeof window !== 'undefined' &&
+      process.env.NEXT_PUBLIC_API_BASE_URL &&
+      process.env.NEXT_PUBLIC_API_BASE_URL !== 'http://127.0.0.1:8000'
+    ) {
+      console.warn('Ignoring NEXT_PUBLIC_API_BASE_URL in development. Using http://127.0.0.1:8000');
+    }
+    return process.env.NEXT_PUBLIC_API_BASE_URL_DEV || 'http://127.0.0.1:8000';
+  }
+
+  // test
+  return process.env.NEXT_PUBLIC_API_BASE_URL_TEST || 'http://localhost:8000';
 };
 
 // Environment configuration
@@ -111,6 +103,7 @@ export const API_ENDPOINTS = {
     GENERATE_IMAGE: '/ai/generate-image',
     GENERATE_TEXT: '/ai/generate-text',
     ENHANCE_PROMPT: '/ai/enhance-prompt',
+    DISORITI_CHAT: '/ai/disoriti-chat',
     SAVE_CONTENT: '/ai/save',
     GET_CONTENT: '/content',
     DELETE_CONTENT: '/content',
@@ -181,6 +174,7 @@ export const API_URLS = {
   GENERATE_IMAGE_URL: buildApiUrl(API_ENDPOINTS.CONTENT.GENERATE_IMAGE),
   GENERATE_TEXT_URL: buildApiUrl(API_ENDPOINTS.CONTENT.GENERATE_TEXT),
   ENHANCE_PROMPT_URL: buildApiUrl(API_ENDPOINTS.CONTENT.ENHANCE_PROMPT),
+  DISORITI_CHAT_URL: buildApiUrl(API_ENDPOINTS.CONTENT.DISORITI_CHAT),
   GENERATE_IMAGE_METADATA_URL: buildApiUrl(API_ENDPOINTS.CONTENT.GENERATE_IMAGE_METADATA),
   SAVE_CONTENT_URL: buildApiUrl(API_ENDPOINTS.CONTENT.SAVE_CONTENT),
   GET_CONTENT_URL: buildApiUrl(API_ENDPOINTS.CONTENT.GET_CONTENT),
