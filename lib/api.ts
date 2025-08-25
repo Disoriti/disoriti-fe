@@ -86,6 +86,7 @@ export const API_ENDPOINTS = {
     LOGOUT: '/auth/logout',
     REFRESH: '/auth/refresh',
     VERIFY: '/auth/verify',
+    ME: '/auth/me',
     FORGOT_PASSWORD: '/auth/forgot-password',
     RESET_PASSWORD: '/auth/reset-password',
   },
@@ -161,6 +162,7 @@ export const API_URLS = {
   LOGOUT_URL: buildApiUrl(API_ENDPOINTS.AUTH.LOGOUT),
   REFRESH_URL: buildApiUrl(API_ENDPOINTS.AUTH.REFRESH),
   VERIFY_URL: buildApiUrl(API_ENDPOINTS.AUTH.VERIFY),
+  ME_URL: buildApiUrl(API_ENDPOINTS.AUTH.ME),
   FORGOT_PASSWORD_URL: buildApiUrl(API_ENDPOINTS.AUTH.FORGOT_PASSWORD),
   RESET_PASSWORD_URL: buildApiUrl(API_ENDPOINTS.AUTH.RESET_PASSWORD),
   

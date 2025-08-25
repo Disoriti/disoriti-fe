@@ -17,7 +17,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Sparkles, Wand2, ArrowRight, Loader2 } from "lucide-react";
 import NavigationButtons from "@/components/navigation-buttons";
 import { API_URLS } from "@/lib/api";
-import { getToken } from "@/lib/auth";
+import { authenticatedFetch, isUnauthorizedError, getToken } from "@/lib/auth";
 import { useAuth } from "@/contexts/auth-context";
 import { toast } from "sonner";
 

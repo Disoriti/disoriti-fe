@@ -68,6 +68,29 @@ export const logout = (): void => {
   removeUser();
 };
 
+export class UnauthorizedError extends Error {
+  constructor(message: string = 'Unauthorized') {
+    super(message);
+    this.name = 'UnauthorizedError';
+  }
+}
+
+export const isUnauthorizedError = (err: unknown): boolean => {
+  return err instanceof UnauthorizedError || (err as any)?.name === 'UnauthorizedError' || (err as any)?.message === 'Unauthorized';
+};
+
+const redirectToLogin = () => {
+  if (typeof window !== 'undefined') {
+    try {
+      // Best-effort toast; ignore if not available
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      const { toast } = require('sonner');
+      toast.error('Session expired. Please log in again.');
+    } catch {}
+    window.location.href = '/login';
+  }
+};
+
 // API request helper with authentication
 export const authenticatedFetch = async (
   url: string,
@@ -84,8 +107,17 @@ export const authenticatedFetch = async (
     headers['Authorization'] = `Bearer ${token}`;
   }
 
-  return fetch(url, {
+  const response = await fetch(url, {
     ...options,
     headers,
   });
+
+  if (response.status === 401) {
+    // Clear auth and redirect
+    logout();
+    redirectToLogin();
+    throw new UnauthorizedError();
+  }
+
+  return response;
 }; 

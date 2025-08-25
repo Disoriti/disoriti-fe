@@ -25,7 +25,7 @@ import AdLayoutPreview from "@/components/AdLayoutPreview";
 import { Switch } from "@/components/ui/switch";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { API_URLS } from "@/lib/api";
-import { getToken } from "@/lib/auth";
+import { authenticatedFetch, isUnauthorizedError } from "@/lib/auth";
 import { useAuth } from "@/contexts/auth-context";
 import { toast } from "sonner";
 
@@ -42,6 +42,64 @@ interface GenerateImageMetadataResponse {
 
 // Layout data will be populated from API response
 const defaultLayouts: Layout[] = [];
+
+// Normalize API layout (which may be normalized 0..1 coords and RGBA hex) into our 1080px space and styling
+function normalizeApiLayouts(apiLayouts: any[]): Layout[] {
+  const toSixHexAndAlpha = (hex: string): { hex6: string; alpha?: number } => {
+    if (!hex || typeof hex !== 'string') return { hex6: '#000000' };
+    const cleaned = hex.trim();
+    if (cleaned.length === 9 && cleaned.startsWith('#')) {
+      const rr = cleaned.slice(1, 3);
+      const gg = cleaned.slice(3, 5);
+      const bb = cleaned.slice(5, 7);
+      const aa = cleaned.slice(7, 9);
+      const alpha = Math.max(0, Math.min(1, parseInt(aa, 16) / 255));
+      return { hex6: `#${rr}${gg}${bb}`, alpha };
+    }
+    return { hex6: cleaned };
+  };
+
+  const toPx = (v: number) => (v <= 1 ? v * 1080 : v);
+
+  const normalizeElement = (key: 'heading' | 'subheading' | 'cta', el: any): ElementData => {
+    const { hex6: bgHex, alpha: bgAlpha } = toSixHexAndAlpha(el?.styling?.background_color || '#000000');
+    const { hex6: textHex, alpha: textAlpha } = toSixHexAndAlpha(el?.styling?.color || '#FFFFFF');
+    const base: ElementData = {
+      bbox: {
+        x: toPx(el?.bbox?.x ?? 0),
+        y: toPx(el?.bbox?.y ?? 0),
+        width: toPx(el?.bbox?.width ?? 0),
+        height: toPx(el?.bbox?.height ?? 0),
+      },
+      styling: {
+        font_size: el?.styling?.font_size ?? 32,
+        font_weight: el?.styling?.font_weight ?? (key === 'heading' ? 'bold' : 'normal'),
+        text_align: el?.styling?.text_align ?? 'left',
+        color: textHex,
+        color_opacity: textAlpha ?? 1,
+        background_color: bgHex,
+        background_opacity: bgAlpha ?? (key === 'cta' ? 1 : 0),
+        margin: el?.styling?.margin ?? 0,
+        font_family: el?.styling?.font_family,
+        letter_spacing: el?.styling?.letter_spacing,
+        text_transform: el?.styling?.text_transform,
+        line_height: el?.styling?.line_height,
+      },
+      text_content: el?.text_content ?? '',
+    };
+    return base;
+  };
+
+  return (apiLayouts || []).map((ly: any): Layout => ({
+    id: ly?.id || 'layout',
+    style: ly?.style || 'auto',
+    elements: {
+      heading: normalizeElement('heading', ly?.elements?.heading || {}),
+      subheading: normalizeElement('subheading', ly?.elements?.subheading || {}),
+      cta: normalizeElement('cta', ly?.elements?.cta || {}),
+    },
+  }));
+}
 
 function getAspectRatio(dim: string | undefined): [number, number] {
   if (!dim) return [1, 1];
@@ -79,7 +137,7 @@ function ContentPageInner() {
   const [isGeneratingContent, setIsGeneratingContent] = useState(false);
   const [generatedContent, setGeneratedContent] = useState<{heading: string, subheading: string, cta: string} | null>(null);
   const router = useRouter();
-  const { logout } = useAuth();
+  const { monthlyCreditsLimit, monthlyCreditsUsed, monthlyCreditsResetAt, setCreditsFromServer } = useAuth();
   
   // Safely get search params with fallbacks
   const searchParams = useSearchParams();
@@ -125,13 +183,6 @@ function ContentPageInner() {
     setGeneratingImage(true);
     
     try {
-      const token = getToken();
-      if (!token) {
-        toast.error('Authentication required');
-        setGeneratingImage(false);
-        return;
-      }
-
       // Use the enhanced prompt from localStorage
       const promptToUse = enhanced || prompt;
       if (!promptToUse) {
@@ -151,11 +202,17 @@ function ContentPageInner() {
       
       console.log('Generate Image API URL:', url);
 
-      const response = await fetch(url, {
+      // Block if credits exhausted
+      if (typeof monthlyCreditsLimit === 'number' && typeof monthlyCreditsUsed === 'number' && monthlyCreditsUsed >= monthlyCreditsLimit) {
+        toast.error('Monthly credits exhausted');
+        setGeneratingImage(false);
+        return;
+      }
+
+      const response = await authenticatedFetch(url, {
         method: 'POST',
         headers: {
           'accept': 'application/json',
-          'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
@@ -166,12 +223,16 @@ function ContentPageInner() {
       });
 
       if (!response.ok) {
-        if (response.status === 401) {
-          toast.error('Session expired. Please log in again.');
-          logout();
+        if (response.status === 402) {
+          try {
+            const err = await response.json();
+            toast.error(err?.message || 'Monthly credits exhausted');
+          } catch {
+            toast.error('Monthly credits exhausted');
+          }
+          setGeneratingImage(false);
           return;
         }
-
         const errorData = await response.json();
         const errorMessage = errorData.message || 'Failed to generate image';
         toast.error(errorMessage);
@@ -192,7 +253,8 @@ function ContentPageInner() {
           
           // Update layouts with the new layout data from API
           if (data.data.layout.layouts && Array.isArray(data.data.layout.layouts)) {
-            setLayouts(data.data.layout.layouts);
+            const normalized = normalizeApiLayouts(data.data.layout.layouts);
+            setLayouts(normalized);
             setSelectedLayoutIdx(0); // Select first layout by default
           }
         } else {
@@ -201,6 +263,14 @@ function ContentPageInner() {
           return;
         }
         
+        // Update credits from response
+        if (data?.data?.credits) {
+          const { limit, used, reset_at } = data.data.credits;
+          if (typeof limit === 'number' && typeof used === 'number') {
+            setCreditsFromServer?.({ limit, used, reset_at });
+          }
+        }
+
         setGeneratingImage(false);
         toast.success('Image generated successfully!');
       } else {
@@ -209,7 +279,9 @@ function ContentPageInner() {
       }
     } catch (error) {
       console.error('Generate image error:', error);
-      toast.error('Network or server error');
+      if (!isUnauthorizedError(error)) {
+        toast.error('Network or server error');
+      }
       setGeneratingImage(false);
     }
   };
@@ -238,13 +310,6 @@ function ContentPageInner() {
     setIsGeneratingContent(true);
     
     try {
-      const token = getToken();
-      if (!token) {
-        toast.error('Authentication required');
-        setIsGeneratingContent(false);
-        return;
-      }
-
       // Use the enhanced prompt from localStorage
       const promptToUse = enhanced || prompt;
       if (!promptToUse) {
@@ -270,23 +335,14 @@ function ContentPageInner() {
         return;
       }
 
-      const response = await fetch(url, {
+      const response = await authenticatedFetch(url, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
         },
       });
 
       if (!response.ok) {
-        // Handle 401 Unauthorized - redirect to login
-        if (response.status === 401) {
-          toast.error('Session expired. Please log in again.');
-          // Clear authentication and redirect to login
-          logout();
-          return;
-        }
-
         const errorData = await response.json();
         // Show the message field as the primary error message
         const errorMessage = errorData.message || 'Failed to generate content';
@@ -317,7 +373,9 @@ function ContentPageInner() {
       }
     } catch (error) {
       console.error('Generate content error:', error);
-      toast.error('Network or server error');
+      if (!isUnauthorizedError(error)) {
+        toast.error('Network or server error');
+      }
       setIsGeneratingContent(false);
     }
   };

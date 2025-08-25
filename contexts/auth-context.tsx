@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { User, LoginCredentials, AuthResponse, getToken, setToken, removeToken, getUser, setUser, removeUser, logout as logoutUtil } from '@/lib/auth';
+import { User, LoginCredentials, AuthResponse, getToken, setToken, removeToken, getUser, setUser, removeUser, logout as logoutUtil, authenticatedFetch } from '@/lib/auth';
 import { API_URLS } from '@/lib/api';
 import { toast } from 'sonner';
 
@@ -13,6 +13,11 @@ interface AuthContextType {
   login: (credentials: LoginCredentials) => Promise<boolean>;
   logout: () => void;
   checkAuth: () => void;
+  plan?: string | null;
+  monthlyCreditsLimit?: number | null;
+  monthlyCreditsUsed?: number | null;
+  monthlyCreditsResetAt?: string | null;
+  setCreditsFromServer?: (credits: { limit: number; used: number; reset_at: string }) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -32,6 +37,10 @@ interface AuthProviderProps {
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUserState] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [plan, setPlan] = useState<string | null>(null);
+  const [monthlyCreditsLimit, setMonthlyCreditsLimit] = useState<number | null>(null);
+  const [monthlyCreditsUsed, setMonthlyCreditsUsed] = useState<number | null>(null);
+  const [monthlyCreditsResetAt, setMonthlyCreditsResetAt] = useState<string | null>(null);
   const router = useRouter();
 
   const checkAuth = () => {
@@ -87,6 +96,21 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         setToken(data.data.access_token);
         setUser(data.data.user);
         setUserState(data.data.user);
+        // Fetch /auth/me for plan and credits
+        try {
+          const meRes = await authenticatedFetch(API_URLS.ME_URL, { method: 'GET' });
+          if (meRes.ok) {
+            const me = await meRes.json();
+            const planName = me?.data?.plan ?? null;
+            const limit = me?.data?.monthly_credits_limit ?? null;
+            const used = me?.data?.monthly_credits_used ?? null;
+            const resetAt = me?.data?.monthly_credits_reset_at ?? null;
+            setPlan(planName);
+            setMonthlyCreditsLimit(limit);
+            setMonthlyCreditsUsed(used);
+            setMonthlyCreditsResetAt(resetAt);
+          }
+        } catch {}
         toast.success('Login successful!');
         return true;
       } else {
@@ -109,6 +133,23 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   useEffect(() => {
     checkAuth();
+    // If already authenticated on app init, fetch /auth/me
+    (async () => {
+      const token = getToken();
+      const userData = getUser();
+      if (token && userData) {
+        try {
+          const meRes = await authenticatedFetch(API_URLS.ME_URL, { method: 'GET' });
+          if (meRes.ok) {
+            const me = await meRes.json();
+            setPlan(me?.data?.plan ?? null);
+            setMonthlyCreditsLimit(me?.data?.monthly_credits_limit ?? null);
+            setMonthlyCreditsUsed(me?.data?.monthly_credits_used ?? null);
+            setMonthlyCreditsResetAt(me?.data?.monthly_credits_reset_at ?? null);
+          }
+        } catch {}
+      }
+    })();
   }, []);
 
   const value: AuthContextType = {
@@ -118,6 +159,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     login,
     logout,
     checkAuth,
+    plan,
+    monthlyCreditsLimit,
+    monthlyCreditsUsed,
+    monthlyCreditsResetAt,
+    setCreditsFromServer: (credits) => {
+      setMonthlyCreditsLimit(credits.limit);
+      setMonthlyCreditsUsed(credits.used);
+      setMonthlyCreditsResetAt(credits.reset_at);
+    },
   };
 
   return (

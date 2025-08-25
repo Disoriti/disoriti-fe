@@ -17,7 +17,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { API_URLS } from "@/lib/api";
-import { getToken } from "@/lib/auth";
+import { authenticatedFetch, isUnauthorizedError } from "@/lib/auth";
 import { useAuth } from "@/contexts/auth-context";
 import { toast } from "sonner";
 
@@ -39,7 +39,7 @@ function AiContentPageInner() {
   const [isGeneratingContent, setIsGeneratingContent] = useState(false);
   const [generatedContent, setGeneratedContent] = useState<{heading: string, subheading: string, cta: string} | null>(null);
   const router = useRouter();
-  const { logout } = useAuth();
+  const { monthlyCreditsLimit, monthlyCreditsUsed } = useAuth();
   
   // Safely get search params with fallbacks
   const searchParams = useSearchParams();
@@ -70,13 +70,11 @@ function AiContentPageInner() {
     setIsGeneratingContent(true);
     
     try {
-      const token = getToken();
-      if (!token) {
-        toast.error('Authentication required');
+      // Optional pre-check for content generation credits if same pool applies; if only images consume, remove this
+      if (typeof monthlyCreditsLimit === 'number' && typeof monthlyCreditsUsed === 'number' && monthlyCreditsUsed >= monthlyCreditsLimit) {
         setIsGeneratingContent(false);
         return;
       }
-
       // Use the enhanced prompt from localStorage
       const promptToUse = enhanced || prompt;
       if (!promptToUse) {
@@ -102,23 +100,14 @@ function AiContentPageInner() {
         return;
       }
 
-      const response = await fetch(url, {
+      const response = await authenticatedFetch(url, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
         },
       });
 
       if (!response.ok) {
-        // Handle 401 Unauthorized - redirect to login
-        if (response.status === 401) {
-          toast.error('Session expired. Please log in again.');
-          // Clear authentication and redirect to login
-          logout();
-          return;
-        }
-
         const errorData = await response.json();
         // Show the message field as the primary error message
         const errorMessage = errorData.message || 'Failed to generate content';
@@ -149,7 +138,9 @@ function AiContentPageInner() {
       }
     } catch (error) {
       console.error('Generate content error:', error);
-      toast.error('Network or server error');
+      if (!isUnauthorizedError(error)) {
+        toast.error('Network or server error');
+      }
       setIsGeneratingContent(false);
     }
   };
