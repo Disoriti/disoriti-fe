@@ -1,6 +1,8 @@
 import { useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { authenticatedFetch } from '@/lib/auth';
+import { buildApiUrl } from '@/lib/api';
+import type { ApiResponse, DisoritiLayout, SceneDigest } from '@/lib/vision-layout-types';
 
 interface UseApiOptions {
   onSuccess?: (data: any) => void;
@@ -60,5 +62,16 @@ export const useApi = (options: UseApiOptions = {}) => {
     loading,
     error,
     clearError: () => setError(null),
+    generateLayout: async (file: File, payload: Record<string, any> = {}) => {
+      const form = new FormData();
+      form.append('image', file);
+      Object.entries(payload).forEach(([k, v]) => form.append(k, String(v)));
+      const url = buildApiUrl('/layout/generate');
+      const res = await authenticatedFetch(url, { method: 'POST', body: form, headers: {} });
+      if (!res.ok) return null;
+      const data = (await res.json()) as ApiResponse<DisoritiLayout>;
+      options.onSuccess?.(data);
+      return data as ApiResponse<DisoritiLayout> & { scene_digest: SceneDigest };
+    }
   };
 }; 

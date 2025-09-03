@@ -13,6 +13,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { useState, useEffect, Suspense } from "react";
+import VisionLayoutRenderer from "@/components/VisionLayoutRenderer";
+import type { DisoritiLayout, SceneDigest } from "@/lib/vision-layout-types";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Sparkles, Wand2, ArrowRight, Loader2 } from "lucide-react";
 import NavigationButtons from "@/components/navigation-buttons";
@@ -33,6 +35,10 @@ function EnhancePromptPageInner() {
   const maxCredits = 5;
   const router = useRouter();
   const { logout } = useAuth();
+  // Vision layout demo state (placeholder integration point)
+  const [visionLayout, setVisionLayout] = useState<DisoritiLayout | null>(null);
+  const [sceneDigest, setSceneDigest] = useState<SceneDigest | null>(null);
+  const [imageUrl, setImageUrl] = useState<string>("/image.png");
   
   // Safely get search params with fallbacks
   const searchParams = useSearchParams();
@@ -420,6 +426,20 @@ function EnhancePromptPageInner() {
           </div>
         )}
       </div>
+
+      {/* Example Vision Layout Preview (only renders if layout present) */}
+      {visionLayout && sceneDigest && (
+        <div className="max-w-3xl mx-auto">
+          <VisionLayoutRenderer
+            imageUrl={imageUrl}
+            layout={visionLayout}
+            scene={sceneDigest}
+            showSafeArea
+            debugOutlineOverflow
+            className="w-full"
+          />
+        </div>
+      )}
 
       {/* Navigation */}
       <NavigationButtons
