@@ -93,128 +93,7 @@ const EnhancedSlider = ({
   );
 };
 
-// Image Drop Zone Component
-const ImageDropZone = ({ onImageSelect }: { onImageSelect?: (file: File) => void }) => {
-  const [isDragOver, setIsDragOver] = useState(false);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const fileInputRef = React.useRef<HTMLInputElement>(null);
-
-  const handleFile = (file: File) => {
-    if (file && file.type.startsWith('image/')) {
-      onImageSelect?.(file);
-      // Create preview URL
-      const url = URL.createObjectURL(file);
-      setPreviewUrl(url);
-    }
-  };
-
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragOver(true);
-  };
-
-  const handleDragLeave = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragOver(false);
-  };
-
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragOver(false);
-    const files = e.dataTransfer.files;
-    if (files.length > 0) {
-      handleFile(files[0]);
-    }
-  };
-
-  const handleFileInput = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (files && files.length > 0) {
-      handleFile(files[0]);
-    }
-  };
-
-  const handleClick = () => {
-    fileInputRef.current?.click();
-  };
-
-  return (
-    <div className="space-y-3">
-      <div
-        className={`relative border-2 border-dashed rounded-lg p-6 transition-all duration-200 cursor-pointer group ${
-          isDragOver 
-            ? 'border-primary bg-primary/5 scale-105' 
-            : 'border-muted-foreground/25 hover:border-primary/50 hover:bg-muted/50'
-        }`}
-        onDragOver={handleDragOver}
-        onDragLeave={handleDragLeave}
-        onDrop={handleDrop}
-        onClick={handleClick}
-      >
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept="image/*"
-          onChange={handleFileInput}
-          className="hidden"
-        />
-        
-        <div className="flex flex-col items-center justify-center space-y-3 text-center">
-          <div className={`p-3 rounded-full transition-colors ${
-            isDragOver ? 'bg-primary/10' : 'bg-muted'
-          }`}>
-            <ImageIcon className={`w-6 h-6 transition-colors ${
-              isDragOver ? 'text-primary' : 'text-muted-foreground'
-            }`} />
-          </div>
-          
-          <div className="space-y-1">
-            <p className={`text-sm font-medium transition-colors ${
-              isDragOver ? 'text-primary' : 'text-foreground'
-            }`}>
-              {isDragOver ? 'Drop your image here' : 'Click to upload or drag and drop'}
-            </p>
-            <p className="text-xs text-muted-foreground">
-              PNG, JPG, GIF up to 10MB
-            </p>
-          </div>
-        </div>
-
-        {/* Preview */}
-        {previewUrl && (
-          <div className="absolute inset-0 bg-background/95 backdrop-blur-sm rounded-lg flex items-center justify-center">
-            <div className="text-center space-y-2">
-              <img 
-                src={previewUrl} 
-                alt="Preview" 
-                className="w-16 h-16 object-cover rounded border"
-              />
-              <p className="text-xs text-muted-foreground">Image selected</p>
-            </div>
-          </div>
-        )}
-      </div>
-      
-      {/* Alternative upload button */}
-      <div className="flex items-center gap-2">
-        {previewUrl && (
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={() => {
-              setPreviewUrl(null);
-              if (fileInputRef.current) fileInputRef.current.value = '';
-            }}
-            className="text-destructive hover:text-destructive"
-          >
-            Clear
-          </Button>
-        )}
-      </div>
-    </div>
-  );
-};
+// Image upload UI removed per requirements
 type ElementType = "heading" | "subheading" | "cta";
 
 const ColorInput = ({ label, value, opacity, onColorChange, onOpacityChange, icon: Icon }: { label: string, value: string, opacity: number, onColorChange: (val: string) => void, onOpacityChange: (val: number) => void, icon: React.ElementType }) => {
@@ -307,6 +186,25 @@ const AdLayoutControls: React.FC<AdLayoutControlsProps> = ({ elements, selected,
             <div className="text-center text-muted-foreground py-6">
               <p>Select an element or logo on the ad to edit its properties.</p>
             </div>
+            {/* Logo uploader always available */}
+            <div className="space-y-2">
+              <Label className="flex items-center gap-2 text-sm font-medium text-muted-foreground"><ImageIcon className="w-4 h-4" /> Upload Logo</Label>
+              <div className="flex items-center gap-3">
+                <label className="inline-flex items-center px-3 py-2 bg-primary text-primary-foreground rounded cursor-pointer hover:bg-primary/90 transition-colors">
+                  <ImageIcon className="w-4 h-4 mr-2" />
+                  Choose Image
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={e => { if (e.target.files?.[0]) onLogoReplace?.(e.target.files[0]); }}
+                  />
+                </label>
+                {logoImage && (
+                  <img src={logoImage} alt="Logo preview" className="w-10 h-10 object-contain border rounded bg-white" />
+                )}
+              </div>
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -352,74 +250,6 @@ const AdLayoutControls: React.FC<AdLayoutControlsProps> = ({ elements, selected,
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="space-y-3">
-              <Label className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-                <Palette className="w-4 h-4" />
-                Logo Color
-              </Label>
-              
-              {/* Color Presets */}
-              <div className="space-y-2">
-                <p className="text-xs text-muted-foreground">Quick Colors</p>
-                <div className="grid grid-cols-6 gap-2">
-                  {['#ffffff', '#000000', '#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#06b6d4', '#84cc16', '#f97316', '#6366f1'].map((color) => (
-                    <button
-                      key={color}
-                      onClick={() => onLogoColorChange?.(color)}
-                      className={`w-8 h-8 rounded-lg border-2 transition-all duration-200 hover:scale-110 ${
-                        (logoColor || "#ffffff") === color 
-                          ? 'border-primary ring-2 ring-primary/20' 
-                          : 'border-border hover:border-primary/50'
-                      }`}
-                      style={{ backgroundColor: color }}
-                      title={color}
-                    />
-                  ))}
-                </div>
-              </div>
-
-              {/* Custom Color Picker */}
-              <div className="space-y-2">
-                <p className="text-xs text-muted-foreground">Custom Color</p>
-                <div className="flex items-center gap-3">
-                  <div className="relative">
-                    <input
-                      type="color"
-                      value={logoColor || "#ffffff"}
-                      onChange={e => onLogoColorChange?.(e.target.value)}
-                      className="w-12 h-12 rounded-lg border-2 border-border bg-background cursor-pointer transition-all duration-200 hover:border-primary/50 hover:scale-105"
-                      style={{ padding: 0 }}
-                    />
-                    <div className="absolute inset-0 rounded-lg border-2 border-white/20 pointer-events-none" />
-                  </div>
-                  
-                  <div className="flex-1">
-                    <Input
-                      type="text"
-                      value={logoColor || "#ffffff"}
-                      onChange={e => onLogoColorChange?.(e.target.value)}
-                      className="font-mono text-sm"
-                      placeholder="#ffffff"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Color Preview */}
-              <div className="space-y-2">
-                <p className="text-xs text-muted-foreground">Preview</p>
-                <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
-                  <div 
-                    className="w-8 h-8 rounded-lg border-2 border-border shadow-sm"
-                    style={{ backgroundColor: logoColor || "#ffffff" }}
-                  />
-                  <div className="flex-1">
-                    <p className="text-sm font-medium">Logo Color</p>
-                    <p className="text-xs text-muted-foreground font-mono">{logoColor || "#ffffff"}</p>
-                  </div>
-                </div>
-              </div>
-            </div>
             <div>
               <Label className="flex items-center gap-2 text-sm font-medium text-muted-foreground mt-2"><ImageIcon className="w-4 h-4" /> Change Logo</Label>
               <div className="flex items-center gap-3 mt-2">
@@ -490,10 +320,6 @@ const AdLayoutControls: React.FC<AdLayoutControlsProps> = ({ elements, selected,
                 icon={Palette}
                 unit="%"
               />
-              <div className="space-y-2">
-                <Label className="flex items-center gap-2 text-sm font-medium text-muted-foreground"><ImageIcon className="w-4 h-4" /> Replace Image</Label>
-                <ImageDropZone onImageSelect={onImageReplace} />
-              </div>
             </AccordionContent>
           </AccordionItem>
           <AccordionItem value="color">

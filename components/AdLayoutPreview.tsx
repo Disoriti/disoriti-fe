@@ -41,6 +41,7 @@ const AdLayoutPreview: React.FC<AdLayoutPreviewProps> = ({ imageUrl, layout, wid
       }}
     >
       {elements.map(({ key, data }) => {
+        if ((data as any)?.hidden) return null;
         // Match AdLayoutSVG background opacity logic
         const isCTA = key === 'cta';
         const bgOpacity = isCTA ? (data.styling.background_opacity ?? 1) : (data.styling.background_opacity ?? 0);
@@ -85,48 +86,23 @@ const AdLayoutPreview: React.FC<AdLayoutPreviewProps> = ({ imageUrl, layout, wid
       })}
       {/* Logo/Watermark */}
       {(() => {
-        if (!logoBbox) return null;
-        if (logoImage) {
-          return (
-            <img
-              src={logoImage}
-              alt="Logo"
-              style={{
-                position: 'absolute',
-                left: logoBbox.x * (width / 1080),
-                top: logoBbox.y * (height / 1080),
-                width: logoBbox.width * (width / 1080),
-                height: logoBbox.height * (width / 1080),
-                objectFit: 'contain',
-                zIndex: 10,
-                pointerEvents: 'none',
-                background: 'transparent',
-              }}
-            />
-          );
-        }
+        if (!logoBbox || !logoImage) return null;
         return (
-          <div
+          <img
+            src={logoImage}
+            alt="Logo"
             style={{
               position: 'absolute',
               left: logoBbox.x * (width / 1080),
               top: logoBbox.y * (height / 1080),
               width: logoBbox.width * (width / 1080),
               height: logoBbox.height * (width / 1080),
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontFamily: 'Montserrat, Poppins, Lato, Arial',
-              fontWeight: 700,
-              fontSize: Math.min(logoBbox.width * (width / 1080) * 0.3, 24),
-              color: logoColor || '#fff',
-              letterSpacing: 1,
+              objectFit: 'contain',
               zIndex: 10,
               pointerEvents: 'none',
+              background: 'transparent',
             }}
-          >
-            Disoriti
-          </div>
+          />
         );
       })()}
     </div>

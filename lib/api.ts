@@ -14,7 +14,7 @@ export const getApiBaseUrl = (): string => {
     if (process.env.NEXT_PUBLIC_API_BASE_URL) {
       return process.env.NEXT_PUBLIC_API_BASE_URL;
     }
-    return 'https://disoriti-be.onrender.com';
+    return 'https://disoriti-be-567480759953.europe-west1.run.app/';
   }
 
   if (env === 'development') {

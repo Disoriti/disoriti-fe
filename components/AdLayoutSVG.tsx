@@ -53,6 +53,7 @@ export interface ElementData {
   bbox: { x: number; y: number; width: number; height: number };
   styling: Styling;
   text_content: string;
+  hidden?: boolean;
 }
 
 export interface Layout {
@@ -300,6 +301,7 @@ const AdLayoutSVG: React.FC<AdLayoutSVGProps> = ({ imageUrl, layout, width = 108
       />
       {(['heading', 'subheading', 'cta'] as ElementType[]).map((type) => {
         const el = layout.elements[type];
+        if (el?.hidden) return null;
         const isSelected = type === selected;
         const bgOpacity = type === 'cta' ? (el.styling.background_opacity ?? 1) : (el.styling.background_opacity ?? 0);
         return (
@@ -316,6 +318,8 @@ const AdLayoutSVG: React.FC<AdLayoutSVGProps> = ({ imageUrl, layout, width = 108
               width: el.bbox.width * (width / 1080),
               height: el.bbox.height * (height / 1080),
               padding: '8px 16px',
+              paddingTop: 10,
+              paddingRight: 28,
               fontSize: el.styling.font_size * (width / 1080),
               fontWeight: el.styling.font_weight,
               color: el.styling.color,
@@ -350,6 +354,42 @@ const AdLayoutSVG: React.FC<AdLayoutSVGProps> = ({ imageUrl, layout, width = 108
               }
             }}
           >
+            {!pointerEventsNone && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  const newElements = {
+                    ...layout.elements,
+                    [type]: {
+                      ...el,
+                      hidden: true,
+                    },
+                  };
+                  onElementsChange?.(newElements);
+                }}
+                style={{
+                  position: 'absolute',
+                  top: 4,
+                  right: 4,
+                  width: 22,
+                  height: 22,
+                  borderRadius: '50%',
+                  background: '#ef4444',
+                  color: '#fff',
+                  border: 'none',
+                  fontSize: 12,
+                  lineHeight: '22px',
+                  textAlign: 'center',
+                  cursor: 'pointer',
+                  zIndex: 11,
+                  boxShadow: '0 1px 4px rgba(0,0,0,0.2)'
+                }}
+                aria-label={`Remove ${type}`}
+                title={`Remove ${type}`}
+              >
+                ×
+              </button>
+            )}
             {editingType === type ? (
               <textarea
                 autoFocus
@@ -472,25 +512,7 @@ const AdLayoutSVG: React.FC<AdLayoutSVGProps> = ({ imageUrl, layout, width = 108
                 background: 'transparent',
               }}
             />
-          ) : (
-            <div
-              style={{
-                width: '100%',
-                height: '100%',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontFamily: 'Montserrat, Poppins, Lato, Arial',
-                fontWeight: 700,
-                fontSize: Math.min((logoBbox?.width || 80) * (width / 1080) * 0.3, 24),
-                color: logoColor || '#fff',
-                letterSpacing: 1,
-                background: 'transparent',
-              }}
-            >
-              Disoriti
-            </div>
-          )}
+          ) : null}
           {selectedLogo && !pointerEventsNone && (
             <div
               style={{

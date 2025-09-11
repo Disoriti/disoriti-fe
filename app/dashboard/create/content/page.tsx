@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/breadcrumb";
 import { useEffect, useState, useRef, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Sparkles, Pencil, Bot, Download, ChevronLeft, Save } from "lucide-react";
+import { Sparkles, Pencil, Bot, Download, ChevronLeft, Save, Undo2, Redo2 } from "lucide-react";
 import AdGenerationLoader from "@/components/ad-generation-loader";
 import NavigationButtons from "@/components/navigation-buttons";
 import AdLayoutSVG from "@/components/AdLayoutSVG";
@@ -130,10 +130,12 @@ function ContentPageInner() {
   const [imageEdits, setImageEdits] = useState({ brightness: 100, contrast: 100, saturation: 100 });
   const [logoPosition, setLogoPosition] = useState<'top-left' | 'top-right' | 'bottom-left' | 'bottom-right'>('top-left');
   const [logoColor, setLogoColor] = useState<string>("#ffffff");
-  const [logoImage, setLogoImage] = useState<string | null>(null);
+  const [logoImage, setLogoImage] = useState<string | null>("/logo-primary.png");
   const [logoBbox, setLogoBbox] = useState({ x: 24, y: 24, width: 80, height: 80 });
   const [selectedLogo, setSelectedLogo] = useState<boolean>(false);
   const [showGrid, setShowGrid] = useState<boolean>(false);
+  const [history, setHistory] = useState<any[]>([]);
+  const [future, setFuture] = useState<any[]>([]);
   const [isGeneratingContent, setIsGeneratingContent] = useState(false);
   const [generatedContent, setGeneratedContent] = useState<{heading: string, subheading: string, cta: string} | null>(null);
   const router = useRouter();
@@ -286,13 +288,52 @@ function ContentPageInner() {
     }
   };
 
+  const pushHistory = () => {
+    const snapshot = {
+      layouts: JSON.parse(JSON.stringify(layouts)),
+      selectedLayoutIdx,
+      logoBbox: JSON.parse(JSON.stringify(logoBbox)),
+      logoImage,
+    };
+    setHistory((h) => [...h, snapshot]);
+    setFuture([]);
+  };
+
+  const handleUndo = () => {
+    setHistory((h) => {
+      if (h.length === 0) return h;
+      const prev = h[h.length - 1];
+      setFuture((f) => [...f, { layouts, selectedLayoutIdx, logoBbox, logoImage }]);
+      setLayouts(prev.layouts);
+      setSelectedLayoutIdx(prev.selectedLayoutIdx);
+      setLogoBbox(prev.logoBbox);
+      setLogoImage(prev.logoImage);
+      return h.slice(0, -1);
+    });
+  };
+
+  const handleRedo = () => {
+    setFuture((f) => {
+      if (f.length === 0) return f;
+      const next = f[f.length - 1];
+      setHistory((h) => [...h, { layouts, selectedLayoutIdx, logoBbox, logoImage }]);
+      setLayouts(next.layouts);
+      setSelectedLayoutIdx(next.selectedLayoutIdx);
+      setLogoBbox(next.logoBbox);
+      setLogoImage(next.logoImage);
+      return f.slice(0, -1);
+    });
+  };
+
   const handleLayoutChange = (newLayout: Layout, index: number) => {
+    pushHistory();
     const newLayouts = [...layouts];
     newLayouts[index] = newLayout;
     setLayouts(newLayouts);
   };
 
   const handleStyleChange = (type: "heading" | "subheading" | "cta", key: keyof Styling, value: string | number) => {
+    pushHistory();
     const newLayouts = [...layouts];
     const newLayout = { ...newLayouts[selectedLayoutIdx] };
     (newLayout.elements[type].styling as any)[key] = value;
@@ -301,6 +342,7 @@ function ContentPageInner() {
   };
 
   const handleElementChange = (newElements: { heading: ElementData; subheading: ElementData; cta: ElementData }) => {
+    pushHistory();
     const newLayouts = [...layouts];
     newLayouts[selectedLayoutIdx].elements = newElements;
     setLayouts(newLayouts);
@@ -430,9 +472,9 @@ function ContentPageInner() {
 
       {generatedImage ? (
         <div className="w-full max-w-[1700px] mx-auto flex-1">
-          <div className="bg-background p-6 rounded-2xl border border-border shadow-lg flex flex-row gap-6 items-start justify-center">
+          <div className="bg-background p-4 rounded-2xl border border-border shadow-lg flex flex-row gap-4 items-start justify-center">
             {/* Tiles on the left (catalogue) */}
-            <div className="flex flex-col gap-4 items-center w-[180px] flex-shrink-0">
+            <div className="flex flex-col gap-4 items-center w-[160px] flex-shrink-0">
               <h3 className="font-semibold text-lg text-foreground mb-2 pt-1 w-full">Layouts</h3>
               <div className="flex flex-col gap-4 items-center w-full">
                 {[1, 2, 3].map((number, idx) => (
@@ -441,8 +483,8 @@ function ContentPageInner() {
                     className={`rounded-lg border-2 cursor-pointer transition-all duration-300 transform hover:scale-105 ${selectedLayoutIdx === idx ? "border-primary shadow-primary/50 shadow-lg" : "border-border"}`}
                     style={{ 
                       background: "linear-gradient(135deg, rgba(0,0,0,0.8) 0%, rgba(20,20,20,0.9) 100%)", 
-                      width: 160, 
-                      height: 160, 
+                      width: 150, 
+                      height: 150, 
                       overflow: "hidden",
                       position: "relative"
                     }}
@@ -506,7 +548,7 @@ function ContentPageInner() {
             
             {/* Main display area (center) */}
             <div className="flex-1 flex flex-col items-center justify-start gap-4">
-              <div ref={previewRef} className="w-full max-w-[700px] aspect-square bg-background/50 rounded-lg border border-primary/40 shadow-[0_0_20px_4px_hsl(var(--primary)/0.5)] overflow-hidden"
+              <div ref={previewRef} className="w-full max-w-[640px] aspect-square bg-background/50 rounded-lg border border-primary/40 shadow-[0_0_20px_4px_hsl(var(--primary)/0.5)] overflow-hidden"
                 onClick={e => {
                   if (e.target === e.currentTarget) {
                     setSelectedElement(null);
@@ -517,8 +559,8 @@ function ContentPageInner() {
                 <AdLayoutSVG
                   imageUrl={generatedImage || "/image.png"}
                   layout={layouts[selectedLayoutIdx]}
-                  width={700}
-                  height={700}
+                  width={640}
+                  height={640}
                   selected={selectedElement}
                   onSelectElement={setSelectedElement}
                   onElementsChange={handleElementChange}
@@ -538,8 +580,8 @@ function ContentPageInner() {
                   <AdLayoutPreview
                     imageUrl={generatedImage || ""}
                     layout={layouts[selectedLayoutIdx]}
-                    width={700}
-                    height={700}
+                    width={640}
+                    height={640}
                     logoImage={logoImage}
                     logoPosition={logoPosition}
                     logoColor={logoColor}
@@ -548,19 +590,29 @@ function ContentPageInner() {
                   />
                 </div>
               </div>
-              <div className="w-full max-w-[700px]">
-                <NavigationButtons
-                  onPrevious={() => setGeneratedImage(null)}
-                  onNext={handleDownload}
-                  nextLabel={<><Save className="w-4 h-4 mr-2" />Save</>}
-                />
+              <div className="w-full max-w-[640px]">
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-2">
+                    <Button variant="outline" size="icon" className="text-white hover:text-white" onClick={handleUndo} disabled={history.length === 0} aria-label="Undo">
+                      <Undo2 className="w-4 h-4" />
+                    </Button>
+                    <Button variant="outline" size="icon" className="text-white hover:text-white" onClick={handleRedo} disabled={future.length === 0} aria-label="Redo">
+                      <Redo2 className="w-4 h-4" />
+                    </Button>
+                  </div>
+                  <NavigationButtons
+                    onPrevious={() => setGeneratedImage(null)}
+                    onNext={handleDownload}
+                    nextLabel={<><Save className="w-4 h-4 mr-2" />Save</>}
+                  />
+                </div>
               </div>
             </div>
 
             <div className="w-px bg-border self-stretch my-4" />
 
             {/* Controls on the right */}
-            <div className="w-[320px] flex-shrink-0">
+            <div className="w-[300px] flex-shrink-0">
               <AdLayoutControls
                 elements={layouts[selectedLayoutIdx].elements}
                 selected={selectedElement}

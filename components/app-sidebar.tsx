@@ -11,7 +11,8 @@ import {
   SquareTerminal,
   LayoutDashboard,
   MessageSquare,
-  Calendar
+  Calendar,
+  CreditCard
 } from "lucide-react"
 
 import { NavMain } from "@/components/nav-main"
@@ -70,6 +71,11 @@ const data = {
       title: "Settings",
       url: "/dashboard/settings",
       icon: Settings2,
+    },
+    {
+      title: "Pricing",
+      url: "/pricing",
+      icon: CreditCard,
     },
   ],
 
