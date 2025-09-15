@@ -22,11 +22,11 @@ export const getApiBaseUrl = (): string => {
     if (
       typeof window !== 'undefined' &&
       process.env.NEXT_PUBLIC_API_BASE_URL &&
-      process.env.NEXT_PUBLIC_API_BASE_URL !== 'http://127.0.0.1:8000'
+      process.env.NEXT_PUBLIC_API_BASE_URL !== 'http://127.0.0.1:8080'
     ) {
-      console.warn('Ignoring NEXT_PUBLIC_API_BASE_URL in development. Using http://127.0.0.1:8000');
+      console.warn('Ignoring NEXT_PUBLIC_API_BASE_URL in development. Using http://127.0.0.1:8080');
     }
-    return process.env.NEXT_PUBLIC_API_BASE_URL_DEV || 'http://127.0.0.1:8000';
+    return process.env.NEXT_PUBLIC_API_BASE_URL_DEV || 'http://127.0.0.1:8080';
   }
 
   // test
@@ -60,8 +60,10 @@ export const buildApiUrl = (endpoint: string): string => {
   const config = getApiConfig();
   
   // Ensure we have a valid API base URL
-  const baseUrl = config.API_BASE_URL || 'http://127.0.0.1:8000';
-  const url = `${baseUrl}/api/${config.API_VERSION}${endpoint}`;
+  const baseUrl = config.API_BASE_URL || 'http://127.0.0.1:8080';
+  const trimmedBase = baseUrl.replace(/\/+$/, '');
+  const path = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
+  const url = `${trimmedBase}${path}`;
   
   // Debug logging in development
   if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {

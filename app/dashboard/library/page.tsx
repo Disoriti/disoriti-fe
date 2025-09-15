@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Folder, Download, Eye, BadgeCheckIcon, Calendar, FileImage } from "lucide-react";
 import AdGenerationLoader from "@/components/ad-generation-loader";
 
@@ -68,7 +68,7 @@ const mockAds: Ad[] = [
 function SkeletonCard() {
   return (
     <Card className="shadow-lg rounded-xl border border-border/40 overflow-hidden">
-      <div className="aspect-w-16 aspect-h-9 bg-muted/20">
+      <div className="bg-muted/20" style={{ aspectRatio: "4 / 5" }}>
         <Skeleton className="w-full h-full" />
       </div>
       <CardContent className="p-4">
@@ -86,6 +86,114 @@ function SkeletonCard() {
         </div>
       </CardContent>
     </Card>
+  );
+}
+
+function MasonryGallery({ ads }: { ads: Ad[] }) {
+  const itemRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  const tickingRef = useRef(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (tickingRef.current) return;
+      tickingRef.current = true;
+      requestAnimationFrame(() => {
+        const viewportCenterY = window.innerHeight / 2;
+        const maxDistance = Math.max(window.innerHeight, 1);
+
+        Object.values(itemRefs.current).forEach((el) => {
+          if (!el) return;
+          const rect = el.getBoundingClientRect();
+          const itemCenterY = rect.top + rect.height / 2;
+          const distanceY = Math.abs(itemCenterY - viewportCenterY);
+          const distanceRatio = Math.min(distanceY / maxDistance, 1);
+          const scale = 1.08 - distanceRatio * 0.18; // 1.08 -> 0.90
+          const translateY = (distanceRatio - 0.5) * 10; // subtle parallax
+          const elevation = Math.round((scale - 0.9) * 100);
+
+          el.style.transform = `translateY(${translateY}px) scale(${scale.toFixed(3)})`;
+          el.style.zIndex = String(10 + elevation);
+          el.style.transition = "transform 120ms ease-out";
+        });
+
+        tickingRef.current = false;
+      });
+    };
+
+    handleScroll();
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    window.addEventListener("resize", handleScroll);
+    return () => {
+      window.removeEventListener("scroll", handleScroll as EventListener);
+      window.removeEventListener("resize", handleScroll as EventListener);
+    };
+  }, []);
+
+  const getAspect = (index: number) => {
+    const pattern = index % 6;
+    if (pattern === 0) return "4 / 5"; // portrait
+    if (pattern === 1) return "1 / 1"; // square
+    if (pattern === 2) return "16 / 9"; // landscape
+    if (pattern === 3) return "3 / 4"; // portrait
+    if (pattern === 4) return "1 / 1"; // square
+    return "5 / 4"; // slightly wide
+  };
+
+  return (
+    <div className="columns-1 sm:columns-2 lg:columns-3 gap-4">
+      {ads.map((ad, index) => (
+        <div
+          key={ad.id}
+          ref={(node) => {
+            itemRefs.current[ad.id] = node;
+          }}
+          className="group mb-4 break-inside-avoid relative will-change-transform"
+        >
+          <Card className="overflow-hidden border border-border/40 rounded-2xl shadow-sm transition-shadow duration-200 group-hover:shadow-xl">
+            <div className="relative bg-muted/20" style={{ aspectRatio: getAspect(index) }}>
+              {ad.media === "video" ? (
+                <video src={ad.previewUrl} className="w-full h-full object-cover" muted playsInline />
+              ) : (
+                <img src={ad.previewUrl} alt={ad.heading} className="w-full h-full object-cover" />
+              )}
+
+              <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-background/70 via-background/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
+
+              <div className="absolute inset-0 flex items-end p-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                <div className="w-full flex items-center justify-between gap-2">
+                  <div className="min-w-0">
+                    <div className="text-sm font-semibold truncate">
+                      {ad.heading}
+                    </div>
+                    <div className="mt-1 flex items-center gap-2">
+                      <Badge variant="secondary" className="bg-primary/15 text-primary border-primary/20">
+                        <BadgeCheckIcon className="w-3 h-3 mr-1" />
+                        {ad.platform}
+                      </Badge>
+                      <Badge variant="outline" className="text-xs">
+                        {ad.postType}
+                      </Badge>
+                    </div>
+                  </div>
+                  <div className="flex-shrink-0 flex items-center gap-2">
+                    <Button size="sm" variant="outline" className="h-8 px-3 pointer-events-auto border-primary/40 text-primary hover:bg-primary/10">
+                      <Eye className="w-3 h-3 mr-1" />
+                      View
+                    </Button>
+                    <Button size="sm" className="h-8 px-3 pointer-events-auto bg-primary text-primary-foreground hover:bg-primary/90">
+                      <Download className="w-3 h-3 mr-1" />
+                      Save
+                    </Button>
+                  </div>
+                </div>
+              </div>
+
+              <div className="absolute inset-0 ring-0 group-hover:ring-2 ring-primary/40 rounded-2xl transition-all duration-200" />
+            </div>
+          </Card>
+        </div>
+      ))}
+    </div>
   );
 }
 
@@ -200,47 +308,7 @@ export default function LibraryPage() {
           </CardContent>
         </Card>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {ads.map((ad) => (
-            <Card key={ad.id} className="shadow-lg rounded-xl border border-border/40 overflow-hidden hover:shadow-xl transition-shadow duration-200">
-              <div className="aspect-w-16 aspect-h-9 bg-muted/20">
-                {ad.media === "video" ? (
-                  <video src={ad.previewUrl} controls className="w-full h-full object-cover" />
-                ) : (
-                  <img src={ad.previewUrl} alt={ad.heading} className="w-full h-full object-cover" />
-                )}
-              </div>
-              <CardContent className="p-4">
-                <h3 className="text-lg font-semibold mb-3 line-clamp-2">{ad.heading}</h3>
-                <div className="flex items-center gap-2 mb-3 flex-wrap">
-                  <Badge variant="secondary" className="bg-blue-500/10 text-blue-700 dark:bg-blue-500/20 dark:text-blue-300">
-                    <BadgeCheckIcon className="w-3 h-3 mr-1" />
-                    {ad.platform}
-                  </Badge>
-                  <Badge variant="outline" className="text-xs">
-                    {ad.postType}
-                  </Badge>
-                </div>
-                <div className="flex justify-between items-center">
-                  <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                    <Calendar className="w-3 h-3" />
-                    <DateClient iso={ad.createdAt} />
-                  </div>
-                  <div className="flex gap-2">
-                    <Button size="sm" variant="outline" className="h-8 px-3">
-                      <Eye className="w-3 h-3 mr-1" />
-                      View
-                    </Button>
-                    <Button size="sm" className="h-8 px-3">
-                      <Download className="w-3 h-3 mr-1" />
-                      Download
-                    </Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+        <MasonryGallery ads={ads} />
       )}
     </div>
   );

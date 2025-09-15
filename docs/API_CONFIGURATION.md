@@ -22,19 +22,16 @@ lib/
 ## Environment Configuration
 
 ### Development
-- **API Base URL**: `http://127.0.0.1:8000`
-- **API Version**: `v1`
-- **Full URL Example**: `http://127.0.0.1:8000/api/v1/auth/login`
+- **API Base URL**: `http://127.0.0.1:8080`
+- **Full URL Example**: `http://127.0.0.1:8080/auth/login`
 
 ### Production
 - **API Base URL**: `https://api.disoriti.com` (or `NEXT_PUBLIC_API_BASE_URL` env var)
-- **API Version**: `v1`
-- **Full URL Example**: `https://api.disoriti.com/api/v1/auth/login`
+- **Full URL Example**: `https://api.disoriti.com/auth/login`
 
 ### Test
 - **API Base URL**: `http://localhost:8000`
-- **API Version**: `v1`
-- **Full URL Example**: `http://localhost:8000/api/v1/auth/login`
+- **Full URL Example**: `http://localhost:8000/auth/login`
 
 ## Usage Examples
 
@@ -192,8 +189,8 @@ NEXT_PUBLIC_APP_ENV=production
 ### Development Environment Variables
 
 ```bash
-# API Configuration (optional, defaults to http://127.0.0.1:8000)
-NEXT_PUBLIC_API_BASE_URL=http://127.0.0.1:8000
+# API Configuration (optional, defaults to http://127.0.0.1:8080)
+NEXT_PUBLIC_API_BASE_URL=http://127.0.0.1:8080
 
 # Other environment variables
 NEXT_PUBLIC_APP_ENV=development
