@@ -83,6 +83,7 @@ export const API_ENDPOINTS = {
   AUTH: {
     LOGIN: '/auth/login',
     SIGNUP: '/auth/signup',
+    REGISTER: '/auth/register',
     LOGOUT: '/auth/logout',
     REFRESH: '/auth/refresh',
     VERIFY: '/auth/verify',
@@ -152,6 +153,13 @@ export const API_ENDPOINTS = {
     INVOICES: '/billing/invoices',
     PAYMENT_METHODS: '/billing/payment-methods',
   },
+
+  // Subscriptions
+  SUBSCRIPTIONS: {
+    PLANS: '/subscriptions/plans',
+    STATUS: '/subscriptions/status',
+    CHECKOUT: '/subscriptions/checkout',
+  },
 } as const;
 
 // Build full API URLs
@@ -159,6 +167,7 @@ export const API_URLS = {
   // Authentication URLs
   LOGIN_URL: buildApiUrl(API_ENDPOINTS.AUTH.LOGIN),
   SIGNUP_URL: buildApiUrl(API_ENDPOINTS.AUTH.SIGNUP),
+  REGISTER_URL: buildApiUrl(API_ENDPOINTS.AUTH.REGISTER),
   LOGOUT_URL: buildApiUrl(API_ENDPOINTS.AUTH.LOGOUT),
   REFRESH_URL: buildApiUrl(API_ENDPOINTS.AUTH.REFRESH),
   VERIFY_URL: buildApiUrl(API_ENDPOINTS.AUTH.VERIFY),
@@ -213,6 +222,11 @@ export const API_URLS = {
   SUBSCRIPTION_URL: buildApiUrl(API_ENDPOINTS.BILLING.SUBSCRIPTION),
   INVOICES_URL: buildApiUrl(API_ENDPOINTS.BILLING.INVOICES),
   PAYMENT_METHODS_URL: buildApiUrl(API_ENDPOINTS.BILLING.PAYMENT_METHODS),
+
+  // Subscription URLs
+  SUBSCRIPTION_PLANS_URL: buildApiUrl(API_ENDPOINTS.SUBSCRIPTIONS.PLANS),
+  SUBSCRIPTION_STATUS_URL: buildApiUrl(API_ENDPOINTS.SUBSCRIPTIONS.STATUS),
+  SUBSCRIPTION_CHECKOUT_URL: buildApiUrl(API_ENDPOINTS.SUBSCRIPTIONS.CHECKOUT),
 } as const;
 
 // Environment info

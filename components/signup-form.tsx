@@ -13,23 +13,23 @@ export function SignupForm({
   className,
   email,
   password,
-  username,
+  confirmPassword,
   loading,
   error,
   onEmailChange,
   onPasswordChange,
-  onUsernameChange,
+  onConfirmPasswordChange,
   onSubmit,
   ...props
 }: React.ComponentProps<"div"> & {
   email: string
   password: string
-  username: string
+  confirmPassword: string
   loading: boolean
   error: string
   onEmailChange: (e: React.ChangeEvent<HTMLInputElement>) => void
   onPasswordChange: (e: React.ChangeEvent<HTMLInputElement>) => void
-  onUsernameChange: (e: React.ChangeEvent<HTMLInputElement>) => void
+  onConfirmPasswordChange: (e: React.ChangeEvent<HTMLInputElement>) => void
   onSubmit: (e: React.FormEvent) => void
 }) {
   return (
@@ -73,17 +73,6 @@ export function SignupForm({
               />
             </div>
             <div className="grid gap-3">
-              <Label htmlFor="username">Username</Label>
-              <Input
-                id="username"
-                type="text"
-                placeholder="username"
-                required
-                value={username}
-                onChange={onUsernameChange}
-              />
-            </div>
-            <div className="grid gap-3">
               <Label htmlFor="password">Password</Label>
               <Input
                 id="password"
@@ -92,6 +81,17 @@ export function SignupForm({
                 required
                 value={password}
                 onChange={onPasswordChange}
+              />
+            </div>
+            <div className="grid gap-3">
+              <Label htmlFor="confirmPassword">Confirm Password</Label>
+              <Input
+                id="confirmPassword"
+                type="password"
+                placeholder="********"
+                required
+                value={confirmPassword}
+                onChange={onConfirmPasswordChange}
               />
             </div>
             <Button type="submit" className="w-full" disabled={loading}>

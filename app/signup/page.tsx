@@ -10,10 +10,10 @@ import { toast } from "sonner"
 export default function SignupPage() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
-  const [username, setUsername] = useState("")
+  const [confirmPassword, setConfirmPassword] = useState("")
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
-  const { isAuthenticated, logout } = useAuth()
+  const { isAuthenticated, register } = useAuth()
   const router = useRouter()
 
   // Redirect if already authenticated
@@ -27,45 +27,20 @@ export default function SignupPage() {
     e.preventDefault()
     setLoading(true)
     setError("")
-    try {
-      const res = await fetch(API_URLS.SIGNUP_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password, username }),
-      })
-      
-      if (!res.ok) {
-        const errorData = await res.json()
-        
-        // Handle 401 Unauthorized - redirect to login
-        if (res.status === 401) {
-          toast.error('Session expired. Please log in again.');
-          // Clear authentication and redirect to login
-          logout();
-          return;
-        }
-        
-        // Show the message field as the primary error message for other errors
-        const errorMessage = errorData.message || "Error in signing up"
-        toast.error(errorMessage)
-        return
-      }
-      
-      const result = await res.json()
-      const token = result.data?.access_token
-      if (!token) {
-        toast.error("No access token returned")
-        return
-      }
-      
-      toast.success("Signup successful! Please log in.")
-      router.push('/login')
-    } catch (err: any) {
-      toast.error("Network or server error")
-      setError(err.message)
-    } finally {
+    
+    // Validate passwords match
+    if (password !== confirmPassword) {
+      setError("Passwords do not match")
       setLoading(false)
+      return
     }
+    
+    const success = await register({ email, password })
+    if (success) {
+      router.push('/login')
+    }
+    
+    setLoading(false)
   }
 
   return (
@@ -74,12 +49,12 @@ export default function SignupPage() {
         <SignupForm
           email={email}
           password={password}
-          username={username}
+          confirmPassword={confirmPassword}
           loading={loading}
           error={error}
           onEmailChange={e => setEmail(e.target.value)}
           onPasswordChange={e => setPassword(e.target.value)}
-          onUsernameChange={e => setUsername(e.target.value)}
+          onConfirmPasswordChange={e => setConfirmPassword(e.target.value)}
           onSubmit={handleSubmit}
         />
       </div>

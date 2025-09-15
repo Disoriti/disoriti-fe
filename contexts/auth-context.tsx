@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { User, LoginCredentials, AuthResponse, getToken, setToken, removeToken, getUser, setUser, removeUser, logout as logoutUtil, authenticatedFetch } from '@/lib/auth';
+import { User, LoginCredentials, RegisterCredentials, RegisterResponse, AuthResponse, getToken, setToken, removeToken, getUser, setUser, removeUser, logout as logoutUtil, authenticatedFetch } from '@/lib/auth';
 import { API_URLS } from '@/lib/api';
 import { toast } from 'sonner';
 
@@ -11,6 +11,7 @@ interface AuthContextType {
   isAuthenticated: boolean;
   isLoading: boolean;
   login: (credentials: LoginCredentials) => Promise<boolean>;
+  register: (credentials: RegisterCredentials) => Promise<boolean>;
   logout: () => void;
   checkAuth: () => void;
   plan?: string | null;
@@ -124,6 +125,37 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
+  const register = async (credentials: RegisterCredentials): Promise<boolean> => {
+    try {
+      const response = await fetch(API_URLS.REGISTER_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(credentials),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        const errorMessage = errorData.message || 'Registration failed';
+        toast.error(errorMessage);
+        return false;
+      }
+
+      const data: RegisterResponse = await response.json();
+      
+      // Don't store user data or set authentication state after registration
+      // The user needs to log in separately to get an access token
+      
+      toast.success('Registration successful! Please log in to continue.');
+      return true;
+    } catch (error) {
+      console.error('Registration error:', error);
+      toast.error('Network or server error');
+      return false;
+    }
+  };
+
   const logout = () => {
     logoutUtil();
     clearAuth();
@@ -157,6 +189,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     isAuthenticated: !!user,
     isLoading,
     login,
+    register,
     logout,
     checkAuth,
     plan,

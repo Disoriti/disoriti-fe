@@ -5,7 +5,7 @@ import { useAuth } from "@/contexts/auth-context";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Check, Star } from "lucide-react";
+import { ArrowLeft, Check, Star } from "lucide-react";
 
 interface PricingPlan {
   name: string;
@@ -20,6 +20,22 @@ interface PricingPlan {
 }
 
 const pricingPlans: PricingPlan[] = [
+  {
+    name: "Free",
+    description: "Try out our platform with basic features",
+    monthlyPrice: 0,
+    yearlyPrice: 0,
+    monthlyLink: "",
+    yearlyLink: "",
+    features: [
+      "Up to 5 AI-generated ads per month",
+      "Basic templates and layouts",
+      "Community support",
+      "Standard export formats",
+      "Basic analytics",
+    ],
+    planId: "free",
+  },
   {
     name: "Essential",
     description: "Perfect for individuals and small teams getting started",
@@ -63,7 +79,7 @@ export default function PricingPage() {
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('monthly');
 
   const getCurrentPlanId = () => {
-    if (!plan) return null;
+    if (!plan) return 'free';
     return plan.toLowerCase();
   };
 
@@ -82,6 +98,16 @@ export default function PricingPage() {
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-16">
+        {/* Back Button */}
+        <div className="mb-8">
+          <Button asChild variant="outline" size="sm" className="hover:text-foreground">
+            <a href="/dashboard" className="flex items-center gap-2">
+              <ArrowLeft className="w-4 h-4" />
+              Back to Dashboard
+            </a>
+          </Button>
+        </div>
+
         {/* Header */}
         <div className="text-center mb-16">
           <h1 className="text-4xl font-bold text-foreground mb-4">
@@ -118,7 +144,7 @@ export default function PricingPage() {
         </div>
 
         {/* Pricing Cards */}
-        <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+        <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
           {pricingPlans.map((planData) => {
             const currentPrice = billingCycle === 'monthly' ? planData.monthlyPrice : planData.yearlyPrice;
             const currentLink = billingCycle === 'monthly' ? planData.monthlyLink : planData.yearlyLink;
@@ -190,24 +216,29 @@ export default function PricingPage() {
                 </CardContent>
 
                 <CardFooter className="pt-0">
-                  <Button 
-                    asChild 
-                    className={`w-full ${
-                      planData.popular 
-                        ? 'bg-primary hover:bg-primary/90' 
-                        : 'bg-secondary hover:bg-secondary/80'
-                    }`}
-                    disabled={isCurrent}
-                  >
-                    <a 
-                      href={currentLink} 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="w-full"
+                  {planData.planId === 'free' ? (
+                    <Button 
+                      className="w-full bg-secondary hover:bg-secondary/80"
+                      disabled={isCurrent}
                     >
-                      {isCurrent ? 'Current Plan' : `Get ${planData.name}`}
-                    </a>
-                  </Button>
+                      {isCurrent ? 'Current Plan' : 'Free Tier'}
+                    </Button>
+                  ) : (
+                    <Button 
+                      asChild 
+                      className="w-full bg-primary hover:bg-primary/90"
+                      disabled={isCurrent}
+                    >
+                      <a 
+                        href={currentLink} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="w-full"
+                      >
+                        {isCurrent ? 'Current Plan' : `Get ${planData.name}`}
+                      </a>
+                    </Button>
+                  )}
                 </CardFooter>
               </Card>
             );

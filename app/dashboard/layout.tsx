@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/sidebar"
 import { Separator } from "@/components/ui/separator"
 import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
 import { useAuth } from "@/contexts/auth-context"
 import CreditsIndicator from "@/components/ui/credits-indicator"
 import {
@@ -37,7 +38,11 @@ function DashboardHeader({ breadcrumb }: { breadcrumb: React.ReactNode }) {
         {breadcrumb}
       </div>
       <div className="flex items-center gap-3">
-        <Badge>{(plan || 'Free') + ' user'}</Badge>
+        <Button asChild variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground">
+          <a href="/account/subscription">
+            <Badge>{(plan || 'Free') + ' user'}</Badge>
+          </a>
+        </Button>
         <CreditsIndicator />
       </div>
     </header>

@@ -1,8 +1,12 @@
 export interface User {
-  id: number;
+  id: string;
   email: string;
   is_active: boolean;
   role: string;
+  plan?: string;
+  monthly_credits_limit?: number;
+  monthly_credits_used?: number;
+  monthly_credits_reset_at?: string;
 }
 
 export interface AuthResponse {
@@ -18,6 +22,22 @@ export interface AuthResponse {
 export interface LoginCredentials {
   email: string;
   password: string;
+}
+
+export interface RegisterCredentials {
+  email: string;
+  password: string;
+}
+
+export interface RegisterResponse {
+  email: string;
+  is_active: boolean;
+  role: string;
+  id: string;
+  plan: string;
+  monthly_credits_limit: number;
+  monthly_credits_used: number;
+  monthly_credits_reset_at: string;
 }
 
 // Token management
