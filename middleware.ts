@@ -5,8 +5,8 @@ export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
   // Public routes that don't require authentication
-  const publicRoutes = ['/login', '/signup']
-  const isPublicRoute = publicRoutes.includes(pathname)
+  const publicRoutes = ['/login', '/signup', '/landing']
+  const isPublicRoute = publicRoutes.includes(pathname) || pathname === '/'
 
   // For now, let the client-side authentication handle the redirects
   // since we're using localStorage for token storage
