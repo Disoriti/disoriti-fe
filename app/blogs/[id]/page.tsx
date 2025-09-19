@@ -138,14 +138,14 @@ export default function BlogPostPage() {
       {/* Grid Background */}
       <div className="absolute inset-0 w-full h-full bg-neon-grid"
         style={{
-          ['--grid-size' as any]: '160px',
-          ['--grid-line' as any]: '1px',
-          ['--grid-color' as any]: 'rgba(0, 255, 169, 0.10)',
+          '--grid-size': '160px',
+          '--grid-line': '1px',
+          '--grid-color': 'rgba(0, 255, 169, 0.10)',
           filter: 'none',
           position: 'absolute',
           minHeight: '100%',
           height: 'auto'
-        }}
+        } as React.CSSProperties}
       />
 
       <LandingNavbar />
