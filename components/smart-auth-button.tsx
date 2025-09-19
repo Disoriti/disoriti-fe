@@ -2,11 +2,12 @@
 
 import { useAuth } from "@/contexts/auth-context";
 import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
-import { ButtonProps } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { type VariantProps } from "class-variance-authority";
 
-interface SmartAuthButtonProps extends ButtonProps {
+interface SmartAuthButtonProps extends React.ComponentProps<"button">, VariantProps<typeof buttonVariants> {
   children: React.ReactNode;
+  asChild?: boolean;
 }
 
 export function SmartAuthButton({ children, ...props }: SmartAuthButtonProps) {
