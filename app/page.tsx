@@ -59,54 +59,54 @@ export default function LandingPage() {
 
       {/* Hero Section */}
       <section id="home" className="relative min-h-screen flex items-center">
-        <div className="container mx-auto px-6 pt-32 pb-16">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+        <div className="container mx-auto px-4 md:px-6 pt-20 md:pt-32 pb-8 md:pb-16">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-center">
             {/* Left Content */}
-            <div className="text-left space-y-8">
+            <div className="text-center md:text-left space-y-6 md:space-y-8">
               {/* Badge */}
-              <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 px-4 py-2 text-sm text-muted-foreground backdrop-blur-sm bg-background/30 animate-fade-in shadow-glow">
-                <Sparkles className="h-4 w-4 text-primary" />
+              <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 px-3 md:px-4 py-1.5 md:py-2 text-xs md:text-sm text-muted-foreground backdrop-blur-sm bg-background/30 animate-fade-in shadow-glow">
+                <Sparkles className="h-3 md:h-4 w-3 md:w-4 text-primary" />
                 Next-Gen AI Content Creation
               </div>
 
               {/* Headline */}
-              <h1 className="text-4xl md:text-6xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-primary via-accent to-primary bg-[length:200%] animate-gradient">
+              <h1 className="text-3xl sm:text-4xl md:text-6xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-primary via-accent to-primary bg-[length:200%] animate-gradient leading-tight">
                 Transform Ideas into
                 <br />
                 Digital Reality
               </h1>
 
               {/* Description */}
-              <p className="text-xl text-muted-foreground animate-fade-in">
+              <p className="text-lg md:text-xl text-muted-foreground animate-fade-in max-w-lg mx-auto md:mx-0">
                 Harness the power of AI to create stunning visuals and compelling content. 
                 Your creative companion for the digital age.
               </p>
 
               {/* CTA Buttons */}
-              <div className="flex flex-wrap gap-4 animate-fade-in">
+              <div className="flex flex-col sm:flex-row gap-3 md:gap-4 animate-fade-in justify-center md:justify-start">
                 <SmartAuthButton 
                   size="lg" 
-                  className="bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 text-primary-foreground shadow-glow-lg"
+                  className="bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 text-primary-foreground shadow-glow-lg w-full sm:w-auto"
                 >
                   Start Creating
                 </SmartAuthButton>
                 <Button 
                   size="lg" 
                   variant="outline" 
-                  className="backdrop-blur-sm bg-background/30 border-primary/20 shadow-glow-sm hover:bg-background/40"
+                  className="backdrop-blur-sm bg-background/30 border-primary/20 shadow-glow-sm hover:bg-background/40 w-full sm:w-auto"
                 >
                   Watch Demo
                 </Button>
               </div>
 
               {/* Feature Pills */}
-              <div className="flex flex-wrap gap-4 text-sm text-muted-foreground animate-fade-in">
-                <div className="flex items-center gap-2 rounded-full border border-primary/20 px-4 py-2 backdrop-blur-sm bg-background/30 shadow-glow-sm">
-                  <Bot className="h-4 w-4 text-primary" />
+              <div className="flex flex-wrap gap-2 md:gap-4 text-xs md:text-sm text-muted-foreground animate-fade-in justify-center md:justify-start">
+                <div className="flex items-center gap-1.5 md:gap-2 rounded-full border border-primary/20 px-3 md:px-4 py-1.5 md:py-2 backdrop-blur-sm bg-background/30 shadow-glow-sm">
+                  <Bot className="h-3 md:h-4 w-3 md:w-4 text-primary" />
                   AI-Powered Design
                 </div>
-                <div className="flex items-center gap-2 rounded-full border border-primary/20 px-4 py-2 backdrop-blur-sm bg-background/30 shadow-glow-sm">
-                  <Wand2 className="h-4 w-4 text-accent" />
+                <div className="flex items-center gap-1.5 md:gap-2 rounded-full border border-primary/20 px-3 md:px-4 py-1.5 md:py-2 backdrop-blur-sm bg-background/30 shadow-glow-sm">
+                  <Wand2 className="h-3 md:h-4 w-3 md:w-4 text-accent" />
                   One-Click Generation
                 </div>
               </div>
@@ -138,25 +138,25 @@ export default function LandingPage() {
       </section>
 
       {/* About Section */}
-      <section id="about" className="relative h-screen flex items-center">
-        <div className="container mx-auto px-6">
+      <section id="about" className="relative min-h-screen py-16 md:py-0 md:h-screen flex items-center">
+        <div className="container mx-auto px-4 md:px-6">
           {/* Vision Statement */}
-          <div className="max-w-4xl mx-auto text-center mb-12">
-            <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 px-4 py-2 text-sm text-muted-foreground backdrop-blur-sm bg-background/30 mb-4">
-              <Lightbulb className="h-4 w-4 text-primary" />
+          <div className="max-w-4xl mx-auto text-center mb-8 md:mb-12">
+            <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 px-3 md:px-4 py-1.5 md:py-2 text-xs md:text-sm text-muted-foreground backdrop-blur-sm bg-background/30 mb-4">
+              <Lightbulb className="h-3 md:h-4 w-3 md:w-4 text-primary" />
               Our Vision
             </div>
-            <h2 className="text-3xl md:text-4xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-primary via-accent to-primary">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-primary via-accent to-primary">
               Why Disoriti Exists
             </h2>
-            <p className="text-lg text-muted-foreground">
+            <p className="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto">
               At Disoriti, we believe creativity shouldn't be limited by tools. Our AI blends design intelligence with automation, helping businesses create stunning, ad-ready visuals in seconds.
             </p>
-        </div>
+          </div>
 
           {/* Journey/Story */}
-          <div className="max-w-6xl mx-auto mb-12">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="max-w-6xl mx-auto mb-8 md:mb-12">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
               {/* The Problem */}
               <div className="relative group">
                 <div className="absolute inset-0 bg-gradient-to-b from-primary/10 to-transparent rounded-2xl -z-10 group-hover:from-primary/20 transition-all duration-500" />
@@ -203,14 +203,14 @@ export default function LandingPage() {
 
           {/* Core Values */}
           <div className="max-w-6xl mx-auto">
-            <div className="text-center mb-8">
-              <h2 className="text-2xl md:text-3xl font-bold mb-2">Our Core Values</h2>
-              <p className="text-sm text-muted-foreground">
+            <div className="text-center mb-6 md:mb-8">
+              <h2 className="text-xl md:text-2xl lg:text-3xl font-bold mb-2">Our Core Values</h2>
+              <p className="text-xs md:text-sm text-muted-foreground">
                 The principles that drive our innovation
               </p>
             </div>
 
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
               {[
                 {
                   icon: Zap,
@@ -239,16 +239,16 @@ export default function LandingPage() {
               ].map((value, index) => (
                 <div key={index} className="relative group">
                   <div className="absolute inset-0 bg-gradient-to-b from-primary/10 to-transparent rounded-2xl -z-10 group-hover:from-primary/20 transition-all duration-500" />
-                  <div className="p-4 backdrop-blur-sm border border-primary/10 rounded-2xl text-center">
-                    <div className="w-12 h-12 rounded-xl mx-auto mb-3 relative">
-                      <div className={`absolute inset-0 bg-gradient-to-r ${value.gradient} opacity-20 rounded-xl blur-lg group-hover:opacity-30 transition-opacity`} />
-                      <div className="absolute inset-0 bg-[#050608]/50 rounded-xl backdrop-blur-sm" />
+                  <div className="p-3 md:p-4 backdrop-blur-sm border border-primary/10 rounded-2xl text-center">
+                    <div className="w-10 md:w-12 h-10 md:h-12 rounded-lg md:rounded-xl mx-auto mb-2 md:mb-3 relative">
+                      <div className={`absolute inset-0 bg-gradient-to-r ${value.gradient} opacity-20 rounded-lg md:rounded-xl blur-lg group-hover:opacity-30 transition-opacity`} />
+                      <div className="absolute inset-0 bg-[#050608]/50 rounded-lg md:rounded-xl backdrop-blur-sm" />
                       <div className="relative h-full flex items-center justify-center">
-                        <value.icon className="h-6 w-6 text-primary" />
+                        <value.icon className="h-5 md:h-6 w-5 md:w-6 text-primary" />
                       </div>
                     </div>
-                    <h3 className="text-base font-semibold mb-1">{value.title}</h3>
-                    <p className="text-xs text-muted-foreground">{value.description}</p>
+                    <h3 className="text-sm md:text-base font-semibold mb-1">{value.title}</h3>
+                    <p className="text-xs text-muted-foreground leading-tight">{value.description}</p>
                   </div>
                 </div>
               ))}
@@ -258,18 +258,18 @@ export default function LandingPage() {
       </section>
 
       {/* How it Works Section */}
-      <section id="how-it-works" className="relative h-screen flex items-center">
-        <div className="container mx-auto px-6">
+      <section id="how-it-works" className="relative min-h-screen py-16 md:py-0 md:h-screen flex items-center">
+        <div className="container mx-auto px-4 md:px-6">
           {/* Section Header */}
-          <div className="text-center mb-16">
-            <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 px-4 py-2 text-sm text-muted-foreground backdrop-blur-sm bg-background/30 mb-4">
-              <Rocket className="h-4 w-4 text-primary" />
+          <div className="text-center mb-8 md:mb-16">
+            <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 px-3 md:px-4 py-1.5 md:py-2 text-xs md:text-sm text-muted-foreground backdrop-blur-sm bg-background/30 mb-4">
+              <Rocket className="h-3 md:h-4 w-3 md:w-4 text-primary" />
               The Process
             </div>
-            <h2 className="text-3xl md:text-4xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-primary via-accent to-primary">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-primary via-accent to-primary">
               How It Works
             </h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+            <p className="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto">
               Create stunning ads in four simple steps
             </p>
           </div>
@@ -372,7 +372,7 @@ export default function LandingPage() {
             </div>
 
             {/* Mobile Pipeline (Vertical) */}
-            <div className="md:hidden space-y-6">
+            <div className="md:hidden space-y-4">
               {[
                 {
                   image: "/one.png",
@@ -398,18 +398,18 @@ export default function LandingPage() {
                 <div key={index} className="relative group">
                   <div className="absolute inset-0 bg-gradient-to-b from-primary/10 to-transparent rounded-2xl -z-10 group-hover:from-primary/20 transition-all duration-500" />
                   <div className="p-4 backdrop-blur-sm border border-primary/10 rounded-2xl bg-[#050608]/50">
-                    <div className="flex items-center gap-4">
-                      <div className="relative w-20 h-20 flex-shrink-0">
+                    <div className="flex items-center gap-3">
+                      <div className="relative w-16 h-16 flex-shrink-0">
                         <Image
                           src={step.image}
                           alt={step.title}
                           fill
                           className="object-contain"
-          />
-        </div>
+                        />
+                      </div>
                       <div className="text-left">
-                        <h3 className="text-lg font-semibold mb-1">{step.title}</h3>
-                        <p className="text-sm text-muted-foreground">{step.description}</p>
+                        <h3 className="text-base font-semibold mb-1">{step.title}</h3>
+                        <p className="text-xs text-muted-foreground leading-tight">{step.description}</p>
                       </div>
                     </div>
                   </div>
@@ -426,15 +426,15 @@ export default function LandingPage() {
       </section>
 
       {/* Showcase Section */}
-      <section id="showcase" className="relative h-screen flex flex-col justify-center">
-        <div className="container mx-auto px-6">
+      <section id="showcase" className="relative min-h-screen py-16 md:py-0 md:h-screen flex flex-col justify-center">
+        <div className="container mx-auto px-4 md:px-6">
           {/* Section Header */}
-          <div className="text-center mb-8">
-            <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 px-4 py-2 text-sm text-muted-foreground backdrop-blur-sm bg-background/30 mb-4">
-              <Sparkles className="h-4 w-4 text-primary" />
+          <div className="text-center mb-6 md:mb-8">
+            <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 px-3 md:px-4 py-1.5 md:py-2 text-xs md:text-sm text-muted-foreground backdrop-blur-sm bg-background/30 mb-4">
+              <Sparkles className="h-3 md:h-4 w-3 md:w-4 text-primary" />
               Our Generations
             </div>
-            <h2 className="text-3xl md:text-4xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-primary via-accent to-primary">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-primary via-accent to-primary">
               Stunning Creations by Disoriti
             </h2>
           </div>
@@ -446,9 +446,9 @@ export default function LandingPage() {
             <div className="absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l from-background to-transparent z-10 pointer-events-none" />
             
             {/* Gallery */}
-            <div className="flex gap-6 overflow-x-auto pb-4 px-4 snap-x snap-mandatory scrollbar-hide">
+            <div className="flex gap-4 md:gap-6 overflow-x-auto pb-4 px-4 snap-x snap-mandatory scrollbar-hide">
               {[1, 2, 3, 4, 5, 6].map((i) => (
-                <div key={i} className="relative flex-none w-[300px] aspect-square snap-center">
+                <div key={i} className="relative flex-none w-[250px] md:w-[300px] aspect-square snap-center">
                   <div className="group relative w-full h-full rounded-2xl overflow-hidden cursor-pointer">
                     {/* Background Glow */}
                     <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-accent/20 opacity-0 group-hover:opacity-100 transition-all duration-500" />
@@ -491,18 +491,18 @@ export default function LandingPage() {
       </section>
 
       {/* Pricing Section */}
-      <section id="pricing" className="relative h-screen flex items-center">
-        <div className="container mx-auto px-6">
+      <section id="pricing" className="relative min-h-screen py-16 md:py-0 md:h-screen flex items-center">
+        <div className="container mx-auto px-4 md:px-6">
           {/* Section Header */}
-          <div className="text-center mb-12">
-            <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 px-4 py-2 text-sm text-muted-foreground backdrop-blur-sm bg-background/30 mb-4">
-              <Star className="h-4 w-4 text-primary" />
+          <div className="text-center mb-8 md:mb-12">
+            <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 px-3 md:px-4 py-1.5 md:py-2 text-xs md:text-sm text-muted-foreground backdrop-blur-sm bg-background/30 mb-4">
+              <Star className="h-3 md:h-4 w-3 md:w-4 text-primary" />
               Pricing Plans
             </div>
-            <h2 className="text-3xl md:text-4xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-primary via-accent to-primary">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-primary via-accent to-primary">
               Choose Your Plan
             </h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto mb-8">
+            <p className="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto mb-6 md:mb-8">
               Select the perfect plan for your advertising needs
             </p>
             
@@ -522,24 +522,24 @@ export default function LandingPage() {
           </div>
 
           {/* Pricing Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 max-w-5xl mx-auto">
             {/* Free Plan */}
             <div className="relative group">
               <div className="absolute inset-0 bg-gradient-to-b from-primary/10 to-transparent rounded-2xl -z-10 group-hover:from-primary/20 transition-all duration-500" />
-              <div className="p-6 backdrop-blur-sm border border-primary/20 rounded-2xl h-full">
+              <div className="p-4 md:p-6 backdrop-blur-sm border border-primary/20 rounded-2xl h-full">
                 <div className="absolute top-3 left-3">
                   <div className="bg-primary/20 px-2 py-1 rounded text-xs font-semibold text-primary">
                     Current Plan
                   </div>
                 </div>
                 
-                <div className="text-center mb-6 mt-8">
-                  <h3 className="text-2xl font-bold mb-2">Free</h3>
-                  <p className="text-sm text-muted-foreground mb-4">Try out our platform with basic features</p>
-                  <div className="text-3xl font-bold">$0<span className="text-sm font-normal text-muted-foreground">/month</span></div>
+                <div className="text-center mb-4 md:mb-6 mt-6 md:mt-8">
+                  <h3 className="text-xl md:text-2xl font-bold mb-2">Free</h3>
+                  <p className="text-xs md:text-sm text-muted-foreground mb-3 md:mb-4">Try out our platform with basic features</p>
+                  <div className="text-2xl md:text-3xl font-bold">$0<span className="text-xs md:text-sm font-normal text-muted-foreground">/month</span></div>
                 </div>
                 
-                <ul className="space-y-3 mb-6 text-sm">
+                <ul className="space-y-2 md:space-y-3 mb-4 md:mb-6 text-xs md:text-sm">
                   {[
                     "Up to 5 AI-generated ads per month",
                     "Basic templates and layouts",
@@ -547,8 +547,8 @@ export default function LandingPage() {
                     "Standard export formats",
                     "Basic analytics"
                   ].map((feature, index) => (
-                    <li key={index} className="flex items-center gap-3">
-                      <Check className="h-4 w-4 text-primary flex-shrink-0" />
+                    <li key={index} className="flex items-center gap-2 md:gap-3">
+                      <Check className="h-3 md:h-4 w-3 md:w-4 text-primary flex-shrink-0" />
                       <span>{feature}</span>
                     </li>
                   ))}
@@ -559,20 +559,20 @@ export default function LandingPage() {
             {/* Essential Plan */}
             <div className="relative group">
               <div className="absolute inset-0 bg-gradient-to-b from-primary/10 to-transparent rounded-2xl -z-10 group-hover:from-primary/20 transition-all duration-500" />
-              <div className="p-6 backdrop-blur-sm border border-primary/10 rounded-2xl h-full">
-                <div className="text-center mb-6">
-                  <h3 className="text-2xl font-bold mb-2">Essential</h3>
-                  <p className="text-sm text-muted-foreground mb-4">Perfect for individuals and small teams getting started</p>
-                  <div className="text-3xl font-bold">
+              <div className="p-4 md:p-6 backdrop-blur-sm border border-primary/10 rounded-2xl h-full">
+                <div className="text-center mb-4 md:mb-6">
+                  <h3 className="text-xl md:text-2xl font-bold mb-2">Essential</h3>
+                  <p className="text-xs md:text-sm text-muted-foreground mb-3 md:mb-4">Perfect for individuals and small teams getting started</p>
+                  <div className="text-2xl md:text-3xl font-bold">
                     ${isYearly ? '199' : '19.99'}
-                    <span className="text-sm font-normal text-muted-foreground">/{isYearly ? 'year' : 'month'}</span>
+                    <span className="text-xs md:text-sm font-normal text-muted-foreground">/{isYearly ? 'year' : 'month'}</span>
                   </div>
                   {isYearly && (
                     <p className="text-xs text-primary mt-1">Save $40/year</p>
                   )}
                 </div>
                 
-                <ul className="space-y-3 mb-6 text-sm">
+                <ul className="space-y-2 md:space-y-3 mb-4 md:mb-6 text-xs md:text-sm">
                   {[
                     "Up to 50 AI-generated ads per month",
                     "Basic templates and layouts",
@@ -580,8 +580,8 @@ export default function LandingPage() {
                     "Export in common formats",
                     "Basic analytics"
                   ].map((feature, index) => (
-                    <li key={index} className="flex items-center gap-3">
-                      <Check className="h-4 w-4 text-primary flex-shrink-0" />
+                    <li key={index} className="flex items-center gap-2 md:gap-3">
+                      <Check className="h-3 md:h-4 w-3 md:w-4 text-primary flex-shrink-0" />
                       <span>{feature}</span>
                     </li>
                   ))}
@@ -596,7 +596,7 @@ export default function LandingPage() {
             {/* Premium Plan */}
             <div className="relative group">
               <div className="absolute inset-0 bg-gradient-to-b from-primary/20 to-accent/20 rounded-2xl -z-10 group-hover:from-primary/30 group-hover:to-accent/30 transition-all duration-500" />
-              <div className="p-6 backdrop-blur-sm border border-primary/30 rounded-2xl h-full relative">
+              <div className="p-4 md:p-6 backdrop-blur-sm border border-primary/30 rounded-2xl h-full relative">
                 {/* Most Popular Badge */}
                 <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
                   <div className="bg-gradient-to-r from-primary to-accent px-3 py-1 rounded-full text-xs font-semibold text-primary-foreground">
@@ -604,19 +604,19 @@ export default function LandingPage() {
                   </div>
                 </div>
 
-                <div className="text-center mb-6">
-                  <h3 className="text-2xl font-bold mb-2">Premium</h3>
-                  <p className="text-sm text-muted-foreground mb-4">Advanced features for growing businesses and agencies</p>
-                  <div className="text-3xl font-bold">
+                <div className="text-center mb-4 md:mb-6">
+                  <h3 className="text-xl md:text-2xl font-bold mb-2">Premium</h3>
+                  <p className="text-xs md:text-sm text-muted-foreground mb-3 md:mb-4">Advanced features for growing businesses and agencies</p>
+                  <div className="text-2xl md:text-3xl font-bold">
                     ${isYearly ? '399' : '39.99'}
-                    <span className="text-sm font-normal text-muted-foreground">/{isYearly ? 'year' : 'month'}</span>
+                    <span className="text-xs md:text-sm font-normal text-muted-foreground">/{isYearly ? 'year' : 'month'}</span>
                   </div>
                   {isYearly && (
                     <p className="text-xs text-primary mt-1">Save $80/year</p>
                   )}
                 </div>
                 
-                <ul className="space-y-3 mb-6 text-sm">
+                <ul className="space-y-2 md:space-y-3 mb-4 md:mb-6 text-xs md:text-sm">
                   {[
                     "Unlimited AI-generated ads",
                     "Premium templates and layouts",
@@ -627,8 +627,8 @@ export default function LandingPage() {
                     "Team collaboration features",
                     "API access"
                   ].map((feature, index) => (
-                    <li key={index} className="flex items-center gap-3">
-                      <Check className="h-4 w-4 text-primary flex-shrink-0" />
+                    <li key={index} className="flex items-center gap-2 md:gap-3">
+                      <Check className="h-3 md:h-4 w-3 md:w-4 text-primary flex-shrink-0" />
                       <span>{feature}</span>
                     </li>
                   ))}
@@ -644,11 +644,11 @@ export default function LandingPage() {
       </section>
 
       {/* FAQ Section */}
-      <section className="relative py-24">
-        <div className="container mx-auto px-6">
+      <section className="relative py-16 md:py-24">
+        <div className="container mx-auto px-4 md:px-6">
           <div className="max-w-4xl mx-auto">
-            <h3 className="text-2xl font-bold text-center mb-8">Frequently Asked Questions</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <h3 className="text-xl md:text-2xl font-bold text-center mb-6 md:mb-8">Frequently Asked Questions</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               {[
                 {
                   question: "Can I change plans anytime?",
@@ -667,9 +667,9 @@ export default function LandingPage() {
                   answer: "Yes! Premium plan includes a 14-day free trial. No credit card required."
                 }
               ].map((faq, index) => (
-                <div key={index} className="p-6 backdrop-blur-sm border border-primary/10 rounded-2xl">
-                  <h4 className="font-semibold mb-2">{faq.question}</h4>
-                  <p className="text-sm text-muted-foreground">{faq.answer}</p>
+                <div key={index} className="p-4 md:p-6 backdrop-blur-sm border border-primary/10 rounded-2xl">
+                  <h4 className="text-sm md:text-base font-semibold mb-2">{faq.question}</h4>
+                  <p className="text-xs md:text-sm text-muted-foreground leading-relaxed">{faq.answer}</p>
                 </div>
               ))}
             </div>

@@ -3,18 +3,18 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Menu, X } from "lucide-react";
+import { Menu, X, BookOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 const navigation = [
-  { name: "Home", href: "#home" },
-  { name: "About", href: "#about" },
-  { name: "How it works", href: "#how-it-works" },
-  { name: "Showcase", href: "#showcase" },
-  { name: "Pricing", href: "#pricing" },
-  { name: "FAQ", href: "#faq" },
-  { name: "Blogs", href: "/blogs" },
+  { name: "Home", href: "#home", isExternal: false },
+  { name: "About", href: "#about", isExternal: false },
+  { name: "How it works", href: "#how-it-works", isExternal: false },
+  { name: "Showcase", href: "#showcase", isExternal: false },
+  { name: "Pricing", href: "#pricing", isExternal: false },
+  { name: "FAQ", href: "#faq", isExternal: false },
+  { name: "Blogs", href: "/blogs", isExternal: true },
 ];
 
 export function LandingNavbar() {
@@ -74,9 +74,14 @@ export function LandingNavbar() {
                 <Link
                   key={item.name}
                   href={item.href}
-                  onClick={handleNavClick}
-                  className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
+                  onClick={item.isExternal ? undefined : handleNavClick}
+                  className={`text-sm font-medium transition-colors flex items-center gap-1.5 ${
+                    item.isExternal 
+                      ? 'text-muted-foreground hover:text-accent px-3 py-1.5 rounded-lg border border-primary/20 hover:border-accent/30 bg-background/20 hover:bg-background/40' 
+                      : 'text-muted-foreground hover:text-primary'
+                  }`}
                 >
+                  {item.isExternal && <BookOpen className="h-4 w-4" />}
                   {item.name}
                 </Link>
               ))}
@@ -117,9 +122,14 @@ export function LandingNavbar() {
                 <Link
                   key={item.name}
                   href={item.href}
-                  onClick={handleNavClick}
-                  className="block py-2 text-base font-medium text-muted-foreground hover:text-primary"
+                  onClick={item.isExternal ? undefined : handleNavClick}
+                  className={`block py-2 text-base font-medium transition-colors flex items-center gap-2 ${
+                    item.isExternal 
+                      ? 'text-muted-foreground hover:text-accent px-3 py-2 rounded-lg border border-primary/20 hover:border-accent/30 bg-background/20 hover:bg-background/40' 
+                      : 'text-muted-foreground hover:text-primary'
+                  }`}
                 >
+                  {item.isExternal && <BookOpen className="h-4 w-4" />}
                   {item.name}
                 </Link>
               ))}
