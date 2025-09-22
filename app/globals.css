@@ -325,3 +325,19 @@
 .no-spinner[type="number"] {
   -moz-appearance: textfield;
 }
+
+/* Fix for text clipping - ensure descenders (y, g, j, p, q) are not cut off */
+h1, h2, h3, h4, h5, h6 {
+  line-height: 1.2;
+  padding-bottom: 0.1em;
+  overflow: visible;
+  text-rendering: optimizeLegibility;
+  -webkit-font-feature-settings: "kern" 1;
+  font-feature-settings: "kern" 1;
+}
+
+/* Additional fix for large headings that might still have clipping issues */
+.text-3xl, .text-4xl, .text-5xl, .text-6xl {
+  line-height: 1.1;
+  padding-bottom: 0.15em;
+}

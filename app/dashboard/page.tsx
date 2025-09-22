@@ -55,31 +55,31 @@ export default function Page() {
             title="Create Post"
             description="Generate and create new social media posts with AI assistance"
             icon={PlusCircle}
-            href="/create"
+            href="/dashboard/create"
           />
           <FeatureCard
             title="Library"
             description="Manage and edit your existing posts and campaigns"
             icon={Library}
-            href="/library"
+            href="/dashboard/library"
           />
           <FeatureCard
             title="Disoriti Assistant"
             description="Get AI-powered suggestions and optimize your content"
             icon={Bot}
-            href="/assistant"
+            href="/dashboard/chat"
           />
           <FeatureCard
             title="Planner"
             description="Plan and schedule your posts and campaigns"
             icon={Calendar}
-            href="/dashboard/planner"
+            href="/dashboard/scheduler"
           />
           <FeatureCard
             title="User Settings"
             description="Manage your account and preferences"
             icon={Settings}
-            href="/settings"
+            href="/dashboard/settings"
           />
         </div>
       </div>

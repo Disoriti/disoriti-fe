@@ -524,22 +524,16 @@ export default function LandingPage() {
           {/* Pricing Cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 max-w-5xl mx-auto">
             {/* Free Plan */}
-            <div className="relative group">
+            <div className="relative group flex flex-col">
               <div className="absolute inset-0 bg-gradient-to-b from-primary/10 to-transparent rounded-2xl -z-10 group-hover:from-primary/20 transition-all duration-500" />
-              <div className="p-4 md:p-6 backdrop-blur-sm border border-primary/20 rounded-2xl h-full">
-                <div className="absolute top-3 left-3">
-                  <div className="bg-primary/20 px-2 py-1 rounded text-xs font-semibold text-primary">
-                    Current Plan
-                  </div>
-                </div>
-                
-                <div className="text-center mb-4 md:mb-6 mt-6 md:mt-8">
+              <div className="p-4 md:p-6 backdrop-blur-sm border border-primary/20 rounded-2xl h-full flex flex-col">
+                <div className="text-center mb-4 md:mb-6">
                   <h3 className="text-xl md:text-2xl font-bold mb-2">Free</h3>
                   <p className="text-xs md:text-sm text-muted-foreground mb-3 md:mb-4">Try out our platform with basic features</p>
                   <div className="text-2xl md:text-3xl font-bold">$0<span className="text-xs md:text-sm font-normal text-muted-foreground">/month</span></div>
                 </div>
                 
-                <ul className="space-y-2 md:space-y-3 mb-4 md:mb-6 text-xs md:text-sm">
+                <ul className="space-y-2 md:space-y-3 mb-4 md:mb-6 text-xs md:text-sm flex-grow">
                   {[
                     "Up to 5 AI-generated ads per month",
                     "Basic templates and layouts",
@@ -553,13 +547,17 @@ export default function LandingPage() {
                     </li>
                   ))}
                 </ul>
+
+                <SmartAuthButton className="w-full bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 text-primary-foreground">
+                  Start Free
+                </SmartAuthButton>
               </div>
             </div>
 
             {/* Essential Plan */}
-            <div className="relative group">
+            <div className="relative group flex flex-col">
               <div className="absolute inset-0 bg-gradient-to-b from-primary/10 to-transparent rounded-2xl -z-10 group-hover:from-primary/20 transition-all duration-500" />
-              <div className="p-4 md:p-6 backdrop-blur-sm border border-primary/10 rounded-2xl h-full">
+              <div className="p-4 md:p-6 backdrop-blur-sm border border-primary/10 rounded-2xl h-full flex flex-col">
                 <div className="text-center mb-4 md:mb-6">
                   <h3 className="text-xl md:text-2xl font-bold mb-2">Essential</h3>
                   <p className="text-xs md:text-sm text-muted-foreground mb-3 md:mb-4">Perfect for individuals and small teams getting started</p>
@@ -572,7 +570,7 @@ export default function LandingPage() {
                   )}
                 </div>
                 
-                <ul className="space-y-2 md:space-y-3 mb-4 md:mb-6 text-xs md:text-sm">
+                <ul className="space-y-2 md:space-y-3 mb-4 md:mb-6 text-xs md:text-sm flex-grow">
                   {[
                     "Up to 50 AI-generated ads per month",
                     "Basic templates and layouts",
@@ -594,9 +592,9 @@ export default function LandingPage() {
             </div>
 
             {/* Premium Plan */}
-            <div className="relative group">
+            <div className="relative group flex flex-col">
               <div className="absolute inset-0 bg-gradient-to-b from-primary/20 to-accent/20 rounded-2xl -z-10 group-hover:from-primary/30 group-hover:to-accent/30 transition-all duration-500" />
-              <div className="p-4 md:p-6 backdrop-blur-sm border border-primary/30 rounded-2xl h-full relative">
+              <div className="p-4 md:p-6 backdrop-blur-sm border border-primary/30 rounded-2xl h-full flex flex-col relative">
                 {/* Most Popular Badge */}
                 <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
                   <div className="bg-gradient-to-r from-primary to-accent px-3 py-1 rounded-full text-xs font-semibold text-primary-foreground">
@@ -616,7 +614,7 @@ export default function LandingPage() {
                   )}
                 </div>
                 
-                <ul className="space-y-2 md:space-y-3 mb-4 md:mb-6 text-xs md:text-sm">
+                <ul className="space-y-2 md:space-y-3 mb-4 md:mb-6 text-xs md:text-sm flex-grow">
                   {[
                     "Unlimited AI-generated ads",
                     "Premium templates and layouts",

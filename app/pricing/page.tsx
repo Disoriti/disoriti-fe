@@ -154,7 +154,7 @@ export default function PricingPage() {
             return (
               <Card 
                 key={planData.name} 
-                className={`relative ${
+                className={`relative flex flex-col h-full ${
                   planData.popular 
                     ? 'border-primary shadow-lg scale-105' 
                     : 'border-border'
@@ -188,7 +188,7 @@ export default function PricingPage() {
                   </CardDescription>
                 </CardHeader>
 
-                <CardContent className="text-center pb-6">
+                <CardContent className="text-center pb-6 flex-grow">
                   <div className="mb-4">
                     <span className="text-4xl font-bold text-foreground">
                       ${currentPrice}
@@ -215,13 +215,15 @@ export default function PricingPage() {
                   </ul>
                 </CardContent>
 
-                <CardFooter className="pt-0">
+                <CardFooter className="pt-0 mt-auto">
                   {planData.planId === 'free' ? (
                     <Button 
-                      className="w-full bg-secondary hover:bg-secondary/80"
-                      disabled={isCurrent}
+                      asChild
+                      className="w-full bg-primary hover:bg-primary/90"
                     >
-                      {isCurrent ? 'Current Plan' : 'Free Tier'}
+                      <a href="/login" className="w-full">
+                        Start Free
+                      </a>
                     </Button>
                   ) : (
                     <Button 
