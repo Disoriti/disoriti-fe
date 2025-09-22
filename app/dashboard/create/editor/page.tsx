@@ -32,6 +32,8 @@ function EnhancePromptPageInner() {
   const [savedPrompts, setSavedPrompts] = useState<Array<{prompt: string, enhanced: string, timestamp: string}>>([]);
   const [creditsUsed, setCreditsUsed] = useState(0);
   const [selectedPromptIndex, setSelectedPromptIndex] = useState(0);
+  const [editablePrompt, setEditablePrompt] = useState("");
+  const [editableEnhancedPrompt, setEditableEnhancedPrompt] = useState("");
   const maxCredits = 5;
   const router = useRouter();
   const { logout } = useAuth();
@@ -97,6 +99,8 @@ function EnhancePromptPageInner() {
         const enhancedPrompt = data.data.prompt;
         
         setEnhancedText(enhancedPrompt);
+        setEditablePrompt(prompt); // Initialize editable prompt with the original
+        setEditableEnhancedPrompt(enhancedPrompt); // Initialize editable enhanced prompt
         setIsEnhancing(false);
         setShowEnhanced(true);
         
@@ -135,9 +139,13 @@ function EnhancePromptPageInner() {
     // Use the selected prompt's data
     const selectedPrompt = savedPrompts[selectedPromptIndex];
     
-    // Store the enhanced prompt in localStorage to avoid URL length issues
-    localStorage.setItem('selectedEnhancedPrompt', selectedPrompt.enhanced);
-    localStorage.setItem('selectedOriginalPrompt', selectedPrompt.prompt);
+    // Use the editable prompts if they have been modified, otherwise use the originals
+    const finalPrompt = editablePrompt.trim() || selectedPrompt.prompt;
+    const finalEnhancedPrompt = editableEnhancedPrompt.trim() || selectedPrompt.enhanced;
+    
+    // Store the final (potentially edited) prompts
+    localStorage.setItem('selectedEnhancedPrompt', finalEnhancedPrompt);
+    localStorage.setItem('selectedOriginalPrompt', finalPrompt);
     
     router.push(
       `/dashboard/create/content?type=${type}&media=${media}&platform=${platform}&postType=${postType}`
@@ -147,6 +155,8 @@ function EnhancePromptPageInner() {
   const loadSavedPrompt = (savedPrompt: {prompt: string, enhanced: string, timestamp: string}, index: number) => {
     setPrompt(savedPrompt.prompt);
     setEnhancedText(savedPrompt.enhanced);
+    setEditablePrompt(savedPrompt.prompt); // Initialize editable prompt with the original
+    setEditableEnhancedPrompt(savedPrompt.enhanced); // Initialize editable enhanced prompt
     setSelectedPromptIndex(index);
     setShowEnhanced(true);
     setAnimationStep(3); // Skip to final animation step since content is already loaded
@@ -324,8 +334,16 @@ function EnhancePromptPageInner() {
                  <CardTitle className="text-lg">Your Image Description</CardTitle>
                </CardHeader>
                <CardContent>
-                 <div className="p-4 bg-muted/30 rounded-lg">
-                   <p className="text-sm text-muted-foreground">{prompt}</p>
+                 <div className="space-y-2">
+                   <Textarea
+                     value={editablePrompt}
+                     onChange={(e) => setEditablePrompt(e.target.value)}
+                     className="min-h-[100px] resize-none border-2 focus:border-disoriti-primary/50 focus:ring-disoriti-primary/20"
+                     placeholder="Edit your image description..."
+                   />
+                   <p className="text-xs text-muted-foreground">
+                     You can edit your original description here. The enhanced prompt below will remain the same.
+                   </p>
                  </div>
                </CardContent>
              </Card>
@@ -344,29 +362,16 @@ function EnhancePromptPageInner() {
                  </CardTitle>
                </CardHeader>
                <CardContent>
-                 <div className="relative">
-                   {/* Animated background effect */}
-                   <div className={`absolute inset-0 bg-gradient-to-r from-disoriti-primary/10 to-disoriti-accent/10 rounded-lg transition-all duration-1000 ${
-                     animationStep >= 1 ? 'opacity-100' : 'opacity-0'
-                   }`} />
-                   
-                   {/* Enhanced text with typing animation */}
-                   <div className={`p-4 bg-background/80 backdrop-blur-sm rounded-lg border border-disoriti-primary/20 transition-all duration-500 ${
-                     animationStep >= 2 ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
-                   }`}>
-                     <div className={`whitespace-pre-wrap text-sm leading-relaxed transition-all duration-1000 ${
-                       animationStep >= 3 ? 'opacity-100' : 'opacity-0'
-                     }`}>
-                       {enhancedText}
-                     </div>
-                   </div>
-                   
-                   {/* Success indicator */}
-                   <div className={`absolute -top-2 -right-2 p-2 bg-green-500 rounded-full transition-all duration-500 ${
-                     animationStep >= 3 ? 'opacity-100 scale-100' : 'opacity-0 scale-0'
-                   }`}>
-                     <Sparkles className="h-4 w-4 text-white" />
-                   </div>
+                 <div className="space-y-2">
+                   <Textarea
+                     value={editableEnhancedPrompt}
+                     onChange={(e) => setEditableEnhancedPrompt(e.target.value)}
+                     className="min-h-[200px] resize-none border-2 focus:border-disoriti-primary/50 focus:ring-disoriti-primary/20"
+                     placeholder="Edit the generated image prompt..."
+                   />
+                   <p className="text-xs text-muted-foreground">
+                     You can edit the AI-generated prompt to fine-tune it to your exact needs.
+                   </p>
                  </div>
                </CardContent>
              </Card>

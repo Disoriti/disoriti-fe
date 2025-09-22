@@ -644,7 +644,7 @@ export default function LandingPage() {
       </section>
 
       {/* FAQ Section */}
-      <section className="relative py-16 md:py-24">
+      <section id="faq" className="relative py-16 md:py-24">
         <div className="container mx-auto px-4 md:px-6">
           <div className="max-w-4xl mx-auto">
             <h3 className="text-xl md:text-2xl font-bold text-center mb-6 md:mb-8">Frequently Asked Questions</h3>

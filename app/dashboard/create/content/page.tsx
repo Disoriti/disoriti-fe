@@ -193,16 +193,31 @@ function ContentPageInner() {
         return;
       }
 
-      if (!generatedContent) {
-        toast.error('Please generate content first');
+      // Check if we have content (either generated or manually entered)
+      if (!generatedContent && (!postHeading.trim() || !postSubheading.trim() || !ctaText.trim())) {
+        toast.error('Please generate content first or fill in all fields');
         setGeneratingImage(false);
         return;
       }
 
+      // Use current edited values or fallback to generated content
+      const currentHeading = postHeading.trim() || (generatedContent?.heading || '');
+      const currentSubheading = postSubheading.trim() || (generatedContent?.subheading || '');
+      const currentCta = ctaText.trim() || (generatedContent?.cta || '');
+      
       // Build the URL with query parameters
       const url = `${API_URLS.GENERATE_IMAGE_URL}?enhanced_prompt=${encodeURIComponent(promptToUse)}&post_size=1024x896`;
       
       console.log('Generate Image API URL:', url);
+      console.log('Content being sent:', {
+        currentHeading,
+        currentSubheading,
+        currentCta,
+        postHeading,
+        postSubheading,
+        ctaText,
+        generatedContent
+      });
 
       // Block if credits exhausted
       if (typeof monthlyCreditsLimit === 'number' && typeof monthlyCreditsUsed === 'number' && monthlyCreditsUsed >= monthlyCreditsLimit) {
@@ -218,9 +233,9 @@ function ContentPageInner() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          image_heading: generatedContent.heading,
-          image_subheading: generatedContent.subheading,
-          image_cta: generatedContent.cta
+          image_heading: currentHeading,
+          image_subheading: currentSubheading,
+          image_cta: currentCta
         }),
       });
 
