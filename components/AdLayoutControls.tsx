@@ -209,28 +209,33 @@ const AdLayoutControls: React.FC<AdLayoutControlsProps> = ({ elements, selected,
         </CardContent>
       </Card>
       {/* Tips Section */}
-      <Card className="w-full mt-4 border-primary/40">
-        <CardHeader className="bg-gradient-to-r from-primary/10 to-accent/10 rounded-t-xl">
+      <Card className="w-full mt-4 border-primary/20">
+        <CardHeader className="bg-gradient-to-r from-primary/5 to-accent/5 rounded-t-xl pb-3">
           <CardTitle className="text-base font-semibold text-primary flex items-center gap-2">
-            <span role="img" aria-label="lightbulb">💡</span> Tips
+            <Settings className="h-4 w-4" /> Editor Guide
           </CardTitle>
         </CardHeader>
         <CardContent className="bg-transparent p-4">
-          <ul className="list-none pl-0 space-y-2 text-base">
-            <li className="flex items-center gap-2 text-primary font-medium">
-              <span role="img" aria-label="editor">📝</span> This is the editor page
+          <ul className="list-none pl-0 space-y-3 text-sm">
+            <li className="flex items-start gap-3">
+              <BadgeCheck className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+              <span className="text-muted-foreground">Select a layout template to begin customizing your design</span>
             </li>
-            <li className="flex items-center gap-2 text-primary font-medium">
-              <span role="img" aria-label="lock">🔒</span> You may choose the layout only once
+            <li className="flex items-start gap-3">
+              <Frame className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+              <span className="text-muted-foreground">Layout selection is final - choose carefully</span>
             </li>
-            <li className="flex items-center gap-2 text-primary font-medium">
-              <span role="img" aria-label="library">📚</span> After that, the image will be edited from the library
+            <li className="flex items-start gap-3">
+              <ImageIcon className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+              <span className="text-muted-foreground">Access and edit your design anytime from your library</span>
             </li>
-            <li className="flex items-center gap-2 text-primary font-medium">
-              <span role="img" aria-label="sliders">🎚️</span> Use the controls to adjust text, colors, and more
+            <li className="flex items-start gap-3">
+              <SlidersHorizontal className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+              <span className="text-muted-foreground">Fine-tune text, colors, and spacing using the control panel</span>
             </li>
-            <li className="flex items-center gap-2 text-primary font-medium">
-              <span role="img" aria-label="pointer">👆</span> Click on elements to edit their properties
+            <li className="flex items-start gap-3">
+              <Type className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+              <span className="text-muted-foreground">Click any element to access its specific properties</span>
             </li>
           </ul>
         </CardContent>

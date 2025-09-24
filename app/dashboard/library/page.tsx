@@ -40,7 +40,7 @@ const mockAds: Ad[] = [
     id: "1",
     media: "image",
     previewUrl: "https://burst.shopifycdn.com/photos/core-strength-fitness.jpg?width=1000&format=pjpg&exif=0&iptc=0",
-    heading: "Summer Sale!",
+    heading: "Summer Fitness Challenge",
     platform: "Instagram",
     postType: "Feed Post (Square)",
     createdAt: new Date().toISOString(),
@@ -48,8 +48,8 @@ const mockAds: Ad[] = [
   {
     id: "2",
     media: "image",
-    previewUrl: "https://miro.medium.com/v2/resize:fit:1400/0*fHbhjfxuc3wQTzq9",
-    heading: "New Product Launch",
+    previewUrl: "https://images.unsplash.com/photo-1542291026-7eec264c27ff",
+    heading: "Limited Edition Sneakers",
     platform: "Facebook",
     postType: "Story",
     createdAt: new Date(Date.now() - 86400000).toISOString(),
@@ -57,12 +57,93 @@ const mockAds: Ad[] = [
   {
     id: "3",
     media: "image",
-    previewUrl: "https://res.cloudinary.com/aenetworks/image/upload/c_fill,ar_1.7777777777777777,w_1920,h_1080,g_auto/dpr_auto/f_auto/q_auto:eco/v1/Greek-mythology-gettyImages-1220052224?_a=BAVAZGDX0",
-    heading: "Join Our Webinar",
+    previewUrl: "https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d",
+    heading: "Digital Marketing Workshop",
     platform: "LinkedIn",
     postType: "Feed Post (Image)",
     createdAt: new Date(Date.now() - 2 * 86400000).toISOString(),
   },
+  {
+    id: "4",
+    media: "image",
+    previewUrl: "https://images.unsplash.com/photo-1504674900247-0877df9cc836",
+    heading: "Healthy Menu Launch",
+    platform: "Instagram",
+    postType: "Carousel",
+    createdAt: new Date(Date.now() - 3 * 86400000).toISOString(),
+  },
+  {
+    id: "5",
+    media: "image",
+    previewUrl: "https://images.unsplash.com/photo-1551434678-e076c223a692",
+    heading: "Tech Innovation Summit",
+    platform: "LinkedIn",
+    postType: "Event Post",
+    createdAt: new Date(Date.now() - 4 * 86400000).toISOString(),
+  },
+  {
+    id: "6",
+    media: "image",
+    previewUrl: "https://images.unsplash.com/photo-1441986300917-64674bd600d8",
+    heading: "Eco-Friendly Collection",
+    platform: "Facebook",
+    postType: "Feed Post (Image)",
+    createdAt: new Date(Date.now() - 5 * 86400000).toISOString(),
+  },
+  {
+    id: "7",
+    media: "image",
+    previewUrl: "https://images.unsplash.com/photo-1523275335684-37898b6baf30",
+    heading: "Smart Watch Sale",
+    platform: "Instagram",
+    postType: "Story",
+    createdAt: new Date(Date.now() - 6 * 86400000).toISOString(),
+  },
+  {
+    id: "8",
+    media: "image",
+    previewUrl: "https://images.unsplash.com/photo-1497215728101-856f4ea42174",
+    heading: "Remote Work Solutions",
+    platform: "LinkedIn",
+    postType: "Feed Post (Square)",
+    createdAt: new Date(Date.now() - 7 * 86400000).toISOString(),
+  },
+  {
+    id: "9",
+    media: "image",
+    previewUrl: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e",
+    heading: "Music Festival Tickets",
+    platform: "Facebook",
+    postType: "Event Post",
+    createdAt: new Date(Date.now() - 8 * 86400000).toISOString(),
+  },
+  {
+    id: "10",
+    media: "image",
+    previewUrl: "https://images.unsplash.com/photo-1542291026-7eec264c27ff",
+    heading: "Premium Headphones",
+    platform: "Instagram",
+    postType: "Product Post",
+    createdAt: new Date(Date.now() - 9 * 86400000).toISOString(),
+  },
+  {
+    id: "11",
+    media: "image",
+    previewUrl: "https://images.unsplash.com/photo-1460925895917-afdab827c52f",
+    heading: "Business Analytics Course",
+    platform: "LinkedIn",
+    postType: "Feed Post (Image)",
+    createdAt: new Date(Date.now() - 10 * 86400000).toISOString(),
+  },
+  {
+    id: "12",
+    media: "image",
+    previewUrl: "https://images.unsplash.com/photo-1441984904996-e0b6ba687e04",
+    heading: "Coffee Shop Opening",
+    platform: "Facebook",
+    postType: "Story",
+    createdAt: new Date(Date.now() - 11 * 86400000).toISOString(),
+  }
 ];
 
 function SkeletonCard() {
@@ -89,106 +170,83 @@ function SkeletonCard() {
   );
 }
 
-function MasonryGallery({ ads }: { ads: Ad[] }) {
-  const itemRefs = useRef<Record<string, HTMLDivElement | null>>({});
-  const tickingRef = useRef(false);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      if (tickingRef.current) return;
-      tickingRef.current = true;
-      requestAnimationFrame(() => {
-        const viewportCenterY = window.innerHeight / 2;
-        const maxDistance = Math.max(window.innerHeight, 1);
-
-        Object.values(itemRefs.current).forEach((el) => {
-          if (!el) return;
-          const rect = el.getBoundingClientRect();
-          const itemCenterY = rect.top + rect.height / 2;
-          const distanceY = Math.abs(itemCenterY - viewportCenterY);
-          const distanceRatio = Math.min(distanceY / maxDistance, 1);
-          const scale = 1.08 - distanceRatio * 0.18; // 1.08 -> 0.90
-          const translateY = (distanceRatio - 0.5) * 10; // subtle parallax
-          const elevation = Math.round((scale - 0.9) * 100);
-
-          el.style.transform = `translateY(${translateY}px) scale(${scale.toFixed(3)})`;
-          el.style.zIndex = String(10 + elevation);
-          el.style.transition = "transform 120ms ease-out";
-        });
-
-        tickingRef.current = false;
-      });
-    };
-
-    handleScroll();
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    window.addEventListener("resize", handleScroll);
-    return () => {
-      window.removeEventListener("scroll", handleScroll as EventListener);
-      window.removeEventListener("resize", handleScroll as EventListener);
-    };
-  }, []);
-
-  const getAspect = (index: number) => {
-    const pattern = index % 6;
-    if (pattern === 0) return "4 / 5"; // portrait
-    if (pattern === 1) return "1 / 1"; // square
-    if (pattern === 2) return "16 / 9"; // landscape
-    if (pattern === 3) return "3 / 4"; // portrait
-    if (pattern === 4) return "1 / 1"; // square
-    return "5 / 4"; // slightly wide
+function AdGallery({ ads }: { ads: Ad[] }) {
+  const getAspectRatio = (index: number) => {
+    const pattern = index % 3;
+    switch (pattern) {
+      case 0: return "4/3";  // landscape
+      case 1: return "1/1";  // square
+      case 2: return "3/4";  // portrait
+      default: return "4/3"; // default to landscape
+    }
   };
 
   return (
-    <div className="columns-1 sm:columns-2 lg:columns-3 gap-4">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
       {ads.map((ad, index) => (
-        <div
-          key={ad.id}
-          ref={(node) => {
-            itemRefs.current[ad.id] = node;
-          }}
-          className="group mb-4 break-inside-avoid relative will-change-transform"
-        >
-          <Card className="overflow-hidden border border-border/40 rounded-2xl shadow-sm transition-shadow duration-200 group-hover:shadow-xl">
-            <div className="relative bg-muted/20" style={{ aspectRatio: getAspect(index) }}>
+        <div key={ad.id} className="group relative">
+          <Card className="overflow-hidden border border-border/40 rounded-2xl shadow-sm transition-all duration-200 hover:shadow-lg hover:border-primary/40">
+            <div 
+              className="relative bg-muted/20" 
+              style={{ aspectRatio: getAspectRatio(index) }}
+            >
               {ad.media === "video" ? (
-                <video src={ad.previewUrl} className="w-full h-full object-cover" muted playsInline />
+                <video 
+                  src={ad.previewUrl} 
+                  className="w-full h-full object-cover" 
+                  muted 
+                  playsInline 
+                />
               ) : (
-                <img src={ad.previewUrl} alt={ad.heading} className="w-full h-full object-cover" />
+                <img 
+                  src={ad.previewUrl} 
+                  alt={ad.heading} 
+                  className="w-full h-full object-cover" 
+                />
               )}
 
-              <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-background/70 via-background/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
+              {/* Hover Overlay */}
+              <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/30 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-200" />
 
-              <div className="absolute inset-0 flex items-end p-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                <div className="w-full flex items-center justify-between gap-2">
+              {/* Content Overlay */}
+              <div className="absolute inset-0 flex items-end p-4 opacity-0 group-hover:opacity-100 transition-all duration-200">
+                <div className="w-full space-y-3">
+                  {/* Title and Tags */}
                   <div className="min-w-0">
-                    <div className="text-sm font-semibold truncate">
+                    <h3 className="text-base font-semibold text-white truncate mb-2">
                       {ad.heading}
-                    </div>
-                    <div className="mt-1 flex items-center gap-2">
-                      <Badge variant="secondary" className="bg-primary/15 text-primary border-primary/20">
+                    </h3>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <Badge variant="secondary" className="bg-primary/20 text-primary border-primary/30">
                         <BadgeCheckIcon className="w-3 h-3 mr-1" />
                         {ad.platform}
                       </Badge>
-                      <Badge variant="outline" className="text-xs">
+                      <Badge variant="outline" className="text-xs border-white/20 text-white">
                         {ad.postType}
                       </Badge>
                     </div>
                   </div>
-                  <div className="flex-shrink-0 flex items-center gap-2">
-                    <Button size="sm" variant="outline" className="h-8 px-3 pointer-events-auto border-primary/40 text-primary hover:bg-primary/10">
+
+                  {/* Action Buttons */}
+                  <div className="flex items-center gap-2 pt-2">
+                    <Button 
+                      size="sm" 
+                      variant="outline" 
+                      className="h-8 px-3 pointer-events-auto border-white/20 text-white hover:bg-white/10 hover:border-white/40"
+                    >
                       <Eye className="w-3 h-3 mr-1" />
                       View
                     </Button>
-                    <Button size="sm" className="h-8 px-3 pointer-events-auto bg-primary text-primary-foreground hover:bg-primary/90">
+                    <Button 
+                      size="sm" 
+                      className="h-8 px-3 pointer-events-auto bg-primary text-primary-foreground hover:bg-primary/90"
+                    >
                       <Download className="w-3 h-3 mr-1" />
                       Save
                     </Button>
                   </div>
                 </div>
               </div>
-
-              <div className="absolute inset-0 ring-0 group-hover:ring-2 ring-primary/40 rounded-2xl transition-all duration-200" />
             </div>
           </Card>
         </div>
@@ -308,7 +366,7 @@ export default function LibraryPage() {
           </CardContent>
         </Card>
       ) : (
-        <MasonryGallery ads={ads} />
+        <AdGallery ads={ads} />
       )}
     </div>
   );
