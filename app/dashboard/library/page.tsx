@@ -11,8 +11,28 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useEffect, useRef, useState } from "react";
-import { Folder, Download, Eye, BadgeCheckIcon, Calendar, FileImage } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Folder,
+  Download,
+  Eye,
+  BadgeCheckIcon,
+  Calendar,
+  FileImage,
+  Search,
+  Filter,
+  LayoutGrid,
+  Rows,
+} from "lucide-react";
 import AdGenerationLoader from "@/components/ad-generation-loader";
 
 // Example ad type
@@ -172,85 +192,101 @@ function SkeletonCard() {
 
 function AdGallery({ ads }: { ads: Ad[] }) {
   const getAspectRatio = (index: number) => {
-    const pattern = index % 3;
-    switch (pattern) {
-      case 0: return "4/3";  // landscape
-      case 1: return "1/1";  // square
-      case 2: return "3/4";  // portrait
-      default: return "4/3"; // default to landscape
-    }
+    // Seeded variability so layout feels organic but stable per render
+    const seed = (index * 9301 + 49297) % 233280; // deterministic pseudo-random
+    const r = seed / 233280;
+    if (r < 0.33) return "4/3";     // landscape
+    if (r < 0.66) return "1/1";     // square
+    return "3/4";                   // portrait
   };
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-      {ads.map((ad, index) => (
-        <div key={ad.id} className="group relative">
-          <Card className="overflow-hidden border border-border/40 rounded-2xl shadow-sm transition-all duration-200 hover:shadow-lg hover:border-primary/40">
-            <div 
-              className="relative bg-muted/20" 
-              style={{ aspectRatio: getAspectRatio(index) }}
-            >
-              {ad.media === "video" ? (
-                <video 
-                  src={ad.previewUrl} 
-                  className="w-full h-full object-cover" 
-                  muted 
-                  playsInline 
-                />
-              ) : (
-                <img 
-                  src={ad.previewUrl} 
-                  alt={ad.heading} 
-                  className="w-full h-full object-cover" 
-                />
-              )}
+    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
+      {ads.map((ad, index) => {
+        const tiltClasses = ["-rotate-2", "rotate-1", "-rotate-1", "rotate-2", "rotate-[1.5deg]", "-rotate-[1.5deg]"];
+        const tiltClass = tiltClasses[(index * 7) % tiltClasses.length];
+        // Randomly allow items to span 2 columns on large screens for variety
+        const seed = (index * 1103515245 + 12345) & 0x7fffffff;
+        const spanLarge = seed % 7 === 0; // ~14% chance
+        return (
+          <div key={ad.id} className={`group relative ${spanLarge ? 'lg:col-span-2' : ''}`}>
+            <Card className={`overflow-hidden border border-primary/10 rounded-2xl shadow-sm transition-all duration-500 hover:shadow-glow-lg hover:border-primary/30 bg-background/40 backdrop-blur-sm transform-gpu ${tiltClass} group-hover:rotate-0 group-hover:scale-[1.02]`}>
+              <div 
+                className="relative bg-muted/20" 
+                style={{ aspectRatio: getAspectRatio(index) }}
+              >
+                <div className="pointer-events-none absolute -inset-1 bg-gradient-to-r from-primary/20 via-accent/10 to-primary/20 blur-xl opacity-60 group-hover:opacity-90 transition-opacity -z-10" />
+                <div className="pointer-events-none absolute -inset-px rounded-2xl border border-primary/10" />
+                {ad.media === "video" ? (
+                  <video 
+                    src={ad.previewUrl} 
+                    className="w-full h-full object-cover" 
+                    muted 
+                    playsInline 
+                  />
+                ) : (
+                  <img 
+                    src={ad.previewUrl} 
+                    alt={ad.heading} 
+                    className="w-full h-full object-cover transform-gpu transition-transform duration-700 ease-out group-hover:scale-[1.06]" 
+                  />
+                )}
 
-              {/* Hover Overlay */}
-              <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/30 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-200" />
+                {/* Scanlines + sheen */}
+                <div className="pointer-events-none absolute inset-0">
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#050608]/90 via-[#050608]/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-primary/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  <div className="absolute inset-0 opacity-[0.08] group-hover:opacity-20 transition-opacity duration-300" style={{ backgroundImage: "repeating-linear-gradient( to bottom, rgba(255,255,255,0.06) 0, rgba(255,255,255,0.06) 1px, transparent 1px, transparent 3px)" }} />
+                </div>
 
-              {/* Content Overlay */}
-              <div className="absolute inset-0 flex items-end p-4 opacity-0 group-hover:opacity-100 transition-all duration-200">
-                <div className="w-full space-y-3">
-                  {/* Title and Tags */}
-                  <div className="min-w-0">
-                    <h3 className="text-base font-semibold text-white truncate mb-2">
-                      {ad.heading}
-                    </h3>
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <Badge variant="secondary" className="bg-primary/20 text-primary border-primary/30">
-                        <BadgeCheckIcon className="w-3 h-3 mr-1" />
-                        {ad.platform}
-                      </Badge>
-                      <Badge variant="outline" className="text-xs border-white/20 text-white">
-                        {ad.postType}
-                      </Badge>
+                {/* Content Overlay */}
+                <div className="absolute inset-0 flex items-end p-4 opacity-0 group-hover:opacity-100 transition-all duration-300">
+                  <div className="w-full space-y-3">
+                    {/* Title and Tags */}
+                    <div className="min-w-0">
+                      <h3 className="text-base font-semibold text-white truncate mb-2">
+                        {ad.heading}
+                      </h3>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <Badge variant="secondary" className="bg-primary/20 text-primary border-primary/30">
+                          <BadgeCheckIcon className="w-3 h-3 mr-1" />
+                          {ad.platform}
+                        </Badge>
+                        <Badge variant="outline" className="text-xs border-white/20 text-white">
+                          {ad.postType}
+                        </Badge>
+                        <Badge variant="outline" className="text-xs border-white/20 text-white">
+                          <Calendar className="w-3 h-3 mr-1" />
+                          <DateClient iso={ad.createdAt} options={{ month: 'short', day: 'numeric' }} />
+                        </Badge>
+                      </div>
                     </div>
-                  </div>
 
-                  {/* Action Buttons */}
-                  <div className="flex items-center gap-2 pt-2">
-                    <Button 
-                      size="sm" 
-                      variant="outline" 
-                      className="h-8 px-3 pointer-events-auto border-white/20 text-white hover:bg-white/10 hover:border-white/40"
-                    >
-                      <Eye className="w-3 h-3 mr-1" />
-                      View
-                    </Button>
-                    <Button 
-                      size="sm" 
-                      className="h-8 px-3 pointer-events-auto bg-primary text-primary-foreground hover:bg-primary/90"
-                    >
-                      <Download className="w-3 h-3 mr-1" />
-                      Save
-                    </Button>
+                    {/* Action Buttons */}
+                    <div className="flex items-center gap-2 pt-2">
+                      <Button 
+                        size="sm" 
+                        variant="outline" 
+                        className="h-8 px-3 pointer-events-auto border-white/20 text-white hover:bg-white/10 hover:border-white/40"
+                      >
+                        <Eye className="w-3 h-3 mr-1" />
+                        View
+                      </Button>
+                      <Button 
+                        size="sm" 
+                        className="h-8 px-3 pointer-events-auto bg-primary text-primary-foreground hover:bg-primary/90"
+                      >
+                        <Download className="w-3 h-3 mr-1" />
+                        Save
+                      </Button>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          </Card>
-        </div>
-      ))}
+            </Card>
+          </div>
+        );
+      })}
     </div>
   );
 }
@@ -260,6 +296,11 @@ export default function LibraryPage() {
   const [loading, setLoading] = useState(true);
   const [generatingImage, setGeneratingImage] = useState(false);
   const [generatedImage, setGeneratedImage] = useState<string | null>(null);
+  const [query, setQuery] = useState("");
+  const [platform, setPlatform] = useState<string>("all");
+  const [postType, setPostType] = useState<string>("all");
+  const [sortBy, setSortBy] = useState<string>("newest");
+  const router = useRouter();
 
   useEffect(() => {
     // Simulate loading and set mock ads
@@ -290,6 +331,29 @@ export default function LibraryPage() {
     }
   };
 
+  const filteredAds = useMemo(() => {
+    const q = query.toLowerCase().trim();
+    let list = ads.filter((ad) => {
+      const matchesQuery = !q || ad.heading.toLowerCase().includes(q) || ad.platform.toLowerCase().includes(q) || ad.postType.toLowerCase().includes(q);
+      const matchesPlatform = platform === "all" || ad.platform.toLowerCase() === platform;
+      const matchesPostType = postType === "all" || ad.postType.toLowerCase() === postType;
+      return matchesQuery && matchesPlatform && matchesPostType;
+    });
+    list = list.sort((a, b) => {
+      if (sortBy === "newest") return +new Date(b.createdAt) - +new Date(a.createdAt);
+      if (sortBy === "oldest") return +new Date(a.createdAt) - +new Date(b.createdAt);
+      return a.heading.localeCompare(b.heading);
+    });
+    return list;
+  }, [ads, query, platform, postType, sortBy]);
+
+  const total = ads.length;
+  const last7 = ads.filter(a => (+new Date() - +new Date(a.createdAt)) < 7 * 86400000).length;
+  const platformsUsed = new Set(ads.map(a => a.platform)).size;
+
+  const distinctPostTypes = Array.from(new Set(ads.map(a => a.postType.toLowerCase())));
+  const distinctPlatforms = Array.from(new Set(ads.map(a => a.platform.toLowerCase())));
+
   return (
     <div className="space-y-8 p-6">
       <Breadcrumb>
@@ -304,16 +368,96 @@ export default function LibraryPage() {
         </BreadcrumbList>
       </Breadcrumb>
       
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Your Ad Library</h1>
-          <p className="text-muted-foreground mt-1">Manage and organize your created advertisements</p>
+      <div className="relative">
+        <div className="absolute -inset-x-4 -top-6 h-24 bg-gradient-to-b from-primary/5 to-transparent blur-2xl -z-10" />
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-primary via-accent to-primary">
+              Your Ad Library
+            </h1>
+            <p className="text-muted-foreground mt-1">Manage and organize your created advertisements</p>
+          </div>
+          <Button onClick={() => router.push('/dashboard/create')} disabled={generatingImage} className="bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90">
+            <FileImage className="w-4 h-4 mr-2" />
+            Generate New Ad
+          </Button>
         </div>
-        <Button onClick={handleGenerateImage} disabled={generatingImage}>
-          <FileImage className="w-4 h-4 mr-2" />
-          Generate New Ad
-        </Button>
       </div>
+
+      {/* Quick Stats */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <Card className="border-primary/10 bg-background/40 backdrop-blur-sm">
+          <CardContent className="p-4">
+            <div className="text-xs text-muted-foreground">Total Items</div>
+            <div className="text-2xl font-semibold">{total}</div>
+          </CardContent>
+        </Card>
+        <Card className="border-primary/10 bg-background/40 backdrop-blur-sm">
+          <CardContent className="p-4">
+            <div className="text-xs text-muted-foreground">New This Week</div>
+            <div className="text-2xl font-semibold">{last7}</div>
+          </CardContent>
+        </Card>
+        <Card className="border-primary/10 bg-background/40 backdrop-blur-sm">
+          <CardContent className="p-4">
+            <div className="text-xs text-muted-foreground">Platforms</div>
+            <div className="text-2xl font-semibold">{platformsUsed}</div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Filters */}
+      <Card className="border-primary/10 bg-background/50 backdrop-blur-sm">
+        <CardContent className="p-4">
+          <div className="flex flex-col md:flex-row gap-3 md:gap-4 items-stretch md:items-center">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Input
+                placeholder="Search by title, platform or type"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                className="pl-9"
+              />
+            </div>
+            <div className="flex gap-3 md:gap-4">
+              <Select value={platform} onValueChange={setPlatform}>
+                <SelectTrigger className="w-[150px]">
+                  <SelectValue placeholder="Platform" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All platforms</SelectItem>
+                  {distinctPlatforms.map((p) => (
+                    <SelectItem key={p} value={p}>{p[0].toUpperCase() + p.slice(1)}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              <Select value={postType} onValueChange={setPostType}>
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue placeholder="Post type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All post types</SelectItem>
+                  {distinctPostTypes.map((t) => (
+                    <SelectItem key={t} value={t}>{t}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              <Select value={sortBy} onValueChange={setSortBy}>
+                <SelectTrigger className="w-[140px]">
+                  <SelectValue placeholder="Sort by" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="newest">Newest</SelectItem>
+                  <SelectItem value="oldest">Oldest</SelectItem>
+                  <SelectItem value="az">A–Z</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
       
       {generatingImage && <AdGenerationLoader />}
       
@@ -330,13 +474,13 @@ export default function LibraryPage() {
               <img src={generatedImage} alt="Generated Ad" className="w-full h-full object-cover" />
             </div>
             <div className="flex gap-3">
-              <Button onClick={handleDownloadImage} className="flex items-center gap-2">
+            <Button onClick={handleDownloadImage} className="flex items-center gap-2">
                 <Download className="w-4 h-4" />
                 Download Image
               </Button>
-              <Button variant="outline" className="flex items-center gap-2">
+            <Button variant="outline" className="flex items-center gap-2" onClick={() => router.push('/dashboard/create')}>
                 <Eye className="w-4 h-4" />
-                View Full Size
+              Open in Creator
               </Button>
             </div>
           </CardContent>
@@ -349,7 +493,7 @@ export default function LibraryPage() {
             <SkeletonCard key={i} />
           ))}
         </div>
-      ) : ads.length === 0 ? (
+      ) : filteredAds.length === 0 ? (
         <Card className="shadow-lg rounded-xl border border-border/40">
           <CardContent className="flex flex-col items-center justify-center py-16 text-center">
             <div className="p-4 rounded-full bg-muted/50 mb-4">
@@ -357,16 +501,23 @@ export default function LibraryPage() {
             </div>
             <h3 className="text-xl font-semibold mb-2">No ads yet!</h3>
             <p className="text-muted-foreground mb-6 max-w-sm">
-              Start creating amazing advertisements to see them appear in your library.
+              Try adjusting filters or start creating amazing advertisements to see them appear here.
             </p>
-            <Button onClick={handleGenerateImage} disabled={generatingImage}>
+            <Button onClick={() => router.push('/dashboard/create')} disabled={generatingImage}>
               <FileImage className="w-4 h-4 mr-2" />
               Create Your First Ad
             </Button>
           </CardContent>
         </Card>
       ) : (
-        <AdGallery ads={ads} />
+        <>
+          <div className="flex items-center justify-between text-sm text-muted-foreground">
+            <span>
+              Showing <span className="text-foreground font-medium">{filteredAds.length}</span> of {total}
+            </span>
+          </div>
+          <AdGallery ads={filteredAds} />
+        </>
       )}
     </div>
   );

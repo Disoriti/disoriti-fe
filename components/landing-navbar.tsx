@@ -12,6 +12,7 @@ const navigation = [
   { name: "About", href: "#about", isExternal: false },
   { name: "How it works", href: "#how-it-works", isExternal: false },
   { name: "Showcase", href: "#showcase", isExternal: false },
+  { name: "Team", href: "#team", isExternal: false },
   { name: "Pricing", href: "#pricing", isExternal: false },
   { name: "FAQ", href: "#faq", isExternal: false },
   { name: "Blogs", href: "/blogs", isExternal: true },

@@ -8,7 +8,7 @@ import Image from "next/image";
 import { 
   Sparkles, Bot, Wand2, Code, Zap, Shield, Lightbulb, Rocket, Target, Lock,
   Keyboard, Brain, LayoutTemplate, SlidersHorizontal, ArrowRight, Mail, 
-  Twitter, Github, Linkedin, Instagram, Check, Star
+  Twitter, Github, Linkedin, Instagram, Check, Star, Users
 } from "lucide-react";
 
 export default function LandingPage() {
@@ -463,6 +463,95 @@ export default function LandingPage() {
               Start Creating Your Own
             </Button>
           </div>
+        </div>
+      </section>
+
+      {/* Our Team Section */}
+      <section id="team" className="relative h-screen flex items-center">
+        <div className="container mx-auto px-6">
+          {/* Section Header */}
+          <div className="text-center mb-12">
+            <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 px-4 py-2 text-sm text-muted-foreground backdrop-blur-sm bg-background/30 mb-4">
+              <Users className="h-4 w-4 text-primary" />
+              Our Team
+            </div>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-primary via-accent to-primary">
+              The Minds Behind Disoriti
+            </h2>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+              Holographic profiles. Real humans. United by a love for creative AI.
+            </p>
+          </div>
+
+          {/* Team Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto">
+            {[
+              {
+                name: "Aiden Kael",
+                role: "CEO",
+                image: "/image-3.png",
+                blurb: "Vision, product, partnerships",
+                floatDelay: "0s",
+              },
+              {
+                name: "Nova Lee",
+                role: "CFO",
+                image: "/image-4.png",
+                blurb: "Sustainable growth, clarity in numbers",
+                floatDelay: "0.2s",
+              },
+              {
+                name: "Rhea Sol",
+                role: "AI / Software Engineer",
+                image: "/image-5.png",
+                blurb: "Model orchestration and delightful UX",
+                floatDelay: "0.4s",
+              },
+            ].map((member, index) => (
+              <div key={index} className="relative group">
+                {/* Holographic Orbit */}
+                <div className="absolute -inset-1 rounded-2xl bg-gradient-to-r from-primary/20 via-accent/10 to-primary/20 blur-xl opacity-60 group-hover:opacity-90 transition-opacity -z-10" />
+                <div className="absolute -inset-0.5 rounded-2xl border border-primary/10 bg-[#050608]/40 backdrop-blur-sm -z-10" />
+
+                {/* Card */}
+                <div className="p-6 rounded-2xl border border-primary/10 bg-[#050608]/50 backdrop-blur-sm h-full">
+                  {/* Avatar with Aura */}
+                  <div className="relative w-24 h-24 mx-auto mb-4">
+                    <div className="absolute -inset-1 rounded-full bg-gradient-to-r from-primary to-accent opacity-30 blur-md" />
+                    <div className="absolute inset-0 rounded-full border border-primary/30" />
+                    <div className="relative w-24 h-24 rounded-full overflow-hidden animate-float" style={{ animationDelay: member.floatDelay }}>
+                      <Image src={member.image} alt={member.name} fill className="object-cover" />
+                    </div>
+                  </div>
+
+                  {/* Name & Role */}
+                  <div className="text-center">
+                    <h3 className="text-xl font-semibold">{member.name}</h3>
+                    <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 px-3 py-1 text-xs text-muted-foreground backdrop-blur-sm bg-background/30 mt-2">
+                      <Shield className="h-3 w-3 text-primary" />
+                      {member.role}
+                    </div>
+                    <p className="text-sm text-muted-foreground mt-3">{member.blurb}</p>
+                  </div>
+
+                  {/* Neon Baseline */}
+                  <div className="mt-6 h-px w-full bg-gradient-to-r from-transparent via-primary/40 to-transparent" />
+                  <div className="mt-3 flex items-center justify-center gap-3 text-xs text-muted-foreground">
+                    <span className="px-2 py-1 rounded bg-primary/10">Focus</span>
+                    <span className="px-2 py-1 rounded bg-accent/10">Impact</span>
+                    <span className="px-2 py-1 rounded bg-primary/10">Craft</span>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Background Effects */}
+        <div className="absolute inset-0 -z-10">
+          <div className="absolute -top-10 left-1/3 w-72 h-72 bg-primary/5 rounded-full blur-3xl" />
+          <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-accent/5 rounded-full blur-3xl" />
+          <div className="absolute inset-0 bg-neon-grid opacity-[0.08]" />
         </div>
       </section>
 
