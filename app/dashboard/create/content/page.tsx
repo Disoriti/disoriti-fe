@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/breadcrumb";
 import { useEffect, useState, useRef, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Sparkles, Pencil, Bot, Download, ChevronLeft, Save, Undo2, Redo2 } from "lucide-react";
+import { Sparkles, Pencil, Bot, Download, ChevronLeft, Save, Undo2, Redo2, Type } from "lucide-react";
 import AdGenerationLoader from "@/components/ad-generation-loader";
 import NavigationButtons from "@/components/navigation-buttons";
 import AdLayoutSVG from "@/components/AdLayoutSVG";
@@ -127,6 +127,7 @@ function ContentPageInner() {
   const [selectedLayoutIdx, setSelectedLayoutIdx] = useState(0);
   const [layouts, setLayouts] = useState<Layout[]>(defaultLayouts);
   const [selectedElement, setSelectedElement] = useState<"heading" | "subheading" | "cta" | null>(null);
+  const [customTextVisible, setCustomTextVisible] = useState<boolean>(false);
   const [imageEdits, setImageEdits] = useState({ brightness: 100, contrast: 100, saturation: 100 });
   const [logoPosition, setLogoPosition] = useState<'top-left' | 'top-right' | 'bottom-left' | 'bottom-right'>('top-left');
   const [logoColor, setLogoColor] = useState<string>("#ffffff");
@@ -148,6 +149,7 @@ function ContentPageInner() {
   const platform = searchParams?.get("platform") || "";
   const postType = searchParams?.get("postType") || "";
   const settings = searchParams?.get("settings") || "";
+  const autoGenerate = searchParams?.get("autoGenerate") === "true";
   
   // Get prompts from localStorage to avoid URL length issues
   const [prompt, setPrompt] = useState("");
@@ -168,6 +170,26 @@ function ContentPageInner() {
       setPrompt(storedOriginal);
     }
   }, []);
+
+  // Auto-generate image when autoGenerate flag is true
+  useEffect(() => {
+    if (autoGenerate && enhanced && !generatingImage && !generatedImage) {
+      // Set some default content values for the image generation
+      setPostHeading("Amazing Content");
+      setPostSubheading("Discover something incredible");
+      setCtaText("Learn More");
+      setGeneratedContent({
+        heading: "Amazing Content",
+        subheading: "Discover something incredible", 
+        cta: "Learn More"
+      });
+      
+      // Trigger image generation after a short delay to ensure state is set
+      setTimeout(() => {
+        handleGenerateImage();
+      }, 500);
+    }
+  }, [autoGenerate, enhanced, generatingImage, generatedImage]);
 
   const handleDownload = async () => {
     if (exportRef.current) {
@@ -193,8 +215,8 @@ function ContentPageInner() {
         return;
       }
 
-      // Check if we have content (either generated or manually entered)
-      if (!generatedContent && (!postHeading.trim() || !postSubheading.trim() || !ctaText.trim())) {
+      // Check if we have content (either generated or manually entered) - skip this check if autoGenerate is true
+      if (!autoGenerate && !generatedContent && (!postHeading.trim() || !postSubheading.trim() || !ctaText.trim())) {
         toast.error('Please generate content first or fill in all fields');
         setGeneratingImage(false);
         return;
@@ -271,8 +293,22 @@ function ContentPageInner() {
           // Update layouts with the new layout data from API
           if (data.data.layout.layouts && Array.isArray(data.data.layout.layouts)) {
             const normalized = normalizeApiLayouts(data.data.layout.layouts);
-            setLayouts(normalized);
-            setSelectedLayoutIdx(0); // Select first layout by default
+            // Keep only first layout option
+            const firstOnly = normalized.length > 0 ? [normalized[0]] : normalized;
+            // Hide default heading/subheading/cta initially; user can add text later
+            if (firstOnly[0]) {
+              firstOnly[0] = {
+                ...firstOnly[0],
+                elements: {
+                  ...firstOnly[0].elements,
+                  heading: { ...firstOnly[0].elements.heading, hidden: true, text_content: firstOnly[0].elements.heading.text_content || "" },
+                  subheading: { ...firstOnly[0].elements.subheading, hidden: true, text_content: firstOnly[0].elements.subheading.text_content || "" },
+                  cta: { ...firstOnly[0].elements.cta, hidden: true, text_content: firstOnly[0].elements.cta.text_content || "" },
+                }
+              };
+            }
+            setLayouts(firstOnly);
+            setSelectedLayoutIdx(0);
           }
         } else {
           toast.error('Invalid response format from server');
@@ -487,83 +523,11 @@ function ContentPageInner() {
 
       {generatedImage ? (
         <div className="w-full max-w-[1700px] mx-auto flex-1">
-          <div className="bg-background p-4 rounded-2xl border border-border shadow-lg flex flex-row gap-4 items-start justify-center">
-            {/* Tiles on the left (catalogue) */}
-            <div className="flex flex-col gap-4 items-center w-[160px] flex-shrink-0">
-              <h3 className="font-semibold text-lg text-foreground mb-2 pt-1 w-full">Layouts</h3>
-              <div className="flex flex-col gap-4 items-center w-full">
-                {[1, 2, 3].map((number, idx) => (
-                  <div
-                    key={idx}
-                    className={`rounded-lg border-2 cursor-pointer transition-all duration-300 transform hover:scale-105 ${selectedLayoutIdx === idx ? "border-primary shadow-primary/50 shadow-lg" : "border-border"}`}
-                    style={{ 
-                      background: "linear-gradient(135deg, rgba(0,0,0,0.8) 0%, rgba(20,20,20,0.9) 100%)", 
-                      width: 150, 
-                      height: 150, 
-                      overflow: "hidden",
-                      position: "relative"
-                    }}
-                    onClick={() => setSelectedLayoutIdx(idx)}
-                  >
-                    <div className="w-full h-full flex items-center justify-center">
-                      <span 
-                        className={`text-6xl font-bold transition-all duration-300 ${
-                          selectedLayoutIdx === idx 
-                            ? "text-primary drop-shadow-[0_0_20px_hsl(var(--primary))] animate-pulse" 
-                            : "text-primary/60 drop-shadow-[0_0_10px_hsl(var(--primary)/0.3)]"
-                        }`}
-                        style={{
-                          textShadow: selectedLayoutIdx === idx 
-                            ? "0 0 20px hsl(var(--primary)), 0 0 40px hsl(var(--primary)), 0 0 60px hsl(var(--primary))"
-                            : "0 0 10px hsl(var(--primary)/0.3), 0 0 20px hsl(var(--primary)/0.2)"
-                        }}
-                      >
-                        {number}
-                      </span>
-                    </div>
-                    {/* Subtle glow effect */}
-                    <div 
-                      className={`absolute inset-0 rounded-lg transition-all duration-300 ${
-                        selectedLayoutIdx === idx 
-                          ? "bg-gradient-to-br from-primary/10 to-transparent" 
-                          : "bg-transparent"
-                      }`}
-                    />
-                  </div>
-                ))}
-                
-                {/* More Layouts Coming Soon Info */}
-                <div className="mt-4 p-3 rounded-lg bg-gradient-to-r from-primary/5 to-accent/5 border border-primary/20 w-full">
-                  <div className="flex items-start gap-2">
-                    <div className="flex-shrink-0 p-1.5 rounded-full bg-primary/10">
-                      <span role="img" aria-label="sparkles" className="text-sm">🎨</span>
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <h4 className="text-xs font-semibold text-primary mb-1 leading-tight">
-                        More Layouts Coming!
-                      </h4>
-                      <p className="text-xs text-muted-foreground leading-relaxed">
-                        We're adding beautiful new layouts including modern, minimalist, and creative designs.
-                      </p>
-                      <div className="flex items-center gap-1.5 mt-1.5">
-                        <div className="flex gap-0.5">
-                          <div className="w-1.5 h-1.5 rounded-full bg-primary/40 animate-pulse"></div>
-                          <div className="w-1.5 h-1.5 rounded-full bg-primary/40 animate-pulse" style={{ animationDelay: '0.2s' }}></div>
-                          <div className="w-1.5 h-1.5 rounded-full bg-primary/40 animate-pulse" style={{ animationDelay: '0.4s' }}></div>
-                        </div>
-                        <span className="text-xs text-primary/70 font-medium">Soon</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="w-px bg-border self-stretch my-4" />
+          <div className="bg-background p-4 rounded-2xl border border-border shadow-lg flex flex-row gap-6 items-start justify-center">
             
             {/* Main display area (center) */}
             <div className="flex-1 flex flex-col items-center justify-start gap-4">
-              <div ref={previewRef} className="w-full max-w-[640px] aspect-square bg-background/50 rounded-lg border border-primary/40 shadow-[0_0_20px_4px_hsl(var(--primary)/0.5)] overflow-hidden"
+              <div ref={previewRef} className="w-full max-w-[1024px] aspect-[4/3] bg-background/50 rounded-lg border border-primary/40 shadow-[0_0_20px_4px_hsl(var(--primary)/0.5)] overflow-hidden"
                 onClick={e => {
                   if (e.target === e.currentTarget) {
                     setSelectedElement(null);
@@ -574,8 +538,8 @@ function ContentPageInner() {
                 <AdLayoutSVG
                   imageUrl={generatedImage || "/image.png"}
                   layout={layouts[selectedLayoutIdx]}
-                  width={640}
-                  height={640}
+                  width={1024}
+                  height={768}
                   selected={selectedElement}
                   onSelectElement={setSelectedElement}
                   onElementsChange={handleElementChange}
@@ -595,8 +559,8 @@ function ContentPageInner() {
                   <AdLayoutPreview
                     imageUrl={generatedImage || ""}
                     layout={layouts[selectedLayoutIdx]}
-                    width={640}
-                    height={640}
+                    width={1024}
+                    height={768}
                     logoImage={logoImage}
                     logoPosition={logoPosition}
                     logoColor={logoColor}
@@ -605,7 +569,7 @@ function ContentPageInner() {
                   />
                 </div>
               </div>
-              <div className="w-full max-w-[640px]">
+              <div className="w-full max-w-[1024px]">
                 <div className="flex items-center justify-between gap-3">
                   <div className="flex items-center gap-2">
                     <Button variant="outline" size="icon" className="text-white hover:text-white" onClick={handleUndo} disabled={history.length === 0} aria-label="Undo">
@@ -613,6 +577,43 @@ function ContentPageInner() {
                     </Button>
                     <Button variant="outline" size="icon" className="text-white hover:text-white" onClick={handleRedo} disabled={future.length === 0} aria-label="Redo">
                       <Redo2 className="w-4 h-4" />
+                    </Button>
+                    <Button variant="outline" className="text-white hover:text-white flex items-center gap-2" onClick={() => {
+                      const current = layouts[selectedLayoutIdx];
+                      const newLayouts = [...layouts];
+                      // Decide which element to use next: heading -> subheading -> cta
+                      let nextType: "heading" | "subheading" | "cta" = "heading";
+                      if (!current.elements.heading.hidden) {
+                        nextType = !current.elements.subheading.hidden ? "cta" : "subheading";
+                      }
+                      const defaults: Record<"heading"|"subheading"|"cta", { x: number; y: number; w: number; h: number; text: string; } > = {
+                        heading: { x: 80, y: 820, w: 840, h: 120, text: "Your text here" },
+                        subheading: { x: 80, y: 920, w: 840, h: 100, text: "Add more details" },
+                        cta: { x: 80, y: 1040-140, w: 360, h: 80, text: "Call to Action" },
+                      };
+                      const d = defaults[nextType];
+                      newLayouts[selectedLayoutIdx] = {
+                        ...current,
+                        elements: {
+                          ...current.elements,
+                          [nextType]: {
+                            ...current.elements[nextType],
+                            hidden: false,
+                            text_content: current.elements[nextType].text_content || d.text,
+                            bbox: {
+                              ...current.elements[nextType].bbox,
+                              x: current.elements[nextType].bbox.x || d.x,
+                              y: current.elements[nextType].bbox.y || d.y,
+                              width: current.elements[nextType].bbox.width || d.w,
+                              height: current.elements[nextType].bbox.height || d.h,
+                            }
+                          }
+                        }
+                      };
+                      setLayouts(newLayouts);
+                      setSelectedElement(nextType);
+                    }} aria-label="Add Text">
+                      <Type className="w-4 h-4" /> Add Text
                     </Button>
                   </div>
                   <NavigationButtons
@@ -684,57 +685,63 @@ function ContentPageInner() {
                   <p className="text-disoriti-primary/70">Generating content...</p>
                 </div>
               ) : generatedContent ? (
-                <div className="w-full space-y-4">
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <div className="p-4 bg-background/50 rounded-lg border-2 border-primary cursor-help">
-                          <div className="flex items-center justify-between mb-4">
-                            <h3 className="text-sm font-medium text-disoriti-primary">Generated Content:</h3>
-                            <span className="text-base text-primary animate-pulse drop-shadow-[0_0_8px_hsl(var(--primary))]">💡</span>
+                <div className="w-full flex flex-col items-center">
+                  <p className="text-muted-foreground">Content generated successfully!</p>
+                  {/* Generated Content Section - Commented Out */}
+                  {/*
+                  <div className="w-full space-y-4">
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <div className="p-4 bg-background/50 rounded-lg border-2 border-primary cursor-help">
+                            <div className="flex items-center justify-between mb-4">
+                              <h3 className="text-sm font-medium text-disoriti-primary">Generated Content:</h3>
+                              <span className="text-base text-primary animate-pulse drop-shadow-[0_0_8px_hsl(var(--primary))]">💡</span>
+                            </div>
+                            <div className="space-y-4">
+                              <div>
+                                <Label htmlFor="ai-heading" className="text-xs text-muted-foreground block mb-2">Heading:</Label>
+                                <Input
+                                  id="ai-heading"
+                                  type="text"
+                                  value={postHeading}
+                                  onChange={(e) => setPostHeading(e.target.value)}
+                                  className="w-full p-3 bg-background/80 rounded-lg border-2 focus:border-primary focus:ring-2 focus:ring-primary/20"
+                                  placeholder="Enter heading"
+                                />
+                              </div>
+                              <div>
+                                <Label htmlFor="ai-subheading" className="text-xs text-muted-foreground block mb-2">Subheading:</Label>
+                                <Input
+                                  id="ai-subheading"
+                                  type="text"
+                                  value={postSubheading}
+                                  onChange={(e) => setPostSubheading(e.target.value)}
+                                  className="w-full p-3 bg-background/80 rounded-lg border-2 focus:border-primary focus:ring-2 focus:ring-primary/20"
+                                  placeholder="Enter subheading"
+                                />
+                              </div>
+                              <div>
+                                <Label htmlFor="ai-cta" className="text-xs text-muted-foreground block mb-2">CTA:</Label>
+                                <Input
+                                  id="ai-cta"
+                                  type="text"
+                                  value={ctaText}
+                                  onChange={(e) => setCtaText(e.target.value)}
+                                  className="w-full p-3 bg-background/80 rounded-lg border-2 focus:border-primary focus:ring-2 focus:ring-primary/20"
+                                  placeholder="Enter call to action"
+                                />
+                              </div>
+                            </div>
                           </div>
-                          <div className="space-y-4">
-                            <div>
-                              <Label htmlFor="ai-heading" className="text-xs text-muted-foreground block mb-2">Heading:</Label>
-                              <Input
-                                id="ai-heading"
-                                type="text"
-                                value={postHeading}
-                                onChange={(e) => setPostHeading(e.target.value)}
-                                className="w-full p-3 bg-background/80 rounded-lg border-2 focus:border-primary focus:ring-2 focus:ring-primary/20"
-                                placeholder="Enter heading"
-                              />
-                            </div>
-                            <div>
-                              <Label htmlFor="ai-subheading" className="text-xs text-muted-foreground block mb-2">Subheading:</Label>
-                              <Input
-                                id="ai-subheading"
-                                type="text"
-                                value={postSubheading}
-                                onChange={(e) => setPostSubheading(e.target.value)}
-                                className="w-full p-3 bg-background/80 rounded-lg border-2 focus:border-primary focus:ring-2 focus:ring-primary/20"
-                                placeholder="Enter subheading"
-                              />
-                            </div>
-                            <div>
-                              <Label htmlFor="ai-cta" className="text-xs text-muted-foreground block mb-2">CTA:</Label>
-                              <Input
-                                id="ai-cta"
-                                type="text"
-                                value={ctaText}
-                                onChange={(e) => setCtaText(e.target.value)}
-                                className="w-full p-3 bg-background/80 rounded-lg border-2 focus:border-primary focus:ring-2 focus:ring-primary/20"
-                                placeholder="Enter call to action"
-                              />
-                            </div>
-                          </div>
-                        </div>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p className="text-sm">You can always edit the heading, subheading, and CTA in our editor!</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p className="text-sm">You can always edit the heading, subheading, and CTA in our editor!</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </div>
+                  */}
                 </div>
               ) : (
                 <Button

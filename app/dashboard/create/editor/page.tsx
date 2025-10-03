@@ -147,8 +147,9 @@ function EnhancePromptPageInner() {
     localStorage.setItem('selectedEnhancedPrompt', finalEnhancedPrompt);
     localStorage.setItem('selectedOriginalPrompt', finalPrompt);
     
+    // Navigate directly to content page with auto-generate flag to skip content generation
     router.push(
-      `/dashboard/create/content?type=${type}&media=${media}&platform=${platform}&postType=${postType}`
+      `/dashboard/create/content?type=${type}&media=${media}&platform=${platform}&postType=${postType}&autoGenerate=true`
     );
   };
 

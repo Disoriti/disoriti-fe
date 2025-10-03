@@ -1,0 +1,154 @@
+{
+  "navigation": {
+    "home": "Home",
+    "dashboard": "Dashboard",
+    "create": "Create",
+    "library": "Library",
+    "chat": "Disoriti Chat",
+    "scheduler": "Scheduler",
+    "settings": "Settings",
+    "pricing": "Pricing",
+    "login": "Login",
+    "signup": "Sign Up"
+  },
+  "hero": {
+    "title": "Transform Ideas into Stunning Digital Reality",
+    "subtitle": "AI-powered design platform that brings your creative vision to life with intelligent automation and professional-grade tools.",
+    "getStarted": "Get Started",
+    "watchDemo": "Watch Demo"
+  },
+  "features": {
+    "title": "Powerful Features for Modern Creators",
+    "subtitle": "Everything you need to create, design, and publish stunning content with AI assistance.",
+    "aiGeneration": {
+      "title": "AI Content Generation",
+      "description": "Generate compelling copy, headlines, and descriptions with advanced AI technology."
+    },
+    "smartTemplates": {
+      "title": "Smart Templates",
+      "description": "Choose from hundreds of professionally designed templates that adapt to your content."
+    },
+    "collaboration": {
+      "title": "Real-time Collaboration",
+      "description": "Work together with your team in real-time with seamless sharing and editing."
+    },
+    "analytics": {
+      "title": "Performance Analytics",
+      "description": "Track your content performance with detailed insights and optimization suggestions."
+    }
+  },
+  "pricing": {
+    "title": "Simple, Transparent Pricing",
+    "subtitle": "Choose the plan that fits your needs. Upgrade or downgrade at any time.",
+    "free": {
+      "name": "Free",
+      "price": "$0",
+      "period": "/month",
+      "description": "Perfect for getting started",
+      "features": [
+        "5 AI generations per month",
+        "Basic templates",
+        "Standard support",
+        "1GB storage"
+      ],
+      "cta": "Get Started Free"
+    },
+    "pro": {
+      "name": "Pro",
+      "price": "$29",
+      "period": "/month",
+      "description": "For growing businesses",
+      "features": [
+        "Unlimited AI generations",
+        "Premium templates",
+        "Priority support",
+        "10GB storage",
+        "Team collaboration"
+      ],
+      "cta": "Start Pro Trial",
+      "popular": "Most Popular"
+    },
+    "enterprise": {
+      "name": "Enterprise",
+      "price": "Custom",
+      "period": "",
+      "description": "For large organizations",
+      "features": [
+        "Everything in Pro",
+        "Custom integrations",
+        "Dedicated support",
+        "Unlimited storage",
+        "Advanced analytics"
+      ],
+      "cta": "Contact Sales"
+    }
+  },
+  "footer": {
+    "company": {
+      "title": "Company",
+      "about": "About",
+      "blog": "Blog",
+      "careers": "Careers",
+      "press": "Press",
+      "partners": "Partners"
+    },
+    "product": {
+      "title": "Product",
+      "features": "Features",
+      "aiGenerator": "AI Generator",
+      "templates": "Templates",
+      "editor": "Editor",
+      "pricing": "Pricing"
+    },
+    "support": {
+      "title": "Support",
+      "helpCenter": "Help Center",
+      "community": "Community",
+      "contact": "Contact",
+      "status": "Status",
+      "privacy": "Privacy"
+    },
+    "legal": {
+      "privacyPolicy": "Privacy Policy",
+      "termsOfService": "Terms of Service",
+      "cookiePolicy": "Cookie Policy"
+    },
+    "newsletter": {
+      "title": "Stay Updated",
+      "description": "Get the latest updates on new features and AI innovations.",
+      "placeholder": "Enter your email",
+      "subscribe": "Subscribe"
+    },
+    "copyright": "All rights reserved."
+  },
+  "terms": {
+    "title": "Terms and Conditions",
+    "subtitle": "Please read these terms and conditions carefully before using our AI-powered design platform.",
+    "lastUpdated": "Last updated",
+    "sections": {
+      "overview": "Overview",
+      "acceptance": "Acceptance",
+      "services": "Services",
+      "payments": "Payments",
+      "liability": "Liability",
+      "changes": "Changes"
+    },
+    "backToHome": "Back to Home"
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "An error occurred",
+    "success": "Success",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "create": "Create",
+    "update": "Update",
+    "close": "Close",
+    "next": "Next",
+    "previous": "Previous",
+    "continue": "Continue",
+    "back": "Back"
+  }
+}

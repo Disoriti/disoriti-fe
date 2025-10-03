@@ -18,6 +18,7 @@ export default function LandingPage() {
   const [isYearly, setIsYearly] = useState(false);
   const { isAuthenticated, isLoading } = useAuth();
   const router = useRouter();
+  // const t = useTranslations();
 
   // Redirect authenticated users directly to dashboard
   useEffect(() => {
@@ -71,15 +72,12 @@ export default function LandingPage() {
 
               {/* Headline */}
               <h1 className="text-3xl sm:text-4xl md:text-6xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-primary via-accent to-primary bg-[length:200%] animate-gradient leading-tight">
-                Transform Ideas into
-                <br />
-                Digital Reality
+                Transform Ideas into Digital Reality
               </h1>
 
               {/* Description */}
               <p className="text-lg md:text-xl text-muted-foreground animate-fade-in max-w-lg mx-auto md:mx-0">
-                Harness the power of AI to create stunning visuals and compelling content. 
-                Your creative companion for the digital age.
+                AI-powered design platform that brings your creative vision to life with intelligent automation and professional-grade tools.
               </p>
 
               {/* CTA Buttons */}
@@ -879,7 +877,7 @@ export default function LandingPage() {
               <Link href="#" className="text-muted-foreground hover:text-primary transition-colors">
                 Privacy Policy
               </Link>
-              <Link href="#" className="text-muted-foreground hover:text-primary transition-colors">
+              <Link href="/terms" className="text-muted-foreground hover:text-primary transition-colors">
                 Terms of Service
               </Link>
               <Link href="#" className="text-muted-foreground hover:text-primary transition-colors">

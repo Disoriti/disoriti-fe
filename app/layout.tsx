@@ -41,13 +41,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="dark">
+    <html className="dark">
       <head />
       <body
         className={`${poppins.variable} ${geistMono.variable} antialiased font-sans`}
       >
         <AuthProvider>
-          <main>{children}</main>
+          {children}
           <Toaster />
         </AuthProvider>
       </body>

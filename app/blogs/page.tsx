@@ -279,7 +279,7 @@ export default function BlogsPage() {
               <Link href="#" className="text-muted-foreground hover:text-primary transition-colors">
                 Privacy Policy
               </Link>
-              <Link href="#" className="text-muted-foreground hover:text-primary transition-colors">
+              <Link href="/terms" className="text-muted-foreground hover:text-primary transition-colors">
                 Terms of Service
               </Link>
             </div>

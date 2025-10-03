@@ -1,0 +1,154 @@
+{
+  "navigation": {
+    "home": "Startseite",
+    "dashboard": "Dashboard",
+    "create": "Erstellen",
+    "library": "Bibliothek",
+    "chat": "Disoriti Chat",
+    "scheduler": "Zeitplaner",
+    "settings": "Einstellungen",
+    "pricing": "Preise",
+    "login": "Anmelden",
+    "signup": "Registrieren"
+  },
+  "hero": {
+    "title": "Verwandeln Sie Ideen in beeindruckende digitale Realität",
+    "subtitle": "KI-gestützte Designplattform, die Ihre kreative Vision mit intelligenter Automatisierung und professionellen Tools zum Leben erweckt.",
+    "getStarted": "Loslegen",
+    "watchDemo": "Demo ansehen"
+  },
+  "features": {
+    "title": "Leistungsstarke Funktionen für moderne Kreative",
+    "subtitle": "Alles was Sie brauchen, um mit KI-Unterstützung beeindruckende Inhalte zu erstellen, zu gestalten und zu veröffentlichen.",
+    "aiGeneration": {
+      "title": "KI-Inhaltsgenerierung",
+      "description": "Generieren Sie überzeugende Texte, Überschriften und Beschreibungen mit fortschrittlicher KI-Technologie."
+    },
+    "smartTemplates": {
+      "title": "Intelligente Vorlagen",
+      "description": "Wählen Sie aus Hunderten von professionell gestalteten Vorlagen, die sich an Ihre Inhalte anpassen."
+    },
+    "collaboration": {
+      "title": "Echtzeit-Zusammenarbeit",
+      "description": "Arbeiten Sie in Echtzeit mit Ihrem Team zusammen mit nahtloser Freigabe und Bearbeitung."
+    },
+    "analytics": {
+      "title": "Leistungsanalyse",
+      "description": "Verfolgen Sie die Leistung Ihrer Inhalte mit detaillierten Einblicken und Optimierungsvorschlägen."
+    }
+  },
+  "pricing": {
+    "title": "Einfache, transparente Preise",
+    "subtitle": "Wählen Sie den Plan, der zu Ihren Bedürfnissen passt. Jederzeit upgraden oder downgraden.",
+    "free": {
+      "name": "Kostenlos",
+      "price": "0€",
+      "period": "/Monat",
+      "description": "Perfekt für den Einstieg",
+      "features": [
+        "5 KI-Generierungen pro Monat",
+        "Basis-Vorlagen",
+        "Standard-Support",
+        "1GB Speicher"
+      ],
+      "cta": "Kostenlos starten"
+    },
+    "pro": {
+      "name": "Pro",
+      "price": "29€",
+      "period": "/Monat",
+      "description": "Für wachsende Unternehmen",
+      "features": [
+        "Unbegrenzte KI-Generierungen",
+        "Premium-Vorlagen",
+        "Prioritäts-Support",
+        "10GB Speicher",
+        "Team-Zusammenarbeit"
+      ],
+      "cta": "Pro-Test starten",
+      "popular": "Am beliebtesten"
+    },
+    "enterprise": {
+      "name": "Enterprise",
+      "price": "Individuell",
+      "period": "",
+      "description": "Für große Organisationen",
+      "features": [
+        "Alles aus Pro",
+        "Benutzerdefinierte Integrationen",
+        "Dedizierter Support",
+        "Unbegrenzter Speicher",
+        "Erweiterte Analysen"
+      ],
+      "cta": "Vertrieb kontaktieren"
+    }
+  },
+  "footer": {
+    "company": {
+      "title": "Unternehmen",
+      "about": "Über uns",
+      "blog": "Blog",
+      "careers": "Karriere",
+      "press": "Presse",
+      "partners": "Partner"
+    },
+    "product": {
+      "title": "Produkt",
+      "features": "Funktionen",
+      "aiGenerator": "KI-Generator",
+      "templates": "Vorlagen",
+      "editor": "Editor",
+      "pricing": "Preise"
+    },
+    "support": {
+      "title": "Support",
+      "helpCenter": "Hilfe-Center",
+      "community": "Community",
+      "contact": "Kontakt",
+      "status": "Status",
+      "privacy": "Datenschutz"
+    },
+    "legal": {
+      "privacyPolicy": "Datenschutzrichtlinie",
+      "termsOfService": "Nutzungsbedingungen",
+      "cookiePolicy": "Cookie-Richtlinie"
+    },
+    "newsletter": {
+      "title": "Auf dem Laufenden bleiben",
+      "description": "Erhalten Sie die neuesten Updates zu neuen Funktionen und KI-Innovationen.",
+      "placeholder": "E-Mail eingeben",
+      "subscribe": "Abonnieren"
+    },
+    "copyright": "Alle Rechte vorbehalten."
+  },
+  "terms": {
+    "title": "Nutzungsbedingungen",
+    "subtitle": "Bitte lesen Sie diese Nutzungsbedingungen sorgfältig durch, bevor Sie unsere KI-gestützte Designplattform verwenden.",
+    "lastUpdated": "Zuletzt aktualisiert",
+    "sections": {
+      "overview": "Überblick",
+      "acceptance": "Annahme",
+      "services": "Dienstleistungen",
+      "payments": "Zahlungen",
+      "liability": "Haftung",
+      "changes": "Änderungen"
+    },
+    "backToHome": "Zurück zur Startseite"
+  },
+  "common": {
+    "loading": "Lädt...",
+    "error": "Ein Fehler ist aufgetreten",
+    "success": "Erfolgreich",
+    "cancel": "Abbrechen",
+    "save": "Speichern",
+    "delete": "Löschen",
+    "edit": "Bearbeiten",
+    "create": "Erstellen",
+    "update": "Aktualisieren",
+    "close": "Schließen",
+    "next": "Weiter",
+    "previous": "Zurück",
+    "continue": "Fortfahren",
+    "back": "Zurück"
+  }
+}

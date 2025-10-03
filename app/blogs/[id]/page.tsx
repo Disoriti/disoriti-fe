@@ -298,8 +298,8 @@ export default function BlogPostPage() {
               <Link href="/blogs" className="text-muted-foreground hover:text-primary transition-colors">
                 All Blogs
               </Link>
-              <Link href="#" className="text-muted-foreground hover:text-primary transition-colors">
-                Privacy Policy
+              <Link href="/terms" className="text-muted-foreground hover:text-primary transition-colors">
+                Terms of Service
               </Link>
             </div>
           </div>
