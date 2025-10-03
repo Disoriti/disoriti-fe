@@ -171,13 +171,15 @@ function ContentPageInner() {
     }
   }, []);
 
-  // Keyboard shortcut: T to add text
+  // Keyboard shortcuts: T/H/S/C to add text
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key.toLowerCase() === 't' && generatedImage) {
-        e.preventDefault();
-        handleAddText();
-      }
+      if (!generatedImage) return;
+      const key = e.key.toLowerCase();
+      if (key === 't') { e.preventDefault(); handleAddText(); }
+      if (key === 'h') { e.preventDefault(); handleAddText('heading'); }
+      if (key === 's') { e.preventDefault(); handleAddText('subheading'); }
+      if (key === 'c') { e.preventDefault(); handleAddText('cta'); }
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
@@ -395,13 +397,16 @@ function ContentPageInner() {
     setLayouts(newLayouts);
   };
 
-  const handleAddText = () => {
+  const handleAddText = (explicitType?: "heading" | "subheading" | "cta") => {
+    pushHistory();
     const current = layouts[selectedLayoutIdx];
     const newLayouts = [...layouts];
     // Decide which element to use next: heading -> subheading -> cta
-    let nextType: "heading" | "subheading" | "cta" = "heading";
-    if (!current.elements.heading.hidden) {
-      nextType = !current.elements.subheading.hidden ? "cta" : "subheading";
+    let nextType: "heading" | "subheading" | "cta" = explicitType || "heading";
+    if (!explicitType) {
+      if (!current.elements.heading.hidden) {
+        nextType = !current.elements.subheading.hidden ? "cta" : "subheading";
+      }
     }
     const defaults: Record<"heading"|"subheading"|"cta", { x: number; y: number; w: number; h: number; text: string; } > = {
       heading: { x: 80, y: 820, w: 840, h: 120, text: "Your text here" },
@@ -600,15 +605,30 @@ function ContentPageInner() {
                   selectedLogo={selectedLogo}
                   onLogoSelect={setSelectedLogo}
                 />
-                {/* Floating Add Text Button */}
-                <button
-                  onClick={handleAddText}
-                  className="group absolute bottom-4 right-4 px-4 py-2 rounded-full bg-gradient-to-r from-primary to-accent text-primary-foreground shadow-glow-lg border border-primary/30 hover:from-primary/90 hover:to-accent/90 transition-all flex items-center gap-2"
-                  aria-label="Add Text"
-                >
-                  <Type className="w-4 h-4" />
-                  <span className="hidden sm:inline">Add Text</span>
-                </button>
+                
+              </div>
+              {/* Add Text Dock (below image) */}
+              <div className="w-full flex justify-center mt-2">
+                <div className="flex items-center gap-2 rounded-full bg-background/80 border border-primary/20 backdrop-blur-md px-2 py-1 shadow-glow-sm z-20">
+                  <button
+                    onClick={(e) => { e.stopPropagation(); handleAddText('heading'); }}
+                    className="px-3 py-1.5 rounded-full text-xs md:text-sm bg-gradient-to-r from-primary/20 to-accent/20 border border-primary/30 hover:from-primary/30 hover:to-accent/30 text-foreground transition-colors flex items-center gap-1"
+                  >
+                    <Type className="w-3 h-3" /> Heading <span className="hidden md:inline text-muted-foreground">(H)</span>
+                  </button>
+                  <button
+                    onClick={(e) => { e.stopPropagation(); handleAddText('subheading'); }}
+                    className="px-3 py-1.5 rounded-full text-xs md:text-sm bg-gradient-to-r from-primary/20 to-accent/20 border border-primary/30 hover:from-primary/30 hover:to-accent/30 text-foreground transition-colors flex items-center gap-1"
+                  >
+                    <Type className="w-3 h-3" /> Subheading <span className="hidden md:inline text-muted-foreground">(S)</span>
+                  </button>
+                  <button
+                    onClick={(e) => { e.stopPropagation(); handleAddText('cta'); }}
+                    className="px-3 py-1.5 rounded-full text-xs md:text-sm bg-gradient-to-r from-primary/20 to-accent/20 border border-primary/30 hover:from-primary/30 hover:to-accent/30 text-foreground transition-colors flex items-center gap-1"
+                  >
+                    <Type className="w-3 h-3" /> CTA <span className="hidden md:inline text-muted-foreground">(C)</span>
+                  </button>
+                </div>
               </div>
               {/* Hidden export preview for image download */}
               <div style={{ position: 'absolute', left: '-9999px', top: 0 }}>
@@ -635,9 +655,7 @@ function ContentPageInner() {
                     <Button variant="outline" size="icon" className="text-white hover:text-white" onClick={handleRedo} disabled={future.length === 0} aria-label="Redo">
                       <Redo2 className="w-4 h-4" />
                     </Button>
-                    <Button variant="outline" className="text-white hover:text-white flex items-center gap-2" onClick={handleAddText} aria-label="Add Text">
-                      <Type className="w-4 h-4" /> Add Text
-                    </Button>
+                    {/* Removed legacy Add Text button for cleaner UI */}
                   </div>
                   <NavigationButtons
                     onPrevious={() => setGeneratedImage(null)}
