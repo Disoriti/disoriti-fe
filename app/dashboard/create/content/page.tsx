@@ -171,6 +171,18 @@ function ContentPageInner() {
     }
   }, []);
 
+  // Keyboard shortcut: T to add text
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key.toLowerCase() === 't' && generatedImage) {
+        e.preventDefault();
+        handleAddText();
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [generatedImage, layouts, selectedLayoutIdx]);
+
   // Auto-generate image when autoGenerate flag is true
   useEffect(() => {
     if (autoGenerate && enhanced && !generatingImage && !generatedImage) {
@@ -383,6 +395,42 @@ function ContentPageInner() {
     setLayouts(newLayouts);
   };
 
+  const handleAddText = () => {
+    const current = layouts[selectedLayoutIdx];
+    const newLayouts = [...layouts];
+    // Decide which element to use next: heading -> subheading -> cta
+    let nextType: "heading" | "subheading" | "cta" = "heading";
+    if (!current.elements.heading.hidden) {
+      nextType = !current.elements.subheading.hidden ? "cta" : "subheading";
+    }
+    const defaults: Record<"heading"|"subheading"|"cta", { x: number; y: number; w: number; h: number; text: string; } > = {
+      heading: { x: 80, y: 820, w: 840, h: 120, text: "Your text here" },
+      subheading: { x: 80, y: 920, w: 840, h: 100, text: "Add more details" },
+      cta: { x: 80, y: 1040-140, w: 360, h: 80, text: "Call to Action" },
+    };
+    const d = defaults[nextType];
+    newLayouts[selectedLayoutIdx] = {
+      ...current,
+      elements: {
+        ...current.elements,
+        [nextType]: {
+          ...current.elements[nextType],
+          hidden: false,
+          text_content: current.elements[nextType].text_content || d.text,
+          bbox: {
+            ...current.elements[nextType].bbox,
+            x: current.elements[nextType].bbox.x || d.x,
+            y: current.elements[nextType].bbox.y || d.y,
+            width: current.elements[nextType].bbox.width || d.w,
+            height: current.elements[nextType].bbox.height || d.h,
+          }
+        }
+      }
+    };
+    setLayouts(newLayouts);
+    setSelectedElement(nextType);
+  };
+
   const handleStyleChange = (type: "heading" | "subheading" | "cta", key: keyof Styling, value: string | number) => {
     pushHistory();
     const newLayouts = [...layouts];
@@ -527,7 +575,7 @@ function ContentPageInner() {
             
             {/* Main display area (center) */}
             <div className="flex-1 flex flex-col items-center justify-start gap-4">
-              <div ref={previewRef} className="w-full max-w-[1024px] aspect-[4/3] bg-background/50 rounded-lg border border-primary/40 shadow-[0_0_20px_4px_hsl(var(--primary)/0.5)] overflow-hidden"
+              <div ref={previewRef} className="w-full max-w-[1024px] aspect-[4/3] bg-background/50 rounded-lg border border-primary/40 shadow-[0_0_20px_4px_hsl(var(--primary)/0.5)] overflow-hidden relative"
                 onClick={e => {
                   if (e.target === e.currentTarget) {
                     setSelectedElement(null);
@@ -552,6 +600,15 @@ function ContentPageInner() {
                   selectedLogo={selectedLogo}
                   onLogoSelect={setSelectedLogo}
                 />
+                {/* Floating Add Text Button */}
+                <button
+                  onClick={handleAddText}
+                  className="group absolute bottom-4 right-4 px-4 py-2 rounded-full bg-gradient-to-r from-primary to-accent text-primary-foreground shadow-glow-lg border border-primary/30 hover:from-primary/90 hover:to-accent/90 transition-all flex items-center gap-2"
+                  aria-label="Add Text"
+                >
+                  <Type className="w-4 h-4" />
+                  <span className="hidden sm:inline">Add Text</span>
+                </button>
               </div>
               {/* Hidden export preview for image download */}
               <div style={{ position: 'absolute', left: '-9999px', top: 0 }}>
@@ -578,41 +635,7 @@ function ContentPageInner() {
                     <Button variant="outline" size="icon" className="text-white hover:text-white" onClick={handleRedo} disabled={future.length === 0} aria-label="Redo">
                       <Redo2 className="w-4 h-4" />
                     </Button>
-                    <Button variant="outline" className="text-white hover:text-white flex items-center gap-2" onClick={() => {
-                      const current = layouts[selectedLayoutIdx];
-                      const newLayouts = [...layouts];
-                      // Decide which element to use next: heading -> subheading -> cta
-                      let nextType: "heading" | "subheading" | "cta" = "heading";
-                      if (!current.elements.heading.hidden) {
-                        nextType = !current.elements.subheading.hidden ? "cta" : "subheading";
-                      }
-                      const defaults: Record<"heading"|"subheading"|"cta", { x: number; y: number; w: number; h: number; text: string; } > = {
-                        heading: { x: 80, y: 820, w: 840, h: 120, text: "Your text here" },
-                        subheading: { x: 80, y: 920, w: 840, h: 100, text: "Add more details" },
-                        cta: { x: 80, y: 1040-140, w: 360, h: 80, text: "Call to Action" },
-                      };
-                      const d = defaults[nextType];
-                      newLayouts[selectedLayoutIdx] = {
-                        ...current,
-                        elements: {
-                          ...current.elements,
-                          [nextType]: {
-                            ...current.elements[nextType],
-                            hidden: false,
-                            text_content: current.elements[nextType].text_content || d.text,
-                            bbox: {
-                              ...current.elements[nextType].bbox,
-                              x: current.elements[nextType].bbox.x || d.x,
-                              y: current.elements[nextType].bbox.y || d.y,
-                              width: current.elements[nextType].bbox.width || d.w,
-                              height: current.elements[nextType].bbox.height || d.h,
-                            }
-                          }
-                        }
-                      };
-                      setLayouts(newLayouts);
-                      setSelectedElement(nextType);
-                    }} aria-label="Add Text">
+                    <Button variant="outline" className="text-white hover:text-white flex items-center gap-2" onClick={handleAddText} aria-label="Add Text">
                       <Type className="w-4 h-4" /> Add Text
                     </Button>
                   </div>
