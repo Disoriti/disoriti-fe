@@ -175,6 +175,18 @@ function ContentPageInner() {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (!generatedImage) return;
+      
+      // Don't trigger shortcuts if user is typing in an input field or textarea
+      const target = e.target as HTMLElement;
+      if (target && (
+        target.tagName === 'INPUT' || 
+        target.tagName === 'TEXTAREA' || 
+        target.contentEditable === 'true' ||
+        target.isContentEditable
+      )) {
+        return;
+      }
+      
       const key = e.key.toLowerCase();
       if (key === 't') { e.preventDefault(); handleAddText(); }
       if (key === 'h') { e.preventDefault(); handleAddText('heading'); }
