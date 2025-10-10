@@ -9,6 +9,7 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
+import StepProgress from "@/components/ui/step-progress";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
@@ -164,7 +165,11 @@ function EnhancePromptPageInner() {
   };
 
   return (
-    <div className="space-y-8 p-6">
+    <div className="space-y-8 p-6 animate-fade-in">
+      {/* Progress */}
+      <div className="max-w-3xl mx-auto w-full">
+        <StepProgress currentStep={5} totalSteps={6} />
+      </div>
       {/* Breadcrumb Navigation */}
       <Breadcrumb>
         <BreadcrumbList>
@@ -178,6 +183,10 @@ function EnhancePromptPageInner() {
           <BreadcrumbSeparator />
           <BreadcrumbItem>
             <BreadcrumbLink href={`/dashboard/create/media?type=${type}`}>Media Type</BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbLink href={`/dashboard/create/reference?type=${type}&media=${media}`}>Reference</BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
@@ -199,10 +208,9 @@ function EnhancePromptPageInner() {
             <Sparkles className="h-8 w-8 text-disoriti-primary" />
           </div>
         </div>
-        <h1 className="text-3xl font-bold tracking-tight">Create Image Generation Prompt</h1>
-        <p className="text-muted-foreground max-w-2xl mx-auto">
-          Describe what you want in your image and we'll enhance it into a detailed 
-          prompt that will generate the perfect visual for your post.
+        <h1 className="text-3xl md:text-4xl font-bold tracking-tight">Create Image Generation Prompt</h1>
+        <p className="text-disoriti-primary/80 max-w-3xl mx-auto text-lg">
+          Describe the scene, style and mood. We’ll enhance it into a detailed prompt to generate your perfect visual.
         </p>
         
         {/* Credits Counter */}

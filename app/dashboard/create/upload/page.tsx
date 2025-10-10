@@ -13,6 +13,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Facebook, Instagram, Linkedin, Music2 } from "lucide-react";
 import NavigationButtons from "@/components/navigation-buttons";
 import { PostType, socialMediaTypes } from "@/app/dashboard/create/upload/types";
+import StepProgress from "@/components/ui/step-progress";
+import { motion } from "framer-motion";
 
 
 
@@ -40,7 +42,11 @@ function UploadPageInner() {
   };
 
   return (
-    <div className="space-y-8 p-6">
+    <div className="space-y-8 p-6 animate-fade-in">
+      {/* Progress */}
+      <div className="max-w-3xl mx-auto w-full">
+        <StepProgress currentStep={4} totalSteps={6} />
+      </div>
       {/* Breadcrumb Navigation */}
       <Breadcrumb>
         <BreadcrumbList>
@@ -57,15 +63,22 @@ function UploadPageInner() {
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
+            <BreadcrumbLink href={`/dashboard/create/reference?type=${type}&media=${media}`}>Reference</BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
             <BreadcrumbPage>Post Type</BreadcrumbPage>
           </BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>
 
       {/* Heading */}
-      <h1 className="text-3xl md:text-3xl font-bold text-disoriti-primary mb-8 text-center tracking-tight animate-glow">
+      <h1 className="text-3xl md:text-4xl font-bold text-disoriti-primary mb-4 text-center tracking-tight animate-glow">
         {!selectedPlatform ? "Choose your platform" : "Select post type"}
       </h1>
+      <p className="text-center text-disoriti-primary/80 max-w-3xl mx-auto text-lg">
+        We’ll tailor sizes and layouts to the platform so your post looks perfect.
+      </p>
 
       {/* Main Selection + Navigation Buttons */}
       <div className="flex flex-col items-center gap-8">
@@ -74,24 +87,28 @@ function UploadPageInner() {
           {!selectedPlatform ? (
             // Platform Selection
             socialMediaTypes.map((platform) => (
-              <button
+              <motion.button
                 key={platform.platform}
-                className="flex flex-col items-center justify-center rounded-2xl border-2 transition-all duration-300 shadow-xl bg-gradient-to-br from-disoriti-primary/10 to-disoriti-accent/10 px-8 py-12 text-xl font-bold w-[280px] hover:border-disoriti-primary/60 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-disoriti-primary/40"
+                whileHover={{ scale: 1.04, rotate: 0.2 }}
+                whileTap={{ scale: 0.98 }}
+                className="flex flex-col items-center justify-center rounded-2xl border-2 transition-all duration-300 shadow-xl bg-gradient-to-br from-disoriti-primary/10 to-disoriti-accent/10 px-8 py-12 text-xl font-bold w-[280px] hover:border-disoriti-primary/60 focus:outline-none focus:ring-2 focus:ring-disoriti-primary/40"
                 onClick={() => setSelectedPlatform(platform.platform)}
                 type="button"
               >
                 {getPlatformIcon(platform.platform)}
                 <span>{platform.platform}</span>
-              </button>
+              </motion.button>
             ))
           ) : (
             // Post Type Selection
             socialMediaTypes
               .find((p) => p.platform === selectedPlatform)
               ?.posts.map((post) => (
-                <button
+                <motion.button
                   key={post.type}
-                  className={`flex flex-col items-center justify-center rounded-2xl border-2 transition-all duration-300 shadow-xl bg-gradient-to-br from-disoriti-primary/10 to-disoriti-accent/10 px-8 py-12 text-lg font-bold w-[280px] hover:border-disoriti-primary/60 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-disoriti-primary/40 ${
+                  whileHover={{ scale: 1.04, rotate: 0.2 }}
+                  whileTap={{ scale: 0.98 }}
+                  className={`flex flex-col items-center justify-center rounded-2xl border-2 transition-all duration-300 shadow-xl bg-gradient-to-br from-disoriti-primary/10 to-disoriti-accent/10 px-8 py-12 text-lg font-bold w-[280px] hover:border-disoriti-primary/60 focus:outline-none focus:ring-2 focus:ring-disoriti-primary/40 ${
                     selectedPostType?.type === post.type
                       ? "border-secondary/80 ring-4 ring-primary/30 scale-105"
                       : "border-secondary/60"
@@ -103,7 +120,7 @@ function UploadPageInner() {
                   <span className="text-sm font-normal text-disoriti-primary/70">
                     {post.size} ({post.aspect_ratio})
                   </span>
-                </button>
+                </motion.button>
               ))
           )}
         </div>

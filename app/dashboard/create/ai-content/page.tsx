@@ -12,6 +12,7 @@ import { useEffect, useState, useRef, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Sparkles, Bot } from "lucide-react";
 import NavigationButtons from "@/components/navigation-buttons";
+import StepProgress from "@/components/ui/step-progress";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -162,7 +163,11 @@ function AiContentPageInner() {
   };
 
   return (
-    <div className="space-y-8 p-6">
+    <div className="space-y-8 p-6 animate-fade-in">
+      {/* Progress */}
+      <div className="max-w-3xl mx-auto w-full">
+        <StepProgress currentStep={6} totalSteps={6} />
+      </div>
       {/* Breadcrumb Navigation */}
       <Breadcrumb>
         <BreadcrumbList>
@@ -205,9 +210,9 @@ function AiContentPageInner() {
               <Bot className="h-16 w-16 text-disoriti-primary drop-shadow-lg relative z-10" />
             </span>
           </span>
-          <h2 className="text-2xl font-bold mb-4">Generate Content from Image Prompt</h2>
-          <p className="text-disoriti-primary/70 mb-6 text-center">
-            Our AI will generate the perfect heading, subheading, and CTA based on your image prompt.
+          <h2 className="text-2xl md:text-3xl font-bold mb-3">Generate Content from Image Prompt</h2>
+          <p className="text-disoriti-primary/80 mb-6 text-center text-lg">
+            We’ll propose a heading, subheading and CTA to match your visual. You can tweak them now or later.
           </p>
           
           {/* Show the selected prompt */}

@@ -12,6 +12,8 @@ import { useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Image, Video } from "lucide-react";
 import NavigationButtons from "@/components/navigation-buttons";
+import StepProgress from "@/components/ui/step-progress";
+import { motion } from "framer-motion";
 
 function MediaPageInner() {
   const [selected, setSelected] = useState<"image" | "video">();
@@ -20,7 +22,11 @@ function MediaPageInner() {
   const type = searchParams.get("type");
 
   return (
-    <div className="space-y-8 p-6">
+    <div className="space-y-8 p-6 animate-fade-in">
+      {/* Progress */}
+      <div className="max-w-3xl mx-auto w-full">
+        <StepProgress currentStep={2} totalSteps={6} />
+      </div>
       {/* Breadcrumb Navigation */}
       <Breadcrumb>
         <BreadcrumbList>
@@ -39,19 +45,22 @@ function MediaPageInner() {
       </Breadcrumb>
 
       {/* Heading */}
-      <h1 className="text-3xl md:text-3xl font-bold text-disoriti-primary mb-8 text-center tracking-tight animate-glow">
+      <h1 className="text-3xl md:text-4xl font-bold text-disoriti-primary mb-4 text-center tracking-tight animate-glow">
         Choose your media type
       </h1>
+      <p className="text-center text-disoriti-primary/80 max-w-3xl mx-auto text-lg">
+        Start with an image for now. Video is coming soon — we’ll let you know when it’s ready.
+      </p>
 
       {/* Main Selection + Navigation Buttons */}
       <div className="flex flex-col items-center gap-8">
         {/* Option Cards */}
         <div className="flex gap-10 w-full justify-center">
-          <button
-            className={`flex flex-col items-center justify-center rounded-2xl border-2 transition-all duration-300 shadow-xl bg-gradient-to-br from-disoriti-primary/10 to-disoriti-accent/10 px-16 py-20 text-2xl font-bold w-[340px] h-56 hover:border-disoriti-primary/60 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-disoriti-primary/40 ${
-              selected === "image"
-                ? "border-secondary/80 ring-4 ring-primary/30 scale-105"
-                : "border-secondary/60"
+          <motion.button
+            whileHover={{ scale: 1.04, rotate: 0.2 }}
+            whileTap={{ scale: 0.98 }}
+            className={`flex flex-col items-center justify-center rounded-2xl border-2 transition-all duration-300 shadow-xl bg-gradient-to-br from-disoriti-primary/10 to-disoriti-accent/10 px-16 py-20 text-2xl font-bold w-[340px] h-56 hover:border-disoriti-primary/60 focus:outline-none focus:ring-2 focus:ring-disoriti-primary/40 ${
+              selected === "image" ? "border-secondary/80 ring-4 ring-primary/30" : "border-secondary/60"
             }`}
             onClick={() => setSelected("image")}
             type="button"
@@ -61,7 +70,7 @@ function MediaPageInner() {
             <span className="text-base font-normal text-disoriti-primary/70">
               Upload or create an image
             </span>
-          </button>
+          </motion.button>
 
           <div className="relative">
             <button
@@ -88,7 +97,7 @@ function MediaPageInner() {
           onPrevious={() => router.back()}
           onNext={() => {
             if (selected) {
-              router.push(`/dashboard/create/upload?type=${type}&media=${selected}`);
+              router.push(`/dashboard/create/reference?type=${type}&media=${selected}`);
             }
           }}
           disablePrevious={false}
