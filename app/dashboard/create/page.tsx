@@ -12,7 +12,6 @@ import { useState } from "react";
 import { Instagram, Facebook, Music2 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
-import StepProgress from "@/components/ui/step-progress";
 import NavigationButtons from "@/components/navigation-buttons";
 
 export default function CreatePage() {
@@ -21,9 +20,9 @@ export default function CreatePage() {
 
   return (
     <div className="space-y-8 p-6 animate-fade-in">
-      {/* Progress */}
-      <div className="max-w-3xl mx-auto w-full">
-        <StepProgress currentStep={1} totalSteps={6} />
+      {/* Decorative heading glow */}
+      <div className="relative max-w-4xl mx-auto">
+        <div className="pointer-events-none absolute inset-x-0 -top-6 h-24 blur-2xl opacity-40" style={{ background: "radial-gradient(60% 80% at 50% 0%, var(--primary) 0%, transparent 60%)" }} />
       </div>
       {/* Breadcrumb Navigation */}
       <Breadcrumb>
@@ -49,7 +48,12 @@ export default function CreatePage() {
       {/* Main Selection + Navigation Buttons */}
       <div className="flex flex-col items-center gap-8">
         {/* Option Cards */}
-        <div className="flex gap-10 w-full justify-center">
+        <div className="w-full max-w-5xl mx-auto bg-background/40 backdrop-blur-md rounded-2xl border border-white/10 p-8 shadow-glow">
+          <div className="mb-6 inline-flex items-center gap-2 text-xs font-medium px-3 py-1 rounded-full border border-primary/20 text-primary/90 bg-primary/5">
+            <span className="inline-block w-2 h-2 rounded-full bg-primary animate-pulse" />
+            Choose an option to begin
+          </div>
+          <div className="flex gap-10 w-full justify-center">
           {([
             { key: "ad", title: "Ad", subtitle: "Promote your product or service" },
             { key: "social", title: "Social Media Post", subtitle: "Instagram, Facebook, TikTok..." },
@@ -77,6 +81,7 @@ export default function CreatePage() {
               )}
             </motion.button>
           ))}
+          </div>
         </div>
 
         <NavigationButtons
@@ -88,6 +93,7 @@ export default function CreatePage() {
           }}
           disablePrevious={true}
           disableNext={!selected}
+          enableClickProgress
         />
       </div>
     </div>

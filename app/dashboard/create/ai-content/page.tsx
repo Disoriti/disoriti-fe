@@ -11,8 +11,8 @@ import {
 import { useEffect, useState, useRef, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Sparkles, Bot } from "lucide-react";
+import { motion } from "framer-motion";
 import NavigationButtons from "@/components/navigation-buttons";
-import StepProgress from "@/components/ui/step-progress";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -39,6 +39,8 @@ function AiContentPageInner() {
   const [ctaText, setCtaText] = useState("");
   const [isGeneratingContent, setIsGeneratingContent] = useState(false);
   const [generatedContent, setGeneratedContent] = useState<{heading: string, subheading: string, cta: string} | null>(null);
+  const [generateContentProgress, setGenerateContentProgress] = useState<number | undefined>(undefined);
+  const progressRef = useRef<number | null>(null);
   const router = useRouter();
   const { monthlyCreditsLimit, monthlyCreditsUsed } = useAuth();
   
@@ -69,11 +71,21 @@ function AiContentPageInner() {
 
   const handleGenerateContent = async () => {
     setIsGeneratingContent(true);
+    setGenerateContentProgress(0);
+    let p = 0;
+    const tick = () => {
+      p = Math.min(99, p + 2.5);
+      setGenerateContentProgress(p);
+      if (p < 99 && progressRef.current !== null) requestAnimationFrame(tick);
+    };
+    progressRef.current = 1;
+    requestAnimationFrame(tick);
     
     try {
       // Optional pre-check for content generation credits if same pool applies; if only images consume, remove this
       if (typeof monthlyCreditsLimit === 'number' && typeof monthlyCreditsUsed === 'number' && monthlyCreditsUsed >= monthlyCreditsLimit) {
         setIsGeneratingContent(false);
+        setGenerateContentProgress(undefined);
         return;
       }
       // Use the enhanced prompt from localStorage
@@ -81,6 +93,7 @@ function AiContentPageInner() {
       if (!promptToUse) {
         toast.error('No prompt available for content generation');
         setIsGeneratingContent(false);
+        setGenerateContentProgress(undefined);
         return;
       }
       
@@ -98,6 +111,7 @@ function AiContentPageInner() {
       if (!API_URLS.GENERATE_IMAGE_METADATA_URL || API_URLS.GENERATE_IMAGE_METADATA_URL.includes('undefined')) {
         toast.error('API configuration error. Please check your environment setup.');
         setIsGeneratingContent(false);
+        setGenerateContentProgress(undefined);
         return;
       }
 
@@ -114,6 +128,7 @@ function AiContentPageInner() {
         const errorMessage = errorData.message || 'Failed to generate content';
         toast.error(errorMessage);
         setIsGeneratingContent(false);
+        setGenerateContentProgress(undefined);
         return;
       }
 
@@ -131,11 +146,13 @@ function AiContentPageInner() {
         setPostSubheading(generatedContent.subheading);
         setCtaText(generatedContent.cta);
         setIsGeneratingContent(false);
+        setGenerateContentProgress(undefined);
         
         toast.success('Content generated successfully!');
       } else {
         toast.error('Invalid response format from server');
         setIsGeneratingContent(false);
+        setGenerateContentProgress(undefined);
       }
     } catch (error) {
       console.error('Generate content error:', error);
@@ -143,6 +160,7 @@ function AiContentPageInner() {
         toast.error('Network or server error');
       }
       setIsGeneratingContent(false);
+      setGenerateContentProgress(undefined);
     }
   };
 
@@ -164,10 +182,6 @@ function AiContentPageInner() {
 
   return (
     <div className="space-y-8 p-6 animate-fade-in">
-      {/* Progress */}
-      <div className="max-w-3xl mx-auto w-full">
-        <StepProgress currentStep={6} totalSteps={6} />
-      </div>
       {/* Breadcrumb Navigation */}
       <Breadcrumb>
         <BreadcrumbList>
@@ -204,6 +218,10 @@ function AiContentPageInner() {
       {/* AI Content Generation Interface */}
       <div className="flex justify-center">
         <div className="w-full max-w-2xl bg-gradient-to-br from-disoriti-primary/5 to-disoriti-accent/5 p-8 rounded-2xl border border-disoriti-primary/20 flex flex-col items-center">
+          <div className="mb-4 inline-flex items-center gap-2 text-xs font-medium px-3 py-1 rounded-full border border-primary/20 text-primary/90 bg-primary/5">
+            <span className="inline-block w-2 h-2 rounded-full bg-primary animate-pulse" />
+            Generate smart copy from your prompt
+          </div>
           <span className="mb-4 flex items-center justify-center">
             <span className="relative flex items-center justify-center">
               <span className="absolute inline-flex h-20 w-20 rounded-full bg-gradient-to-br from-disoriti-primary/30 to-disoriti-accent/30 blur-xl animate-pulse" />
@@ -282,13 +300,33 @@ function AiContentPageInner() {
               </TooltipProvider>
             </div>
           ) : (
-            <Button
-              onClick={handleGenerateContent}
-              className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold shadow-md px-8 py-6 text-lg rounded-full transition-transform transform hover:scale-105"
-            >
-              <Sparkles className="w-6 h-6 mr-3" />
-              Generate Content
-            </Button>
+            <div className="relative">
+              {isGeneratingContent && (
+                <motion.div
+                  className="pointer-events-none absolute -inset-x-8 -top-3 h-1.5 rounded-full"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: [0, 0.8, 0] }}
+                  transition={{ repeat: Infinity, duration: 1.8, ease: "easeInOut" }}
+                  style={{
+                    background: "linear-gradient(90deg, var(--primary), var(--accent))",
+                    filter: "blur(2px)",
+                  }}
+                />
+              )}
+              <NavigationButtons
+                onNext={handleGenerateContent}
+                disablePrevious={true}
+                disableNext={false}
+                isNextLoading={isGeneratingContent}
+                nextLabel={
+                  <span className="inline-flex items-center">
+                    <Sparkles className="w-5 h-5 mr-2" /> Generate Content
+                  </span>
+                }
+                nextProgress={generateContentProgress}
+                enableClickProgress
+              />
+            </div>
           )}
         </div>
       </div>

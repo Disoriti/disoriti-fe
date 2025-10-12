@@ -12,7 +12,6 @@ import { useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Image, Video } from "lucide-react";
 import NavigationButtons from "@/components/navigation-buttons";
-import StepProgress from "@/components/ui/step-progress";
 import { motion } from "framer-motion";
 
 function MediaPageInner() {
@@ -23,10 +22,6 @@ function MediaPageInner() {
 
   return (
     <div className="space-y-8 p-6 animate-fade-in">
-      {/* Progress */}
-      <div className="max-w-3xl mx-auto w-full">
-        <StepProgress currentStep={2} totalSteps={6} />
-      </div>
       {/* Breadcrumb Navigation */}
       <Breadcrumb>
         <BreadcrumbList>
@@ -55,7 +50,12 @@ function MediaPageInner() {
       {/* Main Selection + Navigation Buttons */}
       <div className="flex flex-col items-center gap-8">
         {/* Option Cards */}
-        <div className="flex gap-10 w-full justify-center">
+        <div className="w-full max-w-5xl mx-auto bg-background/40 backdrop-blur-md rounded-2xl border border-white/10 p-8 shadow-glow">
+          <div className="mb-6 inline-flex items-center gap-2 text-xs font-medium px-3 py-1 rounded-full border border-primary/20 text-primary/90 bg-primary/5">
+            <span className="inline-block w-2 h-2 rounded-full bg-primary animate-pulse" />
+            Pick a media type
+          </div>
+          <div className="flex gap-10 w-full justify-center">
           <motion.button
             whileHover={{ scale: 1.04, rotate: 0.2 }}
             whileTap={{ scale: 0.98 }}
@@ -91,6 +91,7 @@ function MediaPageInner() {
               </div>
             </div>
           </div>
+          </div>
         </div>
 
         <NavigationButtons
@@ -102,6 +103,7 @@ function MediaPageInner() {
           }}
           disablePrevious={false}
           disableNext={!selected}
+          enableClickProgress
         />
       </div>
     </div>

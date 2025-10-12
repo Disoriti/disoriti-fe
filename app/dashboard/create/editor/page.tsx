@@ -9,7 +9,6 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
-import StepProgress from "@/components/ui/step-progress";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
@@ -166,10 +165,6 @@ function EnhancePromptPageInner() {
 
   return (
     <div className="space-y-8 p-6 animate-fade-in">
-      {/* Progress */}
-      <div className="max-w-3xl mx-auto w-full">
-        <StepProgress currentStep={5} totalSteps={6} />
-      </div>
       {/* Breadcrumb Navigation */}
       <Breadcrumb>
         <BreadcrumbList>
@@ -461,6 +456,7 @@ function EnhancePromptPageInner() {
         onNext={handleContinue}
         disablePrevious={false}
         disableNext={!showEnhanced}
+        enableClickProgress
       />
     </div>
   );

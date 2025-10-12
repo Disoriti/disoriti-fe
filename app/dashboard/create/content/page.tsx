@@ -11,6 +11,7 @@ import {
 import { useEffect, useState, useRef, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Sparkles, Pencil, Bot, Download, ChevronLeft, Save, Undo2, Redo2, Type } from "lucide-react";
+import { motion } from "framer-motion";
 import AdGenerationLoader from "@/components/ad-generation-loader";
 import NavigationButtons from "@/components/navigation-buttons";
 import AdLayoutSVG from "@/components/AdLayoutSVG";
@@ -139,6 +140,8 @@ function ContentPageInner() {
   const [future, setFuture] = useState<any[]>([]);
   const [isGeneratingContent, setIsGeneratingContent] = useState(false);
   const [generatedContent, setGeneratedContent] = useState<{heading: string, subheading: string, cta: string} | null>(null);
+  const [generateImageProgress, setGenerateImageProgress] = useState<number | undefined>(undefined);
+  const generateProgressTimerRef = useRef<number | null>(null);
   const router = useRouter();
   const { monthlyCreditsLimit, monthlyCreditsUsed, monthlyCreditsResetAt, setCreditsFromServer } = useAuth();
   
@@ -713,6 +716,10 @@ function ContentPageInner() {
           {/* Direct AI Content Generation Interface */}
           <div className="flex justify-center">
             <div className="w-full max-w-2xl bg-gradient-to-br from-disoriti-primary/5 to-disoriti-accent/5 p-8 rounded-2xl border border-disoriti-primary/20 flex flex-col items-center">
+              <div className="mb-4 inline-flex items-center gap-2 text-xs font-medium px-3 py-1 rounded-full border border-primary/20 text-primary/90 bg-primary/5">
+                <span className="inline-block w-2 h-2 rounded-full bg-primary animate-pulse" />
+                Generate copy for your post
+              </div>
               <span className="mb-4 flex items-center justify-center">
                 <span className="relative flex items-center justify-center">
                   <span className="absolute inline-flex h-20 w-20 rounded-full bg-gradient-to-br from-disoriti-primary/30 to-disoriti-accent/30 blur-xl animate-pulse" />
@@ -809,13 +816,49 @@ function ContentPageInner() {
           </div>
 
           {/* Navigation Buttons */}
-          <NavigationButtons
-            onPrevious={() => router.back()}
-            onNext={handleGenerateImage}
-            disablePrevious={false}
-            disableNext={!generatedContent}
-            nextLabel="Generate Image →"
-          />
+          <div className="relative">
+            {generatingImage && (
+              <motion.div
+                className="pointer-events-none absolute -inset-x-8 -top-3 h-1.5 rounded-full"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: [0, 0.8, 0] }}
+                transition={{ repeat: Infinity, duration: 1.8, ease: "easeInOut" }}
+                style={{
+                  background: "linear-gradient(90deg, var(--primary), var(--accent))",
+                  filter: "blur(2px)",
+                }}
+              />
+            )}
+            <NavigationButtons
+              onPrevious={() => router.back()}
+              onNext={async () => {
+                if (!generatedContent || generatingImage) return;
+                // Animate in-button progress while generating
+                let progress = 0;
+                const tick = () => {
+                  progress = Math.min(99, progress + 2.5);
+                  setGenerateImageProgress(progress);
+                  if (progress < 99 && generateProgressTimerRef.current !== null) {
+                    requestAnimationFrame(tick);
+                  }
+                };
+                setGenerateImageProgress(0);
+                generateProgressTimerRef.current = 1;
+                requestAnimationFrame(tick);
+                await handleGenerateImage();
+                // Complete fill and reset
+                setGenerateImageProgress(100);
+                generateProgressTimerRef.current = null;
+                setTimeout(() => setGenerateImageProgress(undefined), 500);
+              }}
+              disablePrevious={false}
+              disableNext={!generatedContent || generatingImage}
+              isNextLoading={generatingImage}
+              nextLabel="Generate Image →"
+              nextProgress={generateImageProgress}
+              enableClickProgress
+            />
+          </div>
         </>
       )}
     </div>

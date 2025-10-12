@@ -13,7 +13,6 @@ import { useRouter, useSearchParams } from "next/navigation";
 import NavigationButtons from "@/components/navigation-buttons";
 import { ImagePlus, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import StepProgress from "@/components/ui/step-progress";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 
@@ -83,10 +82,7 @@ function ReferencePageInner() {
         </BreadcrumbList>
       </Breadcrumb>
 
-      {/* Progress */}
-      <div className="max-w-3xl mx-auto w-full">
-        <StepProgress currentStep={3} totalSteps={6} />
-      </div>
+      {/* Progress removed per new in-button progress approach */}
 
       {/* Heading */}
       <h1 className="text-3xl md:text-4xl font-bold text-disoriti-primary mb-3 text-center tracking-tight animate-glow">
@@ -101,6 +97,10 @@ function ReferencePageInner() {
         <div
           className="w-full max-w-3xl rounded-2xl border border-disoriti-primary/20 bg-gradient-to-br from-disoriti-primary/5 to-disoriti-accent/5 p-8 shadow-xl"
         >
+          <div className="mb-6 inline-flex items-center gap-2 text-xs font-medium px-3 py-1 rounded-full border border-primary/20 text-primary/90 bg-primary/5">
+            <span className="inline-block w-2 h-2 rounded-full bg-primary animate-pulse" />
+            Optional: Add a reference image to guide styling
+          </div>
           {previewUrl && (
             <div className="flex items-center justify-between mb-4">
               <div className="text-sm text-muted-foreground">
@@ -248,6 +248,7 @@ function ReferencePageInner() {
         disablePrevious={false}
         disableNext={false}
         nextLabel={"Continue →"}
+        enableClickProgress
       />
       <div className="text-center text-sm text-muted-foreground -mt-6">You can skip this step</div>
     </div>

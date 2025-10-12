@@ -13,7 +13,6 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Facebook, Instagram, Linkedin, Music2 } from "lucide-react";
 import NavigationButtons from "@/components/navigation-buttons";
 import { PostType, socialMediaTypes } from "@/app/dashboard/create/upload/types";
-import StepProgress from "@/components/ui/step-progress";
 import { motion } from "framer-motion";
 
 
@@ -43,10 +42,6 @@ function UploadPageInner() {
 
   return (
     <div className="space-y-8 p-6 animate-fade-in">
-      {/* Progress */}
-      <div className="max-w-3xl mx-auto w-full">
-        <StepProgress currentStep={4} totalSteps={6} />
-      </div>
       {/* Breadcrumb Navigation */}
       <Breadcrumb>
         <BreadcrumbList>
@@ -83,7 +78,12 @@ function UploadPageInner() {
       {/* Main Selection + Navigation Buttons */}
       <div className="flex flex-col items-center gap-8">
         {/* Option Cards */}
-        <div className="flex flex-wrap gap-6 w-full justify-center">
+        <div className="w-full max-w-5xl mx-auto bg-background/40 backdrop-blur-md rounded-2xl border border-white/10 p-8 shadow-glow">
+          <div className="mb-6 inline-flex items-center gap-2 text-xs font-medium px-3 py-1 rounded-full border border-primary/20 text-primary/90 bg-primary/5">
+            <span className="inline-block w-2 h-2 rounded-full bg-primary animate-pulse" />
+            Select platform and post type
+          </div>
+          <div className="flex flex-wrap gap-6 w-full justify-center">
           {!selectedPlatform ? (
             // Platform Selection
             socialMediaTypes.map((platform) => (
@@ -123,6 +123,7 @@ function UploadPageInner() {
                 </motion.button>
               ))
           )}
+          </div>
         </div>
 
         <NavigationButtons
@@ -143,6 +144,7 @@ function UploadPageInner() {
           }}
           disablePrevious={false}
           disableNext={!(selectedPlatform && selectedPostType)}
+          enableClickProgress
         />
       </div>
     </div>
