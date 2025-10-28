@@ -16,12 +16,13 @@ import { useState, useEffect, Suspense } from "react";
 import VisionLayoutRenderer from "@/components/VisionLayoutRenderer";
 import type { DisoritiLayout, SceneDigest } from "@/lib/vision-layout-types";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Sparkles, Wand2, ArrowRight, Loader2 } from "lucide-react";
+import { Sparkles, Wand2, ArrowRight, Loader2, ImageIcon, Eye } from "lucide-react";
 import NavigationButtons from "@/components/navigation-buttons";
 import { API_URLS } from "@/lib/api";
 import { authenticatedFetch, isUnauthorizedError, getToken } from "@/lib/auth";
 import { useAuth } from "@/contexts/auth-context";
 import { toast } from "sonner";
+import { motion, AnimatePresence } from "framer-motion";
 
 function EnhancePromptPageInner() {
   const [prompt, setPrompt] = useState("");
@@ -42,12 +43,87 @@ function EnhancePromptPageInner() {
   const [sceneDigest, setSceneDigest] = useState<SceneDigest | null>(null);
   const [imageUrl, setImageUrl] = useState<string>("/image.png");
   
+  // Reference image state
+  const [wantsReference, setWantsReference] = useState<boolean | null>(null);
+  const [referenceImage, setReferenceImage] = useState<File | null>(null);
+  const [referencePreview, setReferencePreview] = useState<string | null>(null);
+  const [isGeneratingReference, setIsGeneratingReference] = useState(false);
+  const [referenceProgress, setReferenceProgress] = useState(0);
+  
   // Safely get search params with fallbacks
   const searchParams = useSearchParams();
   const type = searchParams?.get("type") || "";
   const media = searchParams?.get("media") || "";
   const platform = searchParams?.get("platform") || "";
   const postType = searchParams?.get("postType") || "";
+  const hasReference = searchParams?.get("hasReference") === "true";
+
+  // Handle reference image upload
+  const handleReferenceUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file && file.type.startsWith("image/")) {
+      setReferenceImage(file);
+      const url = URL.createObjectURL(file);
+      setReferencePreview(url);
+    }
+  };
+
+  // Generate reference image content
+  const handleGenerateReference = async () => {
+    if (!referenceImage || !prompt.trim()) return;
+    
+    setIsGeneratingReference(true);
+    setReferenceProgress(0);
+    
+    const progressInterval = setInterval(() => {
+      setReferenceProgress(prev => {
+        if (prev >= 90) return prev;
+        return prev + Math.random() * 15;
+      });
+    }, 200);
+
+    try {
+      const formData = new FormData();
+      formData.append('image', referenceImage);
+      formData.append('custom_prompt', prompt);
+
+      const response = await authenticatedFetch(API_URLS.GENERATE_REFERENCE_IMAGE_CONTENT_URL, {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        const errorMessage = errorData.message || 'Failed to generate reference image';
+        throw new Error(errorMessage);
+      }
+
+      const data = await response.json();
+      
+      if (data.data?.generated_images?.[0]?.image_data) {
+        const generatedImage = data.data.generated_images[0].image_data;
+        setReferenceProgress(100);
+        
+        // Store the generated image and navigate to content page
+        localStorage.setItem('generatedImage', generatedImage);
+        toast.success('Image generated successfully!');
+        
+        // Navigate to content page after a brief delay
+        setTimeout(() => {
+          router.push(`/dashboard/create/content?type=${type}&media=${media}&platform=${platform}&postType=${encodeURIComponent(postType)}`);
+        }, 1000);
+      } else {
+        throw new Error('No image data in response');
+      }
+    } catch (error) {
+      console.error('Error generating reference image:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Failed to generate reference image';
+      toast.error(errorMessage);
+    } finally {
+      clearInterval(progressInterval);
+      setIsGeneratingReference(false);
+    }
+  };
 
   const handleEnhance = async () => {
     if (!prompt.trim()) return;
@@ -164,7 +240,51 @@ function EnhancePromptPageInner() {
   };
 
   return (
-    <div className="space-y-8 p-6 animate-fade-in">
+    <div className="space-y-6 p-6 animate-fade-in relative overflow-hidden">
+      {/* Animated background elements */}
+      <div className="absolute inset-0 pointer-events-none">
+        <motion.div
+          className="absolute top-20 left-10 w-32 h-32 rounded-full bg-gradient-to-r from-disoriti-primary/10 to-disoriti-accent/10 blur-xl"
+          animate={{
+            x: [0, 50, 0],
+            y: [0, -30, 0],
+            scale: [1, 1.2, 1]
+          }}
+          transition={{
+            duration: 8,
+            repeat: Infinity,
+            ease: "easeInOut"
+          }}
+        />
+        <motion.div
+          className="absolute top-40 right-20 w-24 h-24 rounded-full bg-gradient-to-r from-disoriti-accent/10 to-disoriti-primary/10 blur-xl"
+          animate={{
+            x: [0, -40, 0],
+            y: [0, 20, 0],
+            scale: [1, 0.8, 1]
+          }}
+          transition={{
+            duration: 6,
+            repeat: Infinity,
+            ease: "easeInOut",
+            delay: 1
+          }}
+        />
+        <motion.div
+          className="absolute bottom-20 left-1/4 w-20 h-20 rounded-full bg-gradient-to-r from-disoriti-primary/5 to-disoriti-accent/5 blur-xl"
+          animate={{
+            x: [0, 30, 0],
+            y: [0, -40, 0],
+            scale: [1, 1.3, 1]
+          }}
+          transition={{
+            duration: 10,
+            repeat: Infinity,
+            ease: "easeInOut",
+            delay: 2
+          }}
+        />
+      </div>
       {/* Breadcrumb Navigation */}
       <Breadcrumb>
         <BreadcrumbList>
@@ -181,36 +301,51 @@ function EnhancePromptPageInner() {
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
-            <BreadcrumbLink href={`/dashboard/create/reference?type=${type}&media=${media}`}>Reference</BreadcrumbLink>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator />
-          <BreadcrumbItem>
             <BreadcrumbLink href={`/dashboard/create/upload?type=${type}&media=${media}`}>
               Post Type
             </BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator />
-                <BreadcrumbItem>
-        <BreadcrumbPage>Image Prompt</BreadcrumbPage>
-      </BreadcrumbItem>
+          <BreadcrumbItem>
+            <BreadcrumbPage>Image Prompt</BreadcrumbPage>
+          </BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>
 
       {/* Heading */}
       <div className="text-center space-y-4">
         <div className="flex items-center justify-center gap-3 mb-4">
-          <div className="p-3 rounded-full bg-gradient-to-r from-disoriti-primary/20 to-disoriti-accent/20">
+          <motion.div 
+            className="p-3 rounded-full bg-gradient-to-r from-disoriti-primary/20 to-disoriti-accent/20"
+            animate={{ 
+              rotate: [0, 5, -5, 0],
+              scale: [1, 1.05, 1]
+            }}
+            transition={{ 
+              duration: 2,
+              repeat: Infinity,
+              ease: "easeInOut"
+            }}
+          >
             <Sparkles className="h-8 w-8 text-disoriti-primary" />
-          </div>
+          </motion.div>
         </div>
-        <h1 className="text-3xl md:text-4xl font-bold tracking-tight">Create Image Generation Prompt</h1>
+        <h1 className="text-3xl md:text-4xl font-bold tracking-tight animate-glow">
+          {wantsReference === null ? "Choose Your Approach" : 
+           wantsReference ? "Generate from Reference Image" : "Create Image Generation Prompt"}
+        </h1>
         <p className="text-disoriti-primary/80 max-w-3xl mx-auto text-lg">
-          Describe the scene, style and mood. We’ll enhance it into a detailed prompt to generate your perfect visual.
+          {wantsReference === null 
+            ? "Would you like to use a reference image to guide the generation, or create from a text prompt?"
+            : wantsReference 
+            ? "Upload your reference image and describe what you want. We'll generate a new image based on your reference and prompt."
+            : "Describe the scene, style and mood. We'll enhance it into a detailed prompt to generate your perfect visual."
+          }
         </p>
         
         {/* Credits Counter */}
-        <div className="flex justify-center mt-6">
-          <div className="bg-gradient-to-r from-disoriti-primary/10 to-disoriti-accent/10 border border-disoriti-primary/20 rounded-full px-6 py-3 backdrop-blur-sm">
+        <div className="flex justify-center mt-4">
+          <div className="bg-gradient-to-r from-disoriti-primary/10 to-disoriti-accent/10 border border-disoriti-primary/20 rounded-full px-4 py-2 backdrop-blur-sm">
             <div className="flex items-center gap-3">
               <div className="flex items-center gap-2">
                 <div className="w-2 h-2 rounded-full bg-disoriti-primary animate-pulse"></div>
@@ -234,61 +369,211 @@ function EnhancePromptPageInner() {
         </div>
       </div>
 
-            {/* Main Content */}
-      <div className="max-w-4xl mx-auto space-y-6">
-        {!showEnhanced ? (
-          // Input Section
-          <Card className="shadow-lg border-0 bg-gradient-to-br from-background to-muted/20">
-                         <CardHeader>
-               <CardTitle className="flex items-center gap-2">
-                 <Wand2 className="h-5 w-5 text-disoriti-primary" />
-                 Describe Your Image
-               </CardTitle>
-             </CardHeader>
-            <CardContent className="space-y-4">
-                             <div className="space-y-2">
-                 <Label htmlFor="prompt" className="text-sm font-medium">
-                   What do you want in your image?
-                 </Label>
-                 <Textarea
-                   id="prompt"
-                   placeholder="e.g., A modern fitness app interface showing workout tracking, progress charts, and motivational elements. Clean design with vibrant colors, showing a person using the app on their phone..."
-                   value={prompt}
-                   onChange={(e) => setPrompt(e.target.value)}
-                   className="min-h-[120px] resize-none border-2 focus:border-disoriti-primary/50 focus:ring-disoriti-primary/20"
-                   disabled={isEnhancing}
-                 />
-                 <p className="text-xs text-muted-foreground">
-                   Be as detailed as possible about the visual elements you want. Include style, colors, 
-                   composition, mood, and any specific objects or scenes you'd like to see.
-                 </p>
-               </div>
+      {/* Main Content */}
+      <div className="max-w-4xl mx-auto space-y-4 bg-background/40 backdrop-blur-md rounded-2xl border border-white/10 p-6 shadow-glow">
+        {wantsReference === null ? (
+          // Choice Section
+          <div className="space-y-6">
+            <div className="mb-6 inline-flex items-center gap-2 text-xs font-medium px-3 py-1 rounded-full border border-primary/20 text-primary/90 bg-primary/5">
+              <span className="inline-block w-2 h-2 rounded-full bg-primary animate-pulse" />
+              Choose your generation method
+            </div>
+            <div className="flex gap-6 justify-center">
+              <motion.button
+                onClick={() => setWantsReference(true)}
+                className="flex-1 max-w-sm p-6 rounded-2xl border border-white/10 bg-gradient-to-br from-background to-muted/20 hover:border-disoriti-primary/50 transition-all duration-300 group"
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                <div className="text-center space-y-4">
+                  <div className="relative">
+                    <span className="absolute inline-flex h-16 w-16 rounded-full bg-gradient-to-br from-disoriti-primary/30 to-disoriti-accent/30 blur-xl animate-pulse" />
+                    <ImageIcon className="h-10 w-10 text-disoriti-primary relative z-10 mx-auto" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold mb-2">Use Reference Image</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Upload an image to guide the style, composition, and visual elements
+                    </p>
+                  </div>
+                </div>
+              </motion.button>
               
-                             <div className="flex justify-center">
-                               <Button 
-                                 onClick={handleEnhance} 
-                                 disabled={!prompt.trim() || isEnhancing || creditsUsed >= maxCredits}
-                                 className="bg-gradient-to-r from-disoriti-primary to-disoriti-accent hover:from-disoriti-primary/90 hover:to-disoriti-accent/90 hover:text-black text-white disabled:opacity-50 disabled:cursor-not-allowed px-8"
-                                 size="lg"
-                               >
-                                 {isEnhancing ? (
-                   <>
-                     <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                     Creating Image Prompt...
-                   </>
-                 ) : creditsUsed >= maxCredits ? (
-                   <>
-                     <Sparkles className="w-4 h-4 mr-2" />
-                     No Credits Left
-                   </>
-                 ) : (
-                   <>
-                     <Sparkles className="w-4 h-4 mr-2" />
-                     Generate Image Prompt ({maxCredits - creditsUsed} left)
-                   </>
-                 )}
-                               </Button>
-                             </div>
+              <motion.button
+                onClick={() => setWantsReference(false)}
+                className="flex-1 max-w-sm p-6 rounded-2xl border border-white/10 bg-gradient-to-br from-background to-muted/20 hover:border-disoriti-primary/50 transition-all duration-300 group"
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                <div className="text-center space-y-4">
+                  <div className="relative">
+                    <span className="absolute inline-flex h-16 w-16 rounded-full bg-gradient-to-br from-disoriti-primary/30 to-disoriti-accent/30 blur-xl animate-pulse" />
+                    <Wand2 className="h-10 w-10 text-disoriti-primary relative z-10 mx-auto" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold mb-2">Text Prompt</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Describe what you want and we'll enhance it into a detailed prompt
+                    </p>
+                  </div>
+                </div>
+              </motion.button>
+            </div>
+          </div>
+        ) : wantsReference ? (
+          // Reference Image Flow
+          <div className="space-y-6">
+            {/* Reference Image Upload */}
+            {!referenceImage && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="relative"
+              >
+                <div className="mb-6 inline-flex items-center gap-2 text-xs font-medium px-3 py-1 rounded-full border border-primary/20 text-primary/90 bg-primary/5">
+                  <span className="inline-block w-2 h-2 rounded-full bg-primary animate-pulse" />
+                  Upload your reference image
+                </div>
+                <Card className="shadow-lg border border-white/10 bg-gradient-to-br from-background to-muted/20">
+                  <CardContent className="p-8">
+                    <div className="flex flex-col items-center gap-4">
+                      <div className="relative">
+                        <span className="absolute inline-flex h-16 w-16 rounded-full bg-gradient-to-br from-disoriti-primary/30 to-disoriti-accent/30 blur-xl animate-pulse" />
+                        <ImageIcon className="h-10 w-10 text-disoriti-primary relative z-10" />
+                      </div>
+                      <div className="text-center">
+                        <h3 className="text-lg font-semibold mb-2">Upload Reference Image</h3>
+                        <p className="text-sm text-muted-foreground mb-4">
+                          Choose an image that represents the style, composition, or elements you want in your final image.
+                        </p>
+                        <label className="cursor-pointer inline-flex items-center justify-center rounded-lg border border-accent/30 px-6 py-3 text-sm font-medium transition hover:scale-105 bg-gradient-to-r from-disoriti-primary/10 to-disoriti-accent/10 hover:from-disoriti-primary/20 hover:to-disoriti-accent/20">
+                          Choose Image
+                          <input type="file" accept="image/*" className="hidden" onChange={handleReferenceUpload} />
+                        </label>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            )}
+
+            {/* Reference Image Preview */}
+            {referencePreview && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="relative"
+              >
+                <div className="mb-6 inline-flex items-center gap-2 text-xs font-medium px-3 py-1 rounded-full border border-primary/20 text-primary/90 bg-primary/5">
+                  <span className="inline-block w-2 h-2 rounded-full bg-primary animate-pulse" />
+                  Reference image uploaded
+                </div>
+                <Card className="shadow-lg border border-white/10 bg-gradient-to-br from-background to-muted/20">
+                  <CardContent className="p-6">
+                    <div className="flex gap-6">
+                      <div className="flex-1">
+                        <img 
+                          src={referencePreview} 
+                          alt="Reference" 
+                          className="w-full h-48 object-cover rounded-lg border border-white/10"
+                        />
+                      </div>
+                      <div className="flex-1 space-y-4">
+                        <div>
+                          <Label htmlFor="reference-prompt" className="text-sm font-medium">
+                            Describe what you want to generate
+                          </Label>
+                          <Textarea
+                            id="reference-prompt"
+                            placeholder="e.g., Create a similar style but with different colors and composition..."
+                            value={prompt}
+                            onChange={(e) => setPrompt(e.target.value)}
+                            className="min-h-[120px] resize-none border-2 focus:border-disoriti-primary/50 focus:ring-disoriti-primary/20 mt-2"
+                            disabled={isGeneratingReference}
+                          />
+                        </div>
+                        <div className="flex justify-center">
+                          <Button 
+                            onClick={handleGenerateReference} 
+                            disabled={!prompt.trim() || isGeneratingReference}
+                            className="bg-gradient-to-r from-disoriti-primary to-disoriti-accent hover:from-disoriti-primary/90 hover:to-disoriti-accent/90 hover:text-black text-white disabled:opacity-50 disabled:cursor-not-allowed px-6"
+                            size="default"
+                          >
+                            {isGeneratingReference ? (
+                              <>
+                                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                Generating from Reference...
+                              </>
+                            ) : (
+                              <>
+                                <Sparkles className="w-4 h-4 mr-2" />
+                                Generate from Reference
+                              </>
+                            )}
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            )}
+          </div>
+        ) : (
+          // Regular Prompt Flow
+          !showEnhanced ? (
+            // Input Section
+            <Card className="shadow-lg border border-white/10 bg-gradient-to-br from-background to-muted/20">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Wand2 className="h-5 w-5 text-disoriti-primary" />
+                  Describe Your Image
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3 pt-3 pb-4">
+                <div className="space-y-2">
+                  <Label htmlFor="prompt" className="text-sm font-medium">
+                    What do you want in your image?
+                  </Label>
+                  <Textarea
+                    id="prompt"
+                    placeholder="e.g., A modern fitness app interface showing workout tracking, progress charts, and motivational elements. Clean design with vibrant colors, showing a person using the app on their phone..."
+                    value={prompt}
+                    onChange={(e) => setPrompt(e.target.value)}
+                    className="min-h-[96px] resize-none border-2 focus:border-disoriti-primary/50 focus:ring-disoriti-primary/20"
+                    disabled={isEnhancing}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Be as detailed as possible about the visual elements you want. Include style, colors, 
+                    composition, mood, and any specific objects or scenes you'd like to see.
+                  </p>
+                </div>
+                
+                <div className="flex justify-center">
+                  <Button 
+                    onClick={handleEnhance} 
+                    disabled={!prompt.trim() || isEnhancing || creditsUsed >= maxCredits}
+                    className="bg-gradient-to-r from-disoriti-primary to-disoriti-accent hover:from-disoriti-primary/90 hover:to-disoriti-accent/90 hover:text-black text-white disabled:opacity-50 disabled:cursor-not-allowed px-6"
+                    size="default"
+                  >
+                    {isEnhancing ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        Creating Image Prompt...
+                      </>
+                    ) : creditsUsed >= maxCredits ? (
+                      <>
+                        <Sparkles className="w-4 h-4 mr-2" />
+                        No Credits Left
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles className="w-4 h-4 mr-2" />
+                        Generate Image Prompt ({maxCredits - creditsUsed} left)
+                      </>
+                    )}
+                  </Button>
+                </div>
 
                              {/* Credits Warning */}
                {creditsUsed >= maxCredits && (
@@ -329,11 +614,11 @@ function EnhancePromptPageInner() {
               )}
             </CardContent>
           </Card>
-        ) : (
+          ) : (
           // Enhanced Result Section
-          <div className="space-y-6">
+          <div className="space-y-4">
                                       {/* Original Prompt */}
-             <Card className="shadow-lg border-0 bg-gradient-to-br from-background to-muted/20">
+            <Card className="shadow-lg border border-white/10 bg-gradient-to-br from-background to-muted/20">
                <CardHeader>
                  <CardTitle className="text-lg">Your Image Description</CardTitle>
                </CardHeader>
@@ -353,7 +638,7 @@ function EnhancePromptPageInner() {
              </Card>
 
              {/* Enhanced Content */}
-             <Card className="shadow-lg border-0 bg-gradient-to-br from-disoriti-primary/5 to-disoriti-accent/5 border-disoriti-primary/20">
+            <Card className="shadow-lg border border-disoriti-primary/20 bg-gradient-to-br from-disoriti-primary/5 to-disoriti-accent/5">
                <CardHeader>
                  <CardTitle className="flex items-center gap-2 text-disoriti-primary">
                    <Sparkles className="h-5 w-5" />
@@ -433,7 +718,7 @@ function EnhancePromptPageInner() {
                </Card>
              )}
           </div>
-        )}
+        ))}
       </div>
 
       {/* Example Vision Layout Preview (only renders if layout present) */}
@@ -452,10 +737,27 @@ function EnhancePromptPageInner() {
 
       {/* Navigation */}
       <NavigationButtons
-        onPrevious={() => router.back()}
-        onNext={handleContinue}
+        onPrevious={() => {
+          if (wantsReference !== null) {
+            setWantsReference(null);
+          } else {
+            router.back();
+          }
+        }}
+        onNext={wantsReference === null ? undefined :
+          wantsReference ? 
+            undefined : // Auto-navigate after generation, no manual next button needed
+            handleContinue
+        }
         disablePrevious={false}
-        disableNext={!showEnhanced}
+        disableNext={wantsReference === null ? true : 
+          wantsReference ? true : // Disable next button for reference flow (auto-navigates after generation)
+          !showEnhanced}
+        nextLabel={wantsReference === null ? "Choose an option" :
+          wantsReference ? 
+            (isGeneratingReference ? "Generating..." : "Generate Image to Continue") : 
+            "Continue →"
+        }
         enableClickProgress
       />
     </div>

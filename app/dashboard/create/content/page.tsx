@@ -161,16 +161,20 @@ function ContentPageInner() {
   const previewRef = useRef<HTMLDivElement>(null);
   const exportRef = useRef<HTMLDivElement>(null);
 
-  // Load prompts from localStorage on component mount
+  // Load prompts and generated image from localStorage on component mount
   useEffect(() => {
     const storedEnhanced = localStorage.getItem('selectedEnhancedPrompt');
     const storedOriginal = localStorage.getItem('selectedOriginalPrompt');
+    const storedGeneratedImage = localStorage.getItem('generatedImage');
     
     if (storedEnhanced) {
       setEnhanced(storedEnhanced);
     }
     if (storedOriginal) {
       setPrompt(storedOriginal);
+    }
+    if (storedGeneratedImage) {
+      setGeneratedImage(storedGeneratedImage);
     }
   }, []);
 
@@ -199,6 +203,75 @@ function ContentPageInner() {
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, [generatedImage, layouts, selectedLayoutIdx]);
+
+  // Auto-generate content when reference image is loaded from localStorage
+  useEffect(() => {
+    if (generatedImage && !generatedContent && enhanced && !isGeneratingContent) {
+      // Auto-generate content for reference images
+      const generateContent = async () => {
+        await handleGenerateContent();
+      };
+      generateContent();
+    }
+  }, [generatedImage, generatedContent, enhanced]);
+
+  // Create default layouts when we have an image but no layouts (for reference images)
+  useEffect(() => {
+    if (generatedImage && layouts.length === 0) {
+      const defaultLayout: Layout = {
+        id: 'default-layout',
+        style: 'auto',
+        elements: {
+          heading: {
+            bbox: { x: 50, y: 50, width: 400, height: 60 },
+            styling: {
+              font_size: 48,
+              font_weight: 'bold',
+              text_align: 'left',
+              color: '#FFFFFF',
+              color_opacity: 1,
+              background_color: '#000000',
+              background_opacity: 0,
+              margin: 0,
+            },
+            text_content: '',
+            hidden: false,
+          },
+          subheading: {
+            bbox: { x: 50, y: 120, width: 400, height: 40 },
+            styling: {
+              font_size: 32,
+              font_weight: 'normal',
+              text_align: 'left',
+              color: '#FFFFFF',
+              color_opacity: 1,
+              background_color: '#000000',
+              background_opacity: 0,
+              margin: 0,
+            },
+            text_content: '',
+            hidden: false,
+          },
+          cta: {
+            bbox: { x: 50, y: 180, width: 200, height: 50 },
+            styling: {
+              font_size: 24,
+              font_weight: 'bold',
+              text_align: 'center',
+              color: '#FFFFFF',
+              color_opacity: 1,
+              background_color: '#007BFF',
+              background_opacity: 1,
+              margin: 0,
+            },
+            text_content: '',
+            hidden: false,
+          },
+        },
+      };
+      setLayouts([defaultLayout]);
+    }
+  }, [generatedImage, layouts.length]);
 
   // Auto-generate image when autoGenerate flag is true
   useEffect(() => {
@@ -525,6 +598,31 @@ function ContentPageInner() {
         setPostHeading(generatedContent.heading);
         setPostSubheading(generatedContent.subheading);
         setCtaText(generatedContent.cta);
+        
+        // Update layouts with generated content if layouts exist
+        if (layouts.length > 0) {
+          const updatedLayouts = [...layouts];
+          updatedLayouts[selectedLayoutIdx] = {
+            ...updatedLayouts[selectedLayoutIdx],
+            elements: {
+              ...updatedLayouts[selectedLayoutIdx].elements,
+              heading: {
+                ...updatedLayouts[selectedLayoutIdx].elements.heading,
+                text_content: generatedContent.heading,
+              },
+              subheading: {
+                ...updatedLayouts[selectedLayoutIdx].elements.subheading,
+                text_content: generatedContent.subheading,
+              },
+              cta: {
+                ...updatedLayouts[selectedLayoutIdx].elements.cta,
+                text_content: generatedContent.cta,
+              },
+            },
+          };
+          setLayouts(updatedLayouts);
+        }
+        
         setIsGeneratingContent(false);
         
         toast.success('Content generated successfully!');
@@ -549,7 +647,7 @@ function ContentPageInner() {
       postType,
       settings
     });
-    router.push(`/dashboard/create/ai-content?${params.toString()}`);
+    router.push(`/dashboard/create/content?${params.toString()}`);
   };
 
   return (
@@ -587,9 +685,14 @@ function ContentPageInner() {
         </BreadcrumbList>
       </Breadcrumb>
 
-      {generatingImage && <AdGenerationLoader />}
+            {generatingImage && <AdGenerationLoader />}
 
-      {generatedImage ? (
+      {generatedImage && layouts.length === 0 && !isGeneratingContent ? (
+        <div className="flex flex-col items-center justify-center min-h-[400px]">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mb-4"></div>
+          <p className="text-muted-foreground">Setting up editor...</p>
+        </div>
+      ) : generatedImage ? (
         <div className="w-full max-w-[1700px] mx-auto flex-1">
           <div className="bg-background p-4 rounded-2xl border border-border shadow-lg flex flex-row gap-6 items-start justify-center">
             
@@ -603,23 +706,25 @@ function ContentPageInner() {
                   }
                 }}
               >
-                <AdLayoutSVG
-                  imageUrl={generatedImage || "/image.png"}
-                  layout={layouts[selectedLayoutIdx]}
-                  width={1024}
-                  height={768}
-                  selected={selectedElement}
-                  onSelectElement={setSelectedElement}
-                  onElementsChange={handleElementChange}
-                  filter={`brightness(${imageEdits.brightness}%) contrast(${imageEdits.contrast}%) saturate(${imageEdits.saturation}%)`}
-                  logoPosition={logoPosition}
-                  logoColor={logoColor}
-                  logoImage={logoImage}
-                  logoBbox={logoBbox}
-                  onLogoBboxChange={setLogoBbox}
-                  selectedLogo={selectedLogo}
-                  onLogoSelect={setSelectedLogo}
-                />
+                {layouts[selectedLayoutIdx] && (
+                  <AdLayoutSVG
+                    imageUrl={generatedImage || "/image.png"}
+                    layout={layouts[selectedLayoutIdx]}
+                    width={1024}
+                    height={768}
+                    selected={selectedElement}
+                    onSelectElement={setSelectedElement}
+                    onElementsChange={handleElementChange}
+                    filter={`brightness(${imageEdits.brightness}%) contrast(${imageEdits.contrast}%) saturate(${imageEdits.saturation}%)`}
+                    logoPosition={logoPosition}
+                    logoColor={logoColor}
+                    logoImage={logoImage}
+                    logoBbox={logoBbox}
+                    onLogoBboxChange={setLogoBbox}
+                    selectedLogo={selectedLogo}
+                    onLogoSelect={setSelectedLogo}
+                  />
+                )}
                 
               </div>
               {/* Add Text Dock (below image) */}
@@ -648,17 +753,19 @@ function ContentPageInner() {
               {/* Hidden export preview for image download */}
               <div style={{ position: 'absolute', left: '-9999px', top: 0 }}>
                 <div ref={exportRef}>
-                  <AdLayoutPreview
-                    imageUrl={generatedImage || ""}
-                    layout={layouts[selectedLayoutIdx]}
-                    width={1024}
-                    height={768}
-                    logoImage={logoImage}
+                  {layouts[selectedLayoutIdx] && (
+                    <AdLayoutPreview
+                      imageUrl={generatedImage || ""}
+                      layout={layouts[selectedLayoutIdx]}
+                      width={1024}
+                      height={768}
+                      logoImage={logoImage}
                     logoPosition={logoPosition}
                     logoColor={logoColor}
                     logoBbox={logoBbox}
                     filter={`brightness(${imageEdits.brightness}%) contrast(${imageEdits.contrast}%) saturate(${imageEdits.saturation}%)`}
-                  />
+                    />
+                  )}
                 </div>
               </div>
               <div className="w-full max-w-[1024px]">
@@ -685,16 +792,17 @@ function ContentPageInner() {
 
             {/* Controls on the right */}
             <div className="w-[300px] flex-shrink-0">
-              <AdLayoutControls
-                elements={layouts[selectedLayoutIdx].elements}
-                selected={selectedElement}
-                onStyleChange={handleStyleChange}
-                onImageEdit={setImageEdits}
-                onImageReplace={file => {
-                  const url = URL.createObjectURL(file);
-                  setGeneratedImage(url);
-                }}
-                logoPosition={logoPosition}
+              {layouts[selectedLayoutIdx] && (
+                <AdLayoutControls
+                  elements={layouts[selectedLayoutIdx].elements}
+                  selected={selectedElement}
+                  onStyleChange={handleStyleChange}
+                  onImageEdit={setImageEdits}
+                  onImageReplace={file => {
+                    const url = URL.createObjectURL(file);
+                    setGeneratedImage(url);
+                  }}
+                  logoPosition={logoPosition}
                 onLogoPositionChange={setLogoPosition}
                 logoColor={logoColor}
                 onLogoColorChange={setLogoColor}
@@ -708,6 +816,7 @@ function ContentPageInner() {
                 showGrid={showGrid}
                 onShowGridChange={setShowGrid}
               />
+              )}
             </div>
           </div>
         </div>

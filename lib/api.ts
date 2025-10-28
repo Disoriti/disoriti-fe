@@ -22,11 +22,12 @@ export const getApiBaseUrl = (): string => {
     if (
       typeof window !== 'undefined' &&
       process.env.NEXT_PUBLIC_API_BASE_URL &&
-      process.env.NEXT_PUBLIC_API_BASE_URL !== 'http://127.0.0.1:8080'
+      process.env.NEXT_PUBLIC_API_BASE_URL !== 'http://127.0.0.1:8000'
     ) {
-      console.warn('Ignoring NEXT_PUBLIC_API_BASE_URL in development. Using http://127.0.0.1:8080');
+      console.warn('Ignoring NEXT_PUBLIC_API_BASE_URL in development. Using http://127.0.0.1:8000');
+      
     }
-    return process.env.NEXT_PUBLIC_API_BASE_URL_DEV || 'http://127.0.0.1:8080';
+    return process.env.NEXT_PUBLIC_API_BASE_URL_DEV || 'http://127.0.0.1:8000';
   }
 
   // test
@@ -112,6 +113,7 @@ export const API_ENDPOINTS = {
     GET_CONTENT: '/content',
     DELETE_CONTENT: '/content',
     GENERATE_IMAGE_METADATA: '/ai/generate-image-metadata',
+    GENERATE_REFERENCE_IMAGE_CONTENT: '/ai/generate-reference-image-content',
   },
   
   // Ad Management
@@ -189,6 +191,7 @@ export const API_URLS = {
   ENHANCE_PROMPT_URL: buildApiUrl(API_ENDPOINTS.CONTENT.ENHANCE_PROMPT),
   DISORITI_CHAT_URL: buildApiUrl(API_ENDPOINTS.CONTENT.DISORITI_CHAT),
   GENERATE_IMAGE_METADATA_URL: buildApiUrl(API_ENDPOINTS.CONTENT.GENERATE_IMAGE_METADATA),
+  GENERATE_REFERENCE_IMAGE_CONTENT_URL: buildApiUrl(API_ENDPOINTS.CONTENT.GENERATE_REFERENCE_IMAGE_CONTENT),
   SAVE_CONTENT_URL: buildApiUrl(API_ENDPOINTS.CONTENT.SAVE_CONTENT),
   GET_CONTENT_URL: buildApiUrl(API_ENDPOINTS.CONTENT.GET_CONTENT),
   DELETE_CONTENT_URL: buildApiUrl(API_ENDPOINTS.CONTENT.DELETE_CONTENT),

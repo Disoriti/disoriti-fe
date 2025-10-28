@@ -98,7 +98,7 @@ function MediaPageInner() {
           onPrevious={() => router.back()}
           onNext={() => {
             if (selected) {
-              router.push(`/dashboard/create/reference?type=${type}&media=${selected}`);
+              router.push(`/dashboard/create/upload?type=${type}&media=${selected}`);
             }
           }}
           disablePrevious={false}

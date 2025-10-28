@@ -58,10 +58,6 @@ function UploadPageInner() {
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
-            <BreadcrumbLink href={`/dashboard/create/reference?type=${type}&media=${media}`}>Reference</BreadcrumbLink>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator />
-          <BreadcrumbItem>
             <BreadcrumbPage>Post Type</BreadcrumbPage>
           </BreadcrumbItem>
         </BreadcrumbList>
@@ -137,9 +133,18 @@ function UploadPageInner() {
           }}
           onNext={() => {
             if (selectedPlatform && selectedPostType) {
-              router.push(
-                `/dashboard/create/editor?type=${type}&media=${media}&platform=${selectedPlatform}&postType=${encodeURIComponent(selectedPostType.type)}`
-              );
+              const params = new URLSearchParams({
+                type,
+                media,
+                platform: selectedPlatform,
+                postType: selectedPostType.type
+              });
+              // Check if we have a reference image
+              const hasReference = searchParams?.get("hasReference") === "true";
+              if (hasReference) {
+                params.set('hasReference', 'true');
+              }
+              router.push(`/dashboard/create/editor?${params.toString()}`);
             }
           }}
           disablePrevious={false}
