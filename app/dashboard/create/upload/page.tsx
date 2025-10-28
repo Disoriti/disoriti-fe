@@ -134,8 +134,8 @@ function UploadPageInner() {
           onNext={() => {
             if (selectedPlatform && selectedPostType) {
               const params = new URLSearchParams({
-                type,
-                media,
+                ...(type && { type }),
+                ...(media && { media }),
                 platform: selectedPlatform,
                 postType: selectedPostType.type
               });
