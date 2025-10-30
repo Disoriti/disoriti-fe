@@ -1,21 +1,9 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { ArrowLeft, FileText, Calendar, Shield, Users, CreditCard, AlertTriangle } from "lucide-react";
+import { ArrowLeft, Calendar } from "lucide-react";
 
 export default function TermsPage() {
-  const [activeSection, setActiveSection] = useState("overview");
-
-  const sections = [
-    { id: "overview", title: "Overview", icon: FileText },
-    { id: "acceptance", title: "Acceptance", icon: Shield },
-    { id: "services", title: "Services", icon: Users },
-    { id: "payments", title: "Payments", icon: CreditCard },
-    { id: "liability", title: "Liability", icon: AlertTriangle },
-    { id: "changes", title: "Changes", icon: Calendar },
-  ];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
@@ -48,10 +36,10 @@ export default function TermsPage() {
           {/* Title Section */}
           <div className="text-center mb-12">
             <h1 className="text-4xl md:text-5xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-primary to-accent">
-              Terms and Conditions
+              Terms of Service – Disoriti V.O.F.
             </h1>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Please read these terms and conditions carefully before using our AI-powered design platform.
+              Please read these terms carefully before using our services.
             </p>
             <div className="mt-6 flex items-center justify-center gap-2 text-sm text-muted-foreground">
               <Calendar className="h-4 w-4" />
@@ -59,268 +47,93 @@ export default function TermsPage() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-            {/* Sidebar Navigation */}
-            <div className="lg:col-span-1">
-              <div className="sticky top-24 space-y-2">
-                <h3 className="text-lg font-semibold mb-4">Table of Contents</h3>
-                {sections.map((section) => {
-                  const Icon = section.icon;
-                  return (
-                    <button
-                      key={section.id}
-                      onClick={() => setActiveSection(section.id)}
-                      className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-all duration-200 ${
-                        activeSection === section.id
-                          ? "bg-primary/10 text-primary border border-primary/20"
-                          : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
-                      }`}
-                    >
-                      <Icon className="h-4 w-4 flex-shrink-0" />
-                      <span className="text-sm font-medium">{section.title}</span>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
+          <div className="max-w-3xl mx-auto">
+            <div className="bg-background/50 backdrop-blur-sm rounded-2xl border border-primary/10 p-8 shadow-lg space-y-6">
+              <p>
+                By using our services, you agree to these terms. Please read them carefully.
+              </p>
 
-            {/* Content */}
-            <div className="lg:col-span-3">
-              <div className="bg-background/50 backdrop-blur-sm rounded-2xl border border-primary/10 p-8 shadow-lg">
-                
-                {/* Overview */}
-                {activeSection === "overview" && (
-                  <div className="space-y-6">
-                    <h2 className="text-2xl font-bold flex items-center gap-3">
-                      <FileText className="h-6 w-6 text-primary" />
-                      Overview
-                    </h2>
-                    <div className="prose prose-gray max-w-none">
-                      <p className="text-muted-foreground leading-relaxed">
-                        Welcome to Disoriti, an AI-powered design platform that transforms your ideas into stunning digital reality. 
-                        These Terms and Conditions ("Terms") govern your use of our website, services, and applications.
-                      </p>
-                      <p className="text-muted-foreground leading-relaxed">
-                        By accessing or using our services, you agree to be bound by these Terms. If you disagree with any part 
-                        of these terms, then you may not access the service.
-                      </p>
-                      <h3 className="text-xl font-semibold mt-6 mb-3">Key Points</h3>
-                      <ul className="space-y-2 text-muted-foreground">
-                        <li className="flex items-start gap-2">
-                          <span className="text-primary mt-1">•</span>
-                          <span>You must be at least 18 years old to use our services</span>
-                        </li>
-                        <li className="flex items-start gap-2">
-                          <span className="text-primary mt-1">•</span>
-                          <span>You are responsible for maintaining the security of your account</span>
-                        </li>
-                        <li className="flex items-start gap-2">
-                          <span className="text-primary mt-1">•</span>
-                          <span>We reserve the right to modify these terms at any time</span>
-                        </li>
-                        <li className="flex items-start gap-2">
-                          <span className="text-primary mt-1">•</span>
-                          <span>Our AI-generated content is provided "as is" without warranties</span>
-                        </li>
-                      </ul>
-                    </div>
-                  </div>
-                )}
+              <h2 className="text-2xl font-semibold">1. Definitions</h2>
+              <p>
+                <strong>Service</strong>: the AI content generator provided by Disoriti, including all related software, APIs, interfaces, updates, upgrades, and documentation.
+              </p>
+              <p>
+                <strong>User</strong>: any individual or legal entity using the Service.
+              </p>
+              <p>
+                <strong>Content</strong>: all data, text, images, or other materials entered or generated by the User through the Service.
+              </p>
 
-                {/* Acceptance */}
-                {activeSection === "acceptance" && (
-                  <div className="space-y-6">
-                    <h2 className="text-2xl font-bold flex items-center gap-3">
-                      <Shield className="h-6 w-6 text-primary" />
-                      Acceptance of Terms
-                    </h2>
-                    <div className="prose prose-gray max-w-none">
-                      <p className="text-muted-foreground leading-relaxed">
-                        By creating an account, accessing our website, or using any of our services, you acknowledge that you 
-                        have read, understood, and agree to be bound by these Terms and our Privacy Policy.
-                      </p>
-                      <h3 className="text-xl font-semibold mt-6 mb-3">Account Requirements</h3>
-                      <ul className="space-y-2 text-muted-foreground">
-                        <li className="flex items-start gap-2">
-                          <span className="text-primary mt-1">•</span>
-                          <span>You must provide accurate and complete information when creating an account</span>
-                        </li>
-                        <li className="flex items-start gap-2">
-                          <span className="text-primary mt-1">•</span>
-                          <span>You are responsible for all activities that occur under your account</span>
-                        </li>
-                        <li className="flex items-start gap-2">
-                          <span className="text-primary mt-1">•</span>
-                          <span>You must notify us immediately of any unauthorized use of your account</span>
-                        </li>
-                        <li className="flex items-start gap-2">
-                          <span className="text-primary mt-1">•</span>
-                          <span>We reserve the right to suspend or terminate accounts that violate these terms</span>
-                        </li>
-                      </ul>
-                    </div>
-                  </div>
-                )}
+              <h2 className="text-2xl font-semibold">2. Services</h2>
+              <p>
+                Disoriti provides an AI content generator that allows businesses to create advertising content. We offer both a free version and a paid subscription.
+              </p>
 
-                {/* Services */}
-                {activeSection === "services" && (
-                  <div className="space-y-6">
-                    <h2 className="text-2xl font-bold flex items-center gap-3">
-                      <Users className="h-6 w-6 text-primary" />
-                      Our Services
-                    </h2>
-                    <div className="prose prose-gray max-w-none">
-                      <p className="text-muted-foreground leading-relaxed">
-                        Disoriti provides AI-powered design tools and services including but not limited to content generation, 
-                        image creation, template design, and collaborative editing features.
-                      </p>
-                      <h3 className="text-xl font-semibold mt-6 mb-3">Service Availability</h3>
-                      <ul className="space-y-2 text-muted-foreground">
-                        <li className="flex items-start gap-2">
-                          <span className="text-primary mt-1">•</span>
-                          <span>Services are provided on an "as available" basis</span>
-                        </li>
-                        <li className="flex items-start gap-2">
-                          <span className="text-primary mt-1">•</span>
-                          <span>We may modify, suspend, or discontinue services at any time</span>
-                        </li>
-                        <li className="flex items-start gap-2">
-                          <span className="text-primary mt-1">•</span>
-                          <span>We strive for 99.9% uptime but cannot guarantee uninterrupted service</span>
-                        </li>
-                      </ul>
-                      <h3 className="text-xl font-semibold mt-6 mb-3">User Content</h3>
-                      <p className="text-muted-foreground leading-relaxed">
-                        You retain ownership of content you create using our services. By using our platform, you grant us 
-                        a limited license to process, store, and display your content as necessary to provide our services.
-                      </p>
-                    </div>
-                  </div>
-                )}
+              <h2 className="text-2xl font-semibold">3. Registration and Account</h2>
+              <p>
+                To use our Services, you must create an account and provide your email address and Instagram credentials. You are required to: provide accurate and up-to-date information; choose a strong password; keep your login details confidential; immediately notify us of any misuse or unauthorized use.
+              </p>
+              <p>
+                You are responsible for all activities occurring under your account. Disoriti is not liable for unauthorized use if you share your login credentials.
+              </p>
 
-                {/* Payments */}
-                {activeSection === "payments" && (
-                  <div className="space-y-6">
-                    <h2 className="text-2xl font-bold flex items-center gap-3">
-                      <CreditCard className="h-6 w-6 text-primary" />
-                      Payments and Billing
-                    </h2>
-                    <div className="prose prose-gray max-w-none">
-                      <p className="text-muted-foreground leading-relaxed">
-                        Our services are offered on both free and paid subscription plans. Paid plans are billed in advance 
-                        on a monthly or annual basis.
-                      </p>
-                      <h3 className="text-xl font-semibold mt-6 mb-3">Billing Terms</h3>
-                      <ul className="space-y-2 text-muted-foreground">
-                        <li className="flex items-start gap-2">
-                          <span className="text-primary mt-1">•</span>
-                          <span>All fees are non-refundable except as required by law</span>
-                        </li>
-                        <li className="flex items-start gap-2">
-                          <span className="text-primary mt-1">•</span>
-                          <span>Subscription fees are charged automatically on the billing date</span>
-                        </li>
-                        <li className="flex items-start gap-2">
-                          <span className="text-primary mt-1">•</span>
-                          <span>You can cancel your subscription at any time from your account settings</span>
-                        </li>
-                        <li className="flex items-start gap-2">
-                          <span className="text-primary mt-1">•</span>
-                          <span>Price changes will be communicated 30 days in advance</span>
-                        </li>
-                      </ul>
-                      <h3 className="text-xl font-semibold mt-6 mb-3">Credits and Usage</h3>
-                      <p className="text-muted-foreground leading-relaxed">
-                        Our AI services operate on a credit system. Credits are consumed based on the complexity and type 
-                        of content generated. Unused credits do not roll over between billing periods.
-                      </p>
-                    </div>
-                  </div>
-                )}
+              <h2 className="text-2xl font-semibold">4. License</h2>
+              <p>
+                We grant you a limited, non-exclusive, non-transferable, and revocable right to use the Service for your internal business purposes. It is prohibited to copy, modify, reverse-engineer, decompile, redistribute, or sublicense the software.
+              </p>
 
-                {/* Liability */}
-                {activeSection === "liability" && (
-                  <div className="space-y-6">
-                    <h2 className="text-2xl font-bold flex items-center gap-3">
-                      <AlertTriangle className="h-6 w-6 text-primary" />
-                      Limitation of Liability
-                    </h2>
-                    <div className="prose prose-gray max-w-none">
-                      <p className="text-muted-foreground leading-relaxed">
-                        To the maximum extent permitted by law, Disoriti shall not be liable for any indirect, incidental, 
-                        special, consequential, or punitive damages, including without limitation, loss of profits, data, 
-                        use, goodwill, or other intangible losses.
-                      </p>
-                      <h3 className="text-xl font-semibold mt-6 mb-3">AI-Generated Content</h3>
-                      <ul className="space-y-2 text-muted-foreground">
-                        <li className="flex items-start gap-2">
-                          <span className="text-primary mt-1">•</span>
-                          <span>AI-generated content is provided "as is" without warranties</span>
-                        </li>
-                        <li className="flex items-start gap-2">
-                          <span className="text-primary mt-1">•</span>
-                          <span>You are responsible for reviewing and validating all generated content</span>
-                        </li>
-                        <li className="flex items-start gap-2">
-                          <span className="text-primary mt-1">•</span>
-                          <span>We do not guarantee the accuracy, completeness, or suitability of AI outputs</span>
-                        </li>
-                        <li className="flex items-start gap-2">
-                          <span className="text-primary mt-1">•</span>
-                          <span>You assume all risks associated with using AI-generated content</span>
-                        </li>
-                      </ul>
-                      <h3 className="text-xl font-semibold mt-6 mb-3">Indemnification</h3>
-                      <p className="text-muted-foreground leading-relaxed">
-                        You agree to defend, indemnify, and hold harmless Disoriti from any claims, damages, or expenses 
-                        arising from your use of our services or violation of these Terms.
-                      </p>
-                    </div>
-                  </div>
-                )}
+              <h2 className="text-2xl font-semibold">5. Prohibited Use</h2>
+              <ul className="list-disc pl-6 space-y-1">
+                <li>Upload illegal, harmful, or copyrighted content without permission;</li>
+                <li>Use the Service for spam, scraping, hacking, or abuse of APIs;</li>
+                <li>Circumvent or attempt to circumvent the Service’s security measures;</li>
+                <li>Use the Service in violation of applicable laws.</li>
+              </ul>
 
-                {/* Changes */}
-                {activeSection === "changes" && (
-                  <div className="space-y-6">
-                    <h2 className="text-2xl font-bold flex items-center gap-3">
-                      <Calendar className="h-6 w-6 text-primary" />
-                      Changes to Terms
-                    </h2>
-                    <div className="prose prose-gray max-w-none">
-                      <p className="text-muted-foreground leading-relaxed">
-                        We reserve the right to modify these Terms at any time. We will notify users of any material 
-                        changes through email or prominent notice on our website.
-                      </p>
-                      <h3 className="text-xl font-semibold mt-6 mb-3">Notification Process</h3>
-                      <ul className="space-y-2 text-muted-foreground">
-                        <li className="flex items-start gap-2">
-                          <span className="text-primary mt-1">•</span>
-                          <span>Material changes will be communicated 30 days in advance</span>
-                        </li>
-                        <li className="flex items-start gap-2">
-                          <span className="text-primary mt-1">•</span>
-                          <span>Continued use of our services constitutes acceptance of new terms</span>
-                        </li>
-                        <li className="flex items-start gap-2">
-                          <span className="text-primary mt-1">•</span>
-                          <span>You may terminate your account if you disagree with changes</span>
-                        </li>
-                      </ul>
-                      <h3 className="text-xl font-semibold mt-6 mb-3">Contact Information</h3>
-                      <p className="text-muted-foreground leading-relaxed">
-                        If you have any questions about these Terms, please contact us at:
-                      </p>
-                      <div className="bg-muted/30 rounded-lg p-4 mt-4">
-                        <p className="text-sm">
-                          <strong>Email:</strong> legal@disoriti.com<br />
-                          <strong>Address:</strong> Disoriti Legal Department<br />
-                          [Your Company Address]
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
+              <h2 className="text-2xl font-semibold">6. API Use</h2>
+              <p>
+                Use of our APIs is subject to these Terms and any additional API documentation. We are not liable for any damages or losses resulting from the use of the API by you or by third parties.
+              </p>
+
+              <h2 className="text-2xl font-semibold">7. Subscriptions, Payments, and Cancellation</h2>
+              <p>
+                We offer both free and paid subscriptions. Paid subscriptions are billed in advance according to the pricing listed on our website. Unless otherwise stated, subscriptions renew automatically. You may cancel your subscription with 14 days’ notice through your account settings. No refunds will be issued for already-paid terms unless the Service is unavailable due to an error on our part. For European consumers, the statutory 14-day withdrawal period applies to online purchases.
+              </p>
+
+              <h2 className="text-2xl font-semibold">8. Intellectual Property</h2>
+              <p>
+                The technology, software, and content of the Service remain the property of Disoriti. You retain ownership of the Content you create, but you grant us a limited license to use it for the purpose of providing the Service.
+              </p>
+
+              <h2 className="text-2xl font-semibold">9. AI Output and Disclaimers</h2>
+              <p>
+                The AI-generated content produced by the Service is generated automatically and may contain inaccuracies. You are solely responsible for the use of the generated content and for compliance with applicable laws, including copyright and advertising regulations. We do not guarantee that the Service automatically complies with all laws and regulations in your jurisdiction; it is the User’s responsibility to ensure that the use of the Service complies with local laws.
+              </p>
+
+              <h2 className="text-2xl font-semibold">10. Indemnification</h2>
+              <p>
+                The User indemnifies Disoriti against any third-party claims arising from the use of the Service, including claims related to Content uploaded or generated by the User.
+              </p>
+
+              <h2 className="text-2xl font-semibold">11. Termination</h2>
+              <p>
+                We may suspend or terminate your account if you violate these Terms or misuse the Service. You may terminate your account at any time through your account settings.
+              </p>
+
+              <h2 className="text-2xl font-semibold">12. Limitation of Liability</h2>
+              <p>
+                Our Services are provided “as is” without any warranties. We are not liable for indirect or consequential damages. Our total liability is limited to the amount you have paid us in the past 12 months. We are not liable for interruptions or delays caused by circumstances beyond our control (force majeure).
+              </p>
+
+              <h2 className="text-2xl font-semibold">13. Changes</h2>
+              <p>
+                We may update these Terms from time to time. We will notify you of any significant changes via email or on our website. Continued use of the Service after such changes take effect constitutes acceptance of the updated Terms.
+              </p>
+
+              <h2 className="text-2xl font-semibold">14. Governing Law and Disputes</h2>
+              <p>
+                These Terms are governed by Dutch law. Disputes will be submitted to the competent court in the Netherlands, unless mandatory law in your country provides otherwise. For consumers outside the Netherlands, the mandatory consumer protection laws of their country of residence will apply where required by law.
+              </p>
             </div>
           </div>
         </div>

@@ -58,6 +58,11 @@ function EnhancePromptPageInner() {
   const postType = searchParams?.get("postType") || "";
   const hasReference = searchParams?.get("hasReference") === "true";
 
+  // If coming from reference image creator, auto-select reference flow
+  useEffect(() => {
+    if (hasReference) setWantsReference(true);
+  }, [hasReference]);
+
   // Handle reference image upload
   const handleReferenceUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -70,7 +75,7 @@ function EnhancePromptPageInner() {
 
   // Generate reference image content
   const handleGenerateReference = async () => {
-    if (!referenceImage || !prompt.trim()) return;
+    if (!referenceImage) return;
     
     setIsGeneratingReference(true);
     setReferenceProgress(0);
@@ -85,7 +90,7 @@ function EnhancePromptPageInner() {
     try {
       const formData = new FormData();
       formData.append('image', referenceImage);
-      formData.append('custom_prompt', prompt);
+      if (prompt.trim()) formData.append('custom_prompt', prompt.trim());
 
       const response = await authenticatedFetch(API_URLS.GENERATE_REFERENCE_IMAGE_CONTENT_URL, {
         method: 'POST',
@@ -479,23 +484,25 @@ function EnhancePromptPageInner() {
                         />
                       </div>
                       <div className="flex-1 space-y-4">
-                        <div>
-                          <Label htmlFor="reference-prompt" className="text-sm font-medium">
-                            Describe what you want to generate
-                          </Label>
-                          <Textarea
-                            id="reference-prompt"
-                            placeholder="e.g., Create a similar style but with different colors and composition..."
-                            value={prompt}
-                            onChange={(e) => setPrompt(e.target.value)}
-                            className="min-h-[120px] resize-none border-2 focus:border-disoriti-primary/50 focus:ring-disoriti-primary/20 mt-2"
-                            disabled={isGeneratingReference}
-                          />
-                        </div>
+                        {!hasReference && (
+                          <div>
+                            <Label htmlFor="reference-prompt" className="text-sm font-medium">
+                              Describe what you want to generate
+                            </Label>
+                            <Textarea
+                              id="reference-prompt"
+                              placeholder="e.g., Create a similar style but with different colors and composition..."
+                              value={prompt}
+                              onChange={(e) => setPrompt(e.target.value)}
+                              className="min-h-[120px] resize-none border-2 focus:border-disoriti-primary/50 focus:ring-disoriti-primary/20 mt-2"
+                              disabled={isGeneratingReference}
+                            />
+                          </div>
+                        )}
                         <div className="flex justify-center">
                           <Button 
                             onClick={handleGenerateReference} 
-                            disabled={!prompt.trim() || isGeneratingReference}
+                            disabled={isGeneratingReference || (!hasReference && !prompt.trim())}
                             className="bg-gradient-to-r from-disoriti-primary to-disoriti-accent hover:from-disoriti-primary/90 hover:to-disoriti-accent/90 hover:text-black text-white disabled:opacity-50 disabled:cursor-not-allowed px-6"
                             size="default"
                           >

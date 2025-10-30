@@ -820,7 +820,7 @@ export default function LandingPage() {
               <ul className="space-y-2">
                 {["Help Center", "Community", "Contact", "Status", "Privacy"].map((item) => (
                   <li key={item}>
-                    <Link href="#" className="text-muted-foreground hover:text-primary transition-colors text-sm">
+                    <Link href={item === "Privacy" ? "/privacy" : "#"} className="text-muted-foreground hover:text-primary transition-colors text-sm">
                       {item}
                     </Link>
                   </li>
@@ -858,7 +858,7 @@ export default function LandingPage() {
               © {new Date().getFullYear()} Disoriti. All rights reserved.
             </div>
             <div className="flex items-center gap-6 text-sm">
-              <Link href="#" className="text-muted-foreground hover:text-primary transition-colors">
+              <Link href="/privacy" className="text-muted-foreground hover:text-primary transition-colors">
                 Privacy Policy
               </Link>
               <Link href="/terms" className="text-muted-foreground hover:text-primary transition-colors">
