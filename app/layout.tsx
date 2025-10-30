@@ -27,7 +27,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Disoriti - AI-powered ad generator",
-  description: "Frontend powered by Next.js and Shadcn UI",
+  description: "Disoriti lets you generate effective AI-powered ads for any social media platform—fast. Turn your ideas into scroll-stopping posts, banners, and stories with the help of advanced AI creative tools.",
   icons: {
     icon: '/favicon.ico',
     shortcut: '/favicon.ico',
