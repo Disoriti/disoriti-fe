@@ -3,7 +3,7 @@ export const getEnvironment = (): 'development' | 'production' | 'test' => {
   const rawEnv = (process.env.NEXT_PUBLIC_APP_ENV || process.env.NODE_ENV || 'development').toLowerCase();
   if (rawEnv.startsWith('prod')) return 'production';
   if (rawEnv.startsWith('test')) return 'test';
-  return 'production';
+  return 'development';
 };
 
 // Get API base URL with fallbacks

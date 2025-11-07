@@ -44,6 +44,18 @@ interface GenerateImageMetadataResponse {
 // Layout data will be populated from API response
 const defaultLayouts: Layout[] = [];
 
+const defaultElementCopy: Record<'heading' | 'subheading' | 'cta', string> = {
+  heading: "heading here",
+  subheading: "Suheading here",
+  cta: "CTA here",
+};
+
+const defaultElementFrames: Record<'heading' | 'subheading' | 'cta', { x: number; y: number; width: number; height: number }> = {
+  heading: { x: 80, y: 720, width: 920, height: 120 },
+  subheading: { x: 80, y: 860, width: 920, height: 100 },
+  cta: { x: 80, y: 990, width: 420, height: 90 },
+};
+
 // Normalize API layout (which may be normalized 0..1 coords and RGBA hex) into our 1080px space and styling
 function normalizeApiLayouts(apiLayouts: any[]): Layout[] {
   const toSixHexAndAlpha = (hex: string): { hex6: string; alpha?: number } => {
@@ -60,17 +72,22 @@ function normalizeApiLayouts(apiLayouts: any[]): Layout[] {
     return { hex6: cleaned };
   };
 
-  const toPx = (v: number) => (v <= 1 ? v * 1080 : v);
+  const toPx = (v: number | undefined, key: 'heading' | 'subheading' | 'cta', axis: 'x' | 'y' | 'width' | 'height') => {
+    if (typeof v === 'number' && v > 0) {
+      return v <= 1 ? v * 1080 : v;
+    }
+    return defaultElementFrames[key][axis];
+  };
 
   const normalizeElement = (key: 'heading' | 'subheading' | 'cta', el: any): ElementData => {
     const { hex6: bgHex, alpha: bgAlpha } = toSixHexAndAlpha(el?.styling?.background_color || '#000000');
     const { hex6: textHex, alpha: textAlpha } = toSixHexAndAlpha(el?.styling?.color || '#FFFFFF');
     const base: ElementData = {
       bbox: {
-        x: toPx(el?.bbox?.x ?? 0),
-        y: toPx(el?.bbox?.y ?? 0),
-        width: toPx(el?.bbox?.width ?? 0),
-        height: toPx(el?.bbox?.height ?? 0),
+        x: toPx(el?.bbox?.x, key, 'x'),
+        y: toPx(el?.bbox?.y, key, 'y'),
+        width: Math.max(120, toPx(el?.bbox?.width, key, 'width')),
+        height: Math.max(48, toPx(el?.bbox?.height, key, 'height')),
       },
       styling: {
         font_size: el?.styling?.font_size ?? 32,
@@ -86,7 +103,7 @@ function normalizeApiLayouts(apiLayouts: any[]): Layout[] {
         text_transform: el?.styling?.text_transform,
         line_height: el?.styling?.line_height,
       },
-      text_content: el?.text_content ?? '',
+      text_content: el?.text_content && el.text_content.trim() ? el.text_content : defaultElementCopy[key],
     };
     return base;
   };
@@ -199,10 +216,14 @@ function ContentPageInner() {
       if (key === 'h') { e.preventDefault(); handleAddText('heading'); }
       if (key === 's') { e.preventDefault(); handleAddText('subheading'); }
       if (key === 'c') { e.preventDefault(); handleAddText('cta'); }
+      if ((key === 'backspace' || key === 'delete') && selectedElement) {
+        e.preventDefault();
+        handleHideElement(selectedElement);
+      }
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [generatedImage, layouts, selectedLayoutIdx]);
+  }, [generatedImage, layouts, selectedLayoutIdx, selectedElement]);
 
   // Auto-generate content when reference image is loaded from localStorage
   useEffect(() => {
@@ -223,7 +244,7 @@ function ContentPageInner() {
         style: 'auto',
         elements: {
           heading: {
-            bbox: { x: 50, y: 50, width: 400, height: 60 },
+            bbox: { ...defaultElementFrames.heading },
             styling: {
               font_size: 48,
               font_weight: 'bold',
@@ -234,11 +255,11 @@ function ContentPageInner() {
               background_opacity: 0,
               margin: 0,
             },
-            text_content: '',
+            text_content: defaultElementCopy.heading,
             hidden: false,
           },
           subheading: {
-            bbox: { x: 50, y: 120, width: 400, height: 40 },
+            bbox: { ...defaultElementFrames.subheading },
             styling: {
               font_size: 32,
               font_weight: 'normal',
@@ -249,11 +270,11 @@ function ContentPageInner() {
               background_opacity: 0,
               margin: 0,
             },
-            text_content: '',
+            text_content: defaultElementCopy.subheading,
             hidden: false,
           },
           cta: {
-            bbox: { x: 50, y: 180, width: 200, height: 50 },
+            bbox: { ...defaultElementFrames.cta },
             styling: {
               font_size: 24,
               font_weight: 'bold',
@@ -264,7 +285,7 @@ function ContentPageInner() {
               background_opacity: 1,
               margin: 0,
             },
-            text_content: '',
+            text_content: defaultElementCopy.cta,
             hidden: false,
           },
         },
@@ -496,10 +517,10 @@ function ContentPageInner() {
         nextType = !current.elements.subheading.hidden ? "cta" : "subheading";
       }
     }
-    const defaults: Record<"heading"|"subheading"|"cta", { x: number; y: number; w: number; h: number; text: string; } > = {
-      heading: { x: 80, y: 820, w: 840, h: 120, text: "Your text here" },
-      subheading: { x: 80, y: 920, w: 840, h: 100, text: "Add more details" },
-      cta: { x: 80, y: 1040-140, w: 360, h: 80, text: "Call to Action" },
+    const defaults: Record<"heading"|"subheading"|"cta", { x: number; y: number; width: number; height: number; text: string; } > = {
+      heading: { ...defaultElementFrames.heading, text: "Your text here" },
+      subheading: { ...defaultElementFrames.subheading, text: "Add more details" },
+      cta: { ...defaultElementFrames.cta, text: "Call to Action" },
     };
     const d = defaults[nextType];
     newLayouts[selectedLayoutIdx] = {
@@ -514,8 +535,8 @@ function ContentPageInner() {
             ...current.elements[nextType].bbox,
             x: current.elements[nextType].bbox.x || d.x,
             y: current.elements[nextType].bbox.y || d.y,
-            width: current.elements[nextType].bbox.width || d.w,
-            height: current.elements[nextType].bbox.height || d.h,
+            width: current.elements[nextType].bbox.width || d.width,
+            height: current.elements[nextType].bbox.height || d.height,
           }
         }
       }
@@ -531,6 +552,29 @@ function ContentPageInner() {
     (newLayout.elements[type].styling as any)[key] = value;
     newLayouts[selectedLayoutIdx] = newLayout;
     setLayouts(newLayouts);
+  };
+
+  const handleHideElement = (type: "heading" | "subheading" | "cta") => {
+    const current = layouts[selectedLayoutIdx];
+    if (!current) return;
+    const element = current.elements[type];
+    if (!element || element.hidden) return;
+    pushHistory();
+    const newLayouts = [...layouts];
+    newLayouts[selectedLayoutIdx] = {
+      ...current,
+      elements: {
+        ...current.elements,
+        [type]: {
+          ...element,
+          hidden: true,
+        },
+      },
+    };
+    setLayouts(newLayouts);
+    if (selectedElement === type) {
+      setSelectedElement(null);
+    }
   };
 
   const handleElementChange = (newElements: { heading: ElementData; subheading: ElementData; cta: ElementData }) => {
