@@ -129,7 +129,7 @@ export const API_ENDPOINTS = {
   
   // Library
   LIBRARY: {
-    GET_ALL: '/library',
+    GET_ALL: '/ai/images',
     GET_BY_ID: '/library',
     SAVE_TO_LIBRARY: '/library/save',
     REMOVE_FROM_LIBRARY: '/library',

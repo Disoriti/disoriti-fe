@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import {
@@ -29,11 +29,11 @@ import {
   Calendar,
   FileImage,
   Search,
-  Filter,
-  LayoutGrid,
-  Rows,
 } from "lucide-react";
 import AdGenerationLoader from "@/components/ad-generation-loader";
+import { API_URLS } from "@/lib/api";
+import { authenticatedFetch } from "@/lib/auth";
+import { toast } from "sonner";
 
 // Example ad type
 interface Ad {
@@ -54,117 +54,37 @@ function DateClient({ iso, options }: { iso: string; options?: Intl.DateTimeForm
   return <span>{date}</span>;
 }
 
-// Mock data
-const mockAds: Ad[] = [
-  {
-    id: "1",
-    media: "image",
-    previewUrl: "https://burst.shopifycdn.com/photos/core-strength-fitness.jpg?width=1000&format=pjpg&exif=0&iptc=0",
-    heading: "Summer Fitness Challenge",
-    platform: "Instagram",
-    postType: "Feed Post (Square)",
-    createdAt: new Date().toISOString(),
-  },
-  {
-    id: "2",
-    media: "image",
-    previewUrl: "https://images.unsplash.com/photo-1542291026-7eec264c27ff",
-    heading: "Limited Edition Sneakers",
-    platform: "Facebook",
-    postType: "Story",
-    createdAt: new Date(Date.now() - 86400000).toISOString(),
-  },
-  {
-    id: "3",
-    media: "image",
-    previewUrl: "https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d",
-    heading: "Digital Marketing Workshop",
-    platform: "LinkedIn",
-    postType: "Feed Post (Image)",
-    createdAt: new Date(Date.now() - 2 * 86400000).toISOString(),
-  },
-  {
-    id: "4",
-    media: "image",
-    previewUrl: "https://images.unsplash.com/photo-1504674900247-0877df9cc836",
-    heading: "Healthy Menu Launch",
-    platform: "Instagram",
-    postType: "Carousel",
-    createdAt: new Date(Date.now() - 3 * 86400000).toISOString(),
-  },
-  {
-    id: "5",
-    media: "image",
-    previewUrl: "https://images.unsplash.com/photo-1551434678-e076c223a692",
-    heading: "Tech Innovation Summit",
-    platform: "LinkedIn",
-    postType: "Event Post",
-    createdAt: new Date(Date.now() - 4 * 86400000).toISOString(),
-  },
-  {
-    id: "6",
-    media: "image",
-    previewUrl: "https://images.unsplash.com/photo-1441986300917-64674bd600d8",
-    heading: "Eco-Friendly Collection",
-    platform: "Facebook",
-    postType: "Feed Post (Image)",
-    createdAt: new Date(Date.now() - 5 * 86400000).toISOString(),
-  },
-  {
-    id: "7",
-    media: "image",
-    previewUrl: "https://images.unsplash.com/photo-1523275335684-37898b6baf30",
-    heading: "Smart Watch Sale",
-    platform: "Instagram",
-    postType: "Story",
-    createdAt: new Date(Date.now() - 6 * 86400000).toISOString(),
-  },
-  {
-    id: "8",
-    media: "image",
-    previewUrl: "https://images.unsplash.com/photo-1497215728101-856f4ea42174",
-    heading: "Remote Work Solutions",
-    platform: "LinkedIn",
-    postType: "Feed Post (Square)",
-    createdAt: new Date(Date.now() - 7 * 86400000).toISOString(),
-  },
-  {
-    id: "9",
-    media: "image",
-    previewUrl: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e",
-    heading: "Music Festival Tickets",
-    platform: "Facebook",
-    postType: "Event Post",
-    createdAt: new Date(Date.now() - 8 * 86400000).toISOString(),
-  },
-  {
-    id: "10",
-    media: "image",
-    previewUrl: "https://images.unsplash.com/photo-1542291026-7eec264c27ff",
-    heading: "Premium Headphones",
-    platform: "Instagram",
-    postType: "Product Post",
-    createdAt: new Date(Date.now() - 9 * 86400000).toISOString(),
-  },
-  {
-    id: "11",
-    media: "image",
-    previewUrl: "https://images.unsplash.com/photo-1460925895917-afdab827c52f",
-    heading: "Business Analytics Course",
-    platform: "LinkedIn",
-    postType: "Feed Post (Image)",
-    createdAt: new Date(Date.now() - 10 * 86400000).toISOString(),
-  },
-  {
-    id: "12",
-    media: "image",
-    previewUrl: "https://images.unsplash.com/photo-1441984904996-e0b6ba687e04",
-    heading: "Coffee Shop Opening",
-    platform: "Facebook",
-    postType: "Story",
-    createdAt: new Date(Date.now() - 11 * 86400000).toISOString(),
-  }
-];
+interface LibraryImagePayload {
+  id?: string;
+  source?: string;
+  url?: string | null;
+  public_url?: string | null;
+  signed_url?: string | null;
+  blob_path?: string | null;
+  bucket?: string | null;
+  metadata?: {
+    index?: number;
+    custom_prompt?: string;
+    reference_image?: {
+      filename?: string;
+      content_type?: string;
+      size?: number;
+    };
+  };
+  created_at?: string;
+}
+
+const formatSource = (source?: string): string => {
+  if (!source) return "Generated";
+  const readable = source.replace(/[_-]+/g, " ");
+  return readable.charAt(0).toUpperCase() + readable.slice(1);
+};
+
+const formatFilename = (filename?: string): string => {
+  if (!filename) return "Generated Image";
+  const parts = filename.split("/");
+  return parts[parts.length - 1] || filename;
+};
 
 function SkeletonCard() {
   return (
@@ -300,15 +220,77 @@ export default function LibraryPage() {
   const [platform, setPlatform] = useState<string>("all");
   const [postType, setPostType] = useState<string>("all");
   const [sortBy, setSortBy] = useState<string>("newest");
+  const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
+  const loadLibrary = useCallback(
+    async (abortSignal?: AbortSignal) => {
+      try {
+        setLoading(true);
+        setError(null);
+
+        const response = await authenticatedFetch(`${API_URLS.LIBRARY_URL}?limit=50`, {
+          method: "GET",
+          signal: abortSignal,
+        });
+
+        if (!response.ok) {
+          throw new Error(`Failed to load library (status ${response.status})`);
+        }
+
+        const payload = await response.json();
+        const images: LibraryImagePayload[] = Array.isArray(payload?.data?.images) ? payload.data.images : [];
+
+        const mapped = images.reduce<Ad[]>((acc, image, index) => {
+          const previewUrl = image.public_url ?? image.url ?? image.signed_url ?? "";
+          if (!image.id || !previewUrl) {
+            return acc;
+          }
+
+          acc.push({
+            id: image.id,
+            media: "image",
+            previewUrl,
+            heading: image.metadata?.custom_prompt?.trim() || `Generated Image ${index + 1}`,
+            platform: formatSource(image.source),
+            postType: formatFilename(image.metadata?.reference_image?.filename),
+            createdAt: image.created_at ?? new Date().toISOString(),
+          });
+
+          return acc;
+        }, []);
+
+        if (abortSignal?.aborted) return;
+
+        setAds(mapped);
+        setError(null);
+      } catch (err) {
+        if (abortSignal?.aborted) return;
+        console.error("Failed to load library items:", err);
+        setAds([]);
+        setError("We couldn't load your library items. Please try again.");
+        toast.error("Failed to load library items");
+      } finally {
+        if (!abortSignal?.aborted) {
+          setLoading(false);
+        }
+      }
+    },
+    []
+  );
+
   useEffect(() => {
-    // Simulate loading and set mock ads
-    setTimeout(() => {
-      setAds(mockAds); // Use mock ads for now
-      setLoading(false);
-    }, 1000);
-  }, []);
+    const controller = new AbortController();
+    loadLibrary(controller.signal);
+
+    return () => {
+      controller.abort();
+    };
+  }, [loadLibrary]);
+
+  const handleRetry = useCallback(() => {
+    loadLibrary();
+  }, [loadLibrary]);
 
   const handleGenerateImage = async () => {
     setGeneratingImage(true);
@@ -493,6 +475,23 @@ export default function LibraryPage() {
             <SkeletonCard key={i} />
           ))}
         </div>
+      ) : error ? (
+        <Card className="shadow-lg rounded-xl border border-border/40">
+          <CardContent className="flex flex-col items-center justify-center py-16 text-center space-y-4">
+            <div className="p-4 rounded-full bg-red-500/10">
+              <FileImage className="h-12 w-12 text-red-500" />
+            </div>
+            <div>
+              <h3 className="text-xl font-semibold mb-2">We hit a snag</h3>
+              <p className="text-muted-foreground max-w-sm mx-auto">
+                {error}
+              </p>
+            </div>
+            <Button onClick={handleRetry} disabled={loading}>
+              Try Again
+            </Button>
+          </CardContent>
+        </Card>
       ) : filteredAds.length === 0 ? (
         <Card className="shadow-lg rounded-xl border border-border/40">
           <CardContent className="flex flex-col items-center justify-center py-16 text-center">
