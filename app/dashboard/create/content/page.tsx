@@ -737,12 +737,12 @@ function ContentPageInner() {
           <p className="text-muted-foreground">Setting up editor...</p>
         </div>
       ) : generatedImage ? (
-        <div className="w-full max-w-[1700px] mx-auto flex-1">
-          <div className="bg-background p-4 rounded-2xl border border-border shadow-lg flex flex-row gap-6 items-start justify-center">
+        <div className="w-full max-w-[1600px] mx-auto flex-1">
+          <div className="bg-background p-4 rounded-2xl border border-border shadow-lg flex flex-row gap-5 items-start justify-center">
             
             {/* Main display area (center) */}
-            <div className="flex-1 flex flex-col items-center justify-start gap-4">
-              <div ref={previewRef} className="w-full max-w-[1024px] aspect-[4/3] bg-background/50 rounded-lg border border-primary/40 shadow-[0_0_20px_4px_hsl(var(--primary)/0.5)] overflow-hidden relative"
+            <div className="flex-1 flex flex-col items-center justify-start gap-3">
+              <div ref={previewRef} className="w-full max-w-[900px] aspect-[4/3] bg-background/50 rounded-lg border border-primary/40 shadow-[0_0_16px_3px_hsl(var(--primary)/0.45)] overflow-hidden relative"
                 onClick={e => {
                   if (e.target === e.currentTarget) {
                     setSelectedElement(null);
@@ -754,8 +754,8 @@ function ContentPageInner() {
                   <AdLayoutSVG
                     imageUrl={generatedImage || "/image.png"}
                     layout={layouts[selectedLayoutIdx]}
-                    width={1024}
-                    height={768}
+                    width={900}
+                    height={675}
                     selected={selectedElement}
                     onSelectElement={setSelectedElement}
                     onElementsChange={handleElementChange}
@@ -801,8 +801,8 @@ function ContentPageInner() {
                     <AdLayoutPreview
                       imageUrl={generatedImage || ""}
                       layout={layouts[selectedLayoutIdx]}
-                      width={1024}
-                      height={768}
+                      width={900}
+                      height={675}
                       logoImage={logoImage}
                     logoPosition={logoPosition}
                     logoColor={logoColor}
@@ -812,7 +812,7 @@ function ContentPageInner() {
                   )}
                 </div>
               </div>
-              <div className="w-full max-w-[1024px]">
+              <div className="w-full max-w-[900px]">
                 <div className="flex items-center justify-between gap-3">
                   <div className="flex items-center gap-2">
                     <Button variant="outline" size="icon" className="text-white hover:text-white" onClick={handleUndo} disabled={history.length === 0} aria-label="Undo">
@@ -835,7 +835,7 @@ function ContentPageInner() {
             <div className="w-px bg-border self-stretch my-4" />
 
             {/* Controls on the right */}
-            <div className="w-[300px] flex-shrink-0">
+            <div className="w-[280px] flex-shrink-0">
               {layouts[selectedLayoutIdx] && (
                 <AdLayoutControls
                   elements={layouts[selectedLayoutIdx].elements}

@@ -12,17 +12,18 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { useState, useEffect, Suspense } from "react";
+import { useState, useEffect, Suspense, useRef } from "react";
 import VisionLayoutRenderer from "@/components/VisionLayoutRenderer";
 import type { DisoritiLayout, SceneDigest } from "@/lib/vision-layout-types";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Sparkles, Wand2, ArrowRight, Loader2, ImageIcon, Eye } from "lucide-react";
+import { Sparkles, Wand2, ArrowRight, Loader2, ImageIcon, Eye, X } from "lucide-react";
 import NavigationButtons from "@/components/navigation-buttons";
 import { API_URLS } from "@/lib/api";
 import { authenticatedFetch, isUnauthorizedError, getToken } from "@/lib/auth";
 import { useAuth } from "@/contexts/auth-context";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 function EnhancePromptPageInner() {
   const [prompt, setPrompt] = useState("");
@@ -49,6 +50,7 @@ function EnhancePromptPageInner() {
   const [referencePreview, setReferencePreview] = useState<string | null>(null);
   const [isGeneratingReference, setIsGeneratingReference] = useState(false);
   const [referenceProgress, setReferenceProgress] = useState(0);
+  const replaceInputRef = useRef<HTMLInputElement | null>(null);
   
   // Safely get search params with fallbacks
   const searchParams = useSearchParams();
@@ -66,11 +68,20 @@ function EnhancePromptPageInner() {
   // Handle reference image upload
   const handleReferenceUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file && file.type.startsWith("image/")) {
-      setReferenceImage(file);
-      const url = URL.createObjectURL(file);
-      setReferencePreview(url);
-    }
+    if (!file || !file.type.startsWith("image/")) return;
+    // Revoke old URL to avoid leaks
+    if (referencePreview) URL.revokeObjectURL(referencePreview);
+    setReferenceImage(file);
+    const url = URL.createObjectURL(file);
+    setReferencePreview(url);
+  };
+
+  const handleRemoveReference = () => {
+    if (referencePreview) URL.revokeObjectURL(referencePreview);
+    setReferenceImage(null);
+    setReferencePreview(null);
+    // Also clear the file input if present so re-uploading the same file re-triggers onChange
+    if (replaceInputRef.current) replaceInputRef.current.value = "";
   };
 
   // Generate reference image content
@@ -477,11 +488,48 @@ function EnhancePromptPageInner() {
                   <CardContent className="p-6">
                     <div className="flex gap-6">
                       <div className="flex-1">
-                        <img 
-                          src={referencePreview} 
-                          alt="Reference" 
-                          className="w-full h-48 object-cover rounded-lg border border-white/10"
+                        <div 
+                          className="relative group cursor-pointer"
+                          onClick={() => replaceInputRef.current?.click()}
+                        >
+                          <img 
+                            src={referencePreview} 
+                            alt="Reference" 
+                            className="w-full h-64 md:h-80 object-contain rounded-lg border border-white/10 bg-muted/10"
+                          />
+                          <TooltipProvider delayDuration={150}>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <button
+                                  type="button"
+                                  aria-label="Remove image"
+                                  className="absolute top-2 right-2 inline-flex items-center justify-center w-8 h-8 rounded-full bg-black/50 hover:bg-black/70 border border-white/20 text-white transition"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleRemoveReference();
+                                  }}
+                                  disabled={isGeneratingReference}
+                                >
+                                  <X className="w-4 h-4" />
+                                </button>
+                              </TooltipTrigger>
+                              <TooltipContent side="left" align="center">
+                                <span>Remove image</span>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                          <div className="pointer-events-none absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition bg-black/20" />
+                        </div>
+                        <input
+                          ref={replaceInputRef}
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={handleReferenceUpload}
                         />
+                        <p className="mt-2 text-xs text-muted-foreground">
+                          Click the image to choose a different file. Use the X to remove it.
+                        </p>
                       </div>
                       <div className="flex-1 space-y-4">
                         {!hasReference && (

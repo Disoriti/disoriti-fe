@@ -24,7 +24,6 @@ import {
 import {
   Folder,
   Download,
-  Eye,
   BadgeCheckIcon,
   Calendar,
   FileImage,
@@ -34,6 +33,7 @@ import AdGenerationLoader from "@/components/ad-generation-loader";
 import { API_URLS } from "@/lib/api";
 import { authenticatedFetch } from "@/lib/auth";
 import { toast } from "sonner";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 // Example ad type
 interface Ad {
@@ -111,6 +111,24 @@ function SkeletonCard() {
 }
 
 function AdGallery({ ads }: { ads: Ad[] }) {
+  const downloadImage = async (url: string, filename: string) => {
+    try {
+      const response = await fetch(url, { mode: "cors", cache: "no-store" });
+      if (!response.ok) throw new Error(`Download failed (${response.status})`);
+      const blob = await response.blob();
+      const objectUrl = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = objectUrl;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(objectUrl);
+    } catch (err) {
+      // Fallback: try opening in new tab if download attribute is blocked by CORS
+      window.open(url, "_blank", "noopener,noreferrer");
+    }
+  };
   const getAspectRatio = (index: number) => {
     // Seeded variability so layout feels organic but stable per render
     const seed = (index * 9301 + 49297) % 233280; // deterministic pseudo-random
@@ -183,22 +201,28 @@ function AdGallery({ ads }: { ads: Ad[] }) {
                     </div>
 
                     {/* Action Buttons */}
-                    <div className="flex items-center gap-2 pt-2">
-                      <Button 
-                        size="sm" 
-                        variant="outline" 
-                        className="h-8 px-3 pointer-events-auto border-white/20 text-white hover:bg-white/10 hover:border-white/40"
-                      >
-                        <Eye className="w-3 h-3 mr-1" />
-                        View
-                      </Button>
-                      <Button 
-                        size="sm" 
-                        className="h-8 px-3 pointer-events-auto bg-primary text-primary-foreground hover:bg-primary/90"
-                      >
-                        <Download className="w-3 h-3 mr-1" />
-                        Save
-                      </Button>
+                    <div className="flex items-center justify-end gap-2 pt-2">
+                      <TooltipProvider delayDuration={150}>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button 
+                              size="icon"
+                              className="h-9 w-9 pointer-events-auto rounded-full bg-primary/90 text-primary-foreground hover:bg-primary shadow-lg"
+                              onClick={() => {
+                                const safeHeading = ad.heading?.trim().replace(/\s+/g, "-").toLowerCase() || "image";
+                                const filename = `disoriti-${safeHeading || "image"}-${ad.id}.png`;
+                                downloadImage(ad.previewUrl, filename);
+                              }}
+                              aria-label="Download"
+                            >
+                              <Download className="w-4 h-4" />
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent side="top" align="end">
+                            <span>Download</span>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
                     </div>
                   </div>
                 </div>
@@ -460,8 +484,9 @@ export default function LibraryPage() {
                 <Download className="w-4 h-4" />
                 Download Image
               </Button>
+              
             <Button variant="outline" className="flex items-center gap-2" onClick={() => router.push('/dashboard/create')}>
-                <Eye className="w-4 h-4" />
+                <FileImage className="w-4 h-4" />
               Open in Creator
               </Button>
             </div>
