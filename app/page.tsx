@@ -622,11 +622,13 @@ export default function LandingPage() {
                 
                 <ul className="space-y-2 md:space-y-3 mb-4 md:mb-6 text-xs md:text-sm flex-grow">
                   {[
-                    "Up to 5 AI-generated ads per month",
-                    "Basic templates and layouts",
+                    "Up to 10 generated ads or posts per month",
+                    "Up to 3 generated ads or posts using reference picture per month",
+                    "Access to Disoriti AI chat",
+                    "Access to layout generator",
+                    "Access to automatic prompt generator",
                     "Community support",
-                    "Standard export formats",
-                    "Basic analytics"
+                    "Watermark on ads and posts from free users"
                   ].map((feature, index) => (
                     <li key={index} className="flex items-center gap-2 md:gap-3">
                       <Check className="h-3 md:h-4 w-3 md:w-4 text-primary flex-shrink-0" />
@@ -659,10 +661,15 @@ export default function LandingPage() {
                 
                 <ul className="space-y-2 md:space-y-3 mb-4 md:mb-6 text-xs md:text-sm flex-grow">
                   {[
-                    "Up to 50 AI-generated ads per month",
-                    "Basic templates and layouts",
-                    "Standard support",
-                    "Export in common formats",
+                    "Up to 30 generated ads or posts per month",
+                    "Up to 10 generated ads or posts using reference image per month",
+                    "Access to Disoriti Chat",
+                    "Access to layout generator",
+                    "Access to automatic prompt generator",
+                    "Access to scheduler",
+                    "Access to Disoriti library",
+                    "Premium support",
+                    "Export in different formats",
                     "Basic analytics"
                   ].map((feature, index) => (
                     <li key={index} className="flex items-center gap-2 md:gap-3">
@@ -703,14 +710,16 @@ export default function LandingPage() {
                 
                 <ul className="space-y-2 md:space-y-3 mb-4 md:mb-6 text-xs md:text-sm flex-grow">
                   {[
-                    "Unlimited AI-generated ads",
-                    "Premium templates and layouts",
-                    "Priority support",
-                    "Advanced export options",
-                    "Detailed analytics and insights",
-                    "Custom branding",
-                    "Team collaboration features",
-                    "API access"
+                    "Unlimited ads or posts per month",
+                    "Up to 40 generated ads or posts using reference image per month",
+                    "Access to Disoriti Chat",
+                    "Access to layout generator",
+                    "Access to automatic prompt generator",
+                    "Access to scheduler",
+                    "Access to Disoriti library",
+                    "Automatic posting to social media accounts (when given access)",
+                    "24/7 custom support",
+                    "Advanced analytics"
                   ].map((feature, index) => (
                     <li key={index} className="flex items-center gap-2 md:gap-3">
                       <Check className="h-3 md:h-4 w-3 md:w-4 text-primary flex-shrink-0" />

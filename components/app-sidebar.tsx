@@ -68,6 +68,11 @@ const data = {
       icon: Calendar,
     },
     {
+      title: "Analytics",
+      url: "/dashboard/analytics",
+      icon: PieChart,
+    },
+    {
       title: "Settings",
       url: "/dashboard/settings",
       icon: Settings2,

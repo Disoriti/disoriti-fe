@@ -210,6 +210,10 @@ function EnhancePromptPageInner() {
         // Set the newly generated prompt as selected
         setSelectedPromptIndex(0);
         
+        // Store prompts in localStorage immediately for the continue flow
+        localStorage.setItem('selectedEnhancedPrompt', enhancedPrompt);
+        localStorage.setItem('selectedOriginalPrompt', prompt);
+        
         // Start animation sequence
         setTimeout(() => setAnimationStep(1), 100);
         setTimeout(() => setAnimationStep(2), 300);
@@ -228,12 +232,37 @@ function EnhancePromptPageInner() {
   };
 
   const handleContinue = () => {
-    // Use the selected prompt's data
-    const selectedPrompt = savedPrompts[selectedPromptIndex];
+    // Determine which prompts to use
+    let finalPrompt = '';
+    let finalEnhancedPrompt = '';
     
-    // Use the editable prompts if they have been modified, otherwise use the originals
-    const finalPrompt = editablePrompt.trim() || selectedPrompt.prompt;
-    const finalEnhancedPrompt = editableEnhancedPrompt.trim() || selectedPrompt.enhanced;
+    // If we have editable prompts (user has edited them), use those
+    if (editablePrompt.trim() && editableEnhancedPrompt.trim()) {
+      finalPrompt = editablePrompt.trim();
+      finalEnhancedPrompt = editableEnhancedPrompt.trim();
+    }
+    // Otherwise, try to get from saved prompts
+    else if (savedPrompts.length > 0 && savedPrompts[selectedPromptIndex]) {
+      const selectedPrompt = savedPrompts[selectedPromptIndex];
+      finalPrompt = editablePrompt.trim() || selectedPrompt.prompt;
+      finalEnhancedPrompt = editableEnhancedPrompt.trim() || selectedPrompt.enhanced;
+    }
+    // Fallback to current state values
+    else if (prompt.trim() && enhancedText.trim()) {
+      finalPrompt = prompt.trim();
+      finalEnhancedPrompt = enhancedText.trim();
+    }
+    // Last resort: use editable values even if empty
+    else {
+      finalPrompt = editablePrompt.trim() || prompt.trim();
+      finalEnhancedPrompt = editableEnhancedPrompt.trim() || enhancedText.trim();
+    }
+    
+    // Validate we have at least an enhanced prompt
+    if (!finalEnhancedPrompt.trim()) {
+      toast.error('Please generate an enhanced prompt first');
+      return;
+    }
     
     // Store the final (potentially edited) prompts
     localStorage.setItem('selectedEnhancedPrompt', finalEnhancedPrompt);
@@ -241,7 +270,7 @@ function EnhancePromptPageInner() {
     
     // Navigate directly to content page with auto-generate flag to skip content generation
     router.push(
-      `/dashboard/create/content?type=${type}&media=${media}&platform=${platform}&postType=${postType}&autoGenerate=true`
+      `/dashboard/create/content?type=${type}&media=${media}&platform=${platform}&postType=${encodeURIComponent(postType)}&autoGenerate=true`
     );
   };
 

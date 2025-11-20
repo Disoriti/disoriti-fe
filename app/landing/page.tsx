@@ -612,7 +612,7 @@ export default function LandingPage() {
                     "Access to layout generator",
                     "Access to automatic prompt generator",
                     "Community support",
-                    "Is it possible to add a watermark to ads and posts from free users?"
+                    "Watermark on ads and posts from free users"
                   ].map((feature, index) => (
                     <li key={index} className="flex items-center gap-3">
                       <Check className="h-4 w-4 text-primary flex-shrink-0" />
@@ -643,7 +643,7 @@ export default function LandingPage() {
                   {[
                     "Up to 30 generated ads or posts per month",
                     "Up to 10 generated ads or posts using reference image per month",
-                    "Access Disoriti Chat",
+                    "Access to Disoriti Chat",
                     "Access to layout generator",
                     "Access to automatic prompt generator",
                     "Access to scheduler",

@@ -3,7 +3,7 @@ export const getEnvironment = (): 'development' | 'production' | 'test' => {
   const rawEnv = (process.env.NEXT_PUBLIC_APP_ENV || process.env.NODE_ENV || 'development').toLowerCase();
   if (rawEnv.startsWith('prod')) return 'production';
   if (rawEnv.startsWith('test')) return 'test';
-  return 'production';
+  return 'development';
 };
 
 // Get API base URL with fallbacks
@@ -110,6 +110,7 @@ export const API_ENDPOINTS = {
     ENHANCE_PROMPT: '/ai/enhance-prompt',
     DISORITI_CHAT: '/ai/disoriti-chat',
     SAVE_CONTENT: '/ai/save',
+    SAVE_IMAGE: '/ai/save-image',
     GET_CONTENT: '/content',
     DELETE_CONTENT: '/content',
     GENERATE_IMAGE_METADATA: '/ai/generate-image-metadata',
@@ -193,6 +194,7 @@ export const API_URLS = {
   GENERATE_IMAGE_METADATA_URL: buildApiUrl(API_ENDPOINTS.CONTENT.GENERATE_IMAGE_METADATA),
   GENERATE_REFERENCE_IMAGE_CONTENT_URL: buildApiUrl(API_ENDPOINTS.CONTENT.GENERATE_REFERENCE_IMAGE_CONTENT),
   SAVE_CONTENT_URL: buildApiUrl(API_ENDPOINTS.CONTENT.SAVE_CONTENT),
+  SAVE_IMAGE_URL: buildApiUrl(API_ENDPOINTS.CONTENT.SAVE_IMAGE),
   GET_CONTENT_URL: buildApiUrl(API_ENDPOINTS.CONTENT.GET_CONTENT),
   DELETE_CONTENT_URL: buildApiUrl(API_ENDPOINTS.CONTENT.DELETE_CONTENT),
   
