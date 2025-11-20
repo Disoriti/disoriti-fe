@@ -390,7 +390,9 @@ function AnalyticsPageInner() {
                           }}
                           whileHover={{ scale: 1.1, rotate: 5 }}
                         >
-                          <Icon className="h-6 w-6" style={{ color: colors.primary }} />
+                          <div style={{ color: colors.primary }}>
+                            <Icon className="h-6 w-6" />
+                          </div>
                         </motion.div>
                         <div>
                           <h3 className="text-xl font-semibold">{platform.platform}</h3>
@@ -539,7 +541,9 @@ function AnalyticsPageInner() {
                       className="flex items-center gap-4"
                     >
                       <div className="flex items-center gap-3 min-w-[120px]">
-                        <Icon className="h-5 w-5" style={{ color: colors.primary }} />
+                        <div style={{ color: colors.primary }}>
+                          <Icon className="h-5 w-5" />
+                        </div>
                         <span className="text-sm font-medium">{platform.platform}</span>
                       </div>
                       <div className="flex-1">
@@ -617,7 +621,9 @@ function AnalyticsPageInner() {
                                 background: `linear-gradient(135deg, ${colors.primary}20, ${colors.secondary})`,
                               }}
                             >
-                              <Icon className="h-5 w-5" style={{ color: colors.primary }} />
+                              <div style={{ color: colors.primary }}>
+                                <Icon className="h-5 w-5" />
+                              </div>
                             </div>
                             <div>
                               <p className="font-semibold">{platform.platform}</p>
