@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import {
@@ -110,7 +110,10 @@ function SkeletonCard() {
   );
 }
 
-function AdGallery({ ads }: { ads: Ad[] }) {
+function ImageCard({ ad, index }: { ad: Ad; index: number }) {
+  const [imageLoaded, setImageLoaded] = useState(false);
+  const [imageError, setImageError] = useState(false);
+
   const downloadImage = async (url: string, filename: string) => {
     try {
       const response = await fetch(url, { mode: "cors", cache: "no-store" });
@@ -129,6 +132,7 @@ function AdGallery({ ads }: { ads: Ad[] }) {
       window.open(url, "_blank", "noopener,noreferrer");
     }
   };
+
   const getAspectRatio = (index: number) => {
     // Seeded variability so layout feels organic but stable per render
     const seed = (index * 9301 + 49297) % 233280; // deterministic pseudo-random
@@ -138,106 +142,141 @@ function AdGallery({ ads }: { ads: Ad[] }) {
     return "3/4";                   // portrait
   };
 
+  const tiltClasses = ["-rotate-2", "rotate-1", "-rotate-1", "rotate-2", "rotate-[1.5deg]", "-rotate-[1.5deg]"];
+  const tiltClass = tiltClasses[(index * 7) % tiltClasses.length];
+  // Randomly allow items to span 2 columns on large screens for variety
+  const seed = (index * 1103515245 + 12345) & 0x7fffffff;
+  const spanLarge = seed % 7 === 0; // ~14% chance
+
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
-      {ads.map((ad, index) => {
-        const tiltClasses = ["-rotate-2", "rotate-1", "-rotate-1", "rotate-2", "rotate-[1.5deg]", "-rotate-[1.5deg]"];
-        const tiltClass = tiltClasses[(index * 7) % tiltClasses.length];
-        // Randomly allow items to span 2 columns on large screens for variety
-        const seed = (index * 1103515245 + 12345) & 0x7fffffff;
-        const spanLarge = seed % 7 === 0; // ~14% chance
-        return (
-          <div key={ad.id} className={`group relative ${spanLarge ? 'lg:col-span-2' : ''}`}>
-            <Card className={`overflow-hidden border border-primary/10 rounded-2xl shadow-sm transition-all duration-500 hover:shadow-glow-lg hover:border-primary/30 bg-background/40 backdrop-blur-sm transform-gpu ${tiltClass} group-hover:rotate-0 group-hover:scale-[1.02]`}>
-              <div 
-                className="relative bg-muted/20" 
-                style={{ aspectRatio: getAspectRatio(index) }}
-              >
-                <div className="pointer-events-none absolute -inset-1 bg-gradient-to-r from-primary/20 via-accent/10 to-primary/20 blur-xl opacity-60 group-hover:opacity-90 transition-opacity -z-10" />
-                <div className="pointer-events-none absolute -inset-px rounded-2xl border border-primary/10" />
-                {ad.media === "video" ? (
-                  <video 
-                    src={ad.previewUrl} 
-                    className="w-full h-full object-cover" 
-                    muted 
-                    playsInline 
-                  />
-                ) : (
-                  <img 
-                    src={ad.previewUrl} 
-                    alt={ad.heading} 
-                    className="w-full h-full object-cover transform-gpu transition-transform duration-700 ease-out group-hover:scale-[1.06]" 
-                  />
-                )}
+    <div className={`group relative ${spanLarge ? 'lg:col-span-2' : ''}`}>
+      <Card className={`overflow-hidden border border-primary/10 rounded-2xl shadow-sm transition-all duration-500 hover:shadow-glow-lg hover:border-primary/30 bg-background/40 backdrop-blur-sm transform-gpu ${tiltClass} group-hover:rotate-0 group-hover:scale-[1.02]`}>
+        <div 
+          className="relative bg-muted/20 overflow-hidden" 
+          style={{ aspectRatio: getAspectRatio(index) }}
+        >
+          <div className="pointer-events-none absolute -inset-1 bg-gradient-to-r from-primary/20 via-accent/10 to-primary/20 blur-xl opacity-60 group-hover:opacity-90 transition-opacity -z-10" />
+          <div className="pointer-events-none absolute -inset-px rounded-2xl border border-primary/10" />
+          
+          {/* Loading placeholder */}
+          {!imageLoaded && !imageError && (
+            <div className="absolute inset-0 flex items-center justify-center bg-muted/30">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+            </div>
+          )}
 
-                {/* Scanlines + sheen */}
-                <div className="pointer-events-none absolute inset-0">
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#050608]/90 via-[#050608]/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                  <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-primary/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                  <div className="absolute inset-0 opacity-[0.08] group-hover:opacity-20 transition-opacity duration-300" style={{ backgroundImage: "repeating-linear-gradient( to bottom, rgba(255,255,255,0.06) 0, rgba(255,255,255,0.06) 1px, transparent 1px, transparent 3px)" }} />
-                </div>
+          {/* Error placeholder */}
+          {imageError && (
+            <div className="absolute inset-0 flex items-center justify-center bg-muted/30">
+              <FileImage className="h-8 w-8 text-muted-foreground" />
+            </div>
+          )}
 
-                {/* Content Overlay */}
-                <div className="absolute inset-0 flex items-end p-4 opacity-0 group-hover:opacity-100 transition-all duration-300">
-                  <div className="w-full space-y-3">
-                    {/* Title and Tags */}
-                    <div className="min-w-0">
-                      <h3 className="text-base font-semibold text-white truncate mb-2">
-                        {ad.heading}
-                      </h3>
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <Badge variant="secondary" className="bg-primary/20 text-primary border-primary/30">
-                          <BadgeCheckIcon className="w-3 h-3 mr-1" />
-                          {ad.platform}
-                        </Badge>
-                        <Badge variant="outline" className="text-xs border-white/20 text-white">
-                          {ad.postType}
-                        </Badge>
-                        <Badge variant="outline" className="text-xs border-white/20 text-white">
-                          <Calendar className="w-3 h-3 mr-1" />
-                          <DateClient iso={ad.createdAt} options={{ month: 'short', day: 'numeric' }} />
-                        </Badge>
-                      </div>
-                    </div>
+          {/* Actual image - only shown when loaded */}
+          {ad.media === "video" ? (
+            <video 
+              src={ad.previewUrl} 
+              className={`w-full h-full object-cover ${imageLoaded ? 'opacity-100' : 'opacity-0'} transition-opacity duration-300`}
+              muted 
+              playsInline
+              onLoadedData={() => setImageLoaded(true)}
+              onError={() => setImageError(true)}
+            />
+          ) : (
+            <img 
+              src={ad.previewUrl} 
+              alt={ad.heading}
+              className={`w-full h-full object-cover transform-gpu transition-all duration-300 group-hover:scale-[1.06] ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
+              onLoad={() => setImageLoaded(true)}
+              onError={() => setImageError(true)}
+              loading="lazy"
+            />
+          )}
 
-                    {/* Action Buttons */}
-                    <div className="flex items-center justify-end gap-2 pt-2">
-                      <TooltipProvider delayDuration={150}>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Button 
-                              size="icon"
-                              className="h-9 w-9 pointer-events-auto rounded-full bg-primary/90 text-primary-foreground hover:bg-primary shadow-lg"
-                              onClick={() => {
-                                const safeHeading = ad.heading?.trim().replace(/\s+/g, "-").toLowerCase() || "image";
-                                const filename = `disoriti-${safeHeading || "image"}-${ad.id}.png`;
-                                downloadImage(ad.previewUrl, filename);
-                              }}
-                              aria-label="Download"
-                            >
-                              <Download className="w-4 h-4" />
-                            </Button>
-                          </TooltipTrigger>
-                          <TooltipContent side="top" align="end">
-                            <span>Download</span>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                    </div>
-                  </div>
+          {/* Scanlines + sheen */}
+          <div className="pointer-events-none absolute inset-0">
+            <div className="absolute inset-0 bg-gradient-to-t from-[#050608]/90 via-[#050608]/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+            <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-primary/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+            <div className="absolute inset-0 opacity-[0.08] group-hover:opacity-20 transition-opacity duration-300" style={{ backgroundImage: "repeating-linear-gradient( to bottom, rgba(255,255,255,0.06) 0, rgba(255,255,255,0.06) 1px, transparent 1px, transparent 3px)" }} />
+          </div>
+
+          {/* Content Overlay */}
+          <div className="absolute inset-0 flex items-end p-4 opacity-0 group-hover:opacity-100 transition-all duration-300">
+            <div className="w-full space-y-3">
+              {/* Title and Tags */}
+              <div className="min-w-0">
+                <h3 className="text-base font-semibold text-white truncate mb-2">
+                  {ad.heading}
+                </h3>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <Badge variant="secondary" className="bg-primary/20 text-primary border-primary/30">
+                    <BadgeCheckIcon className="w-3 h-3 mr-1" />
+                    {ad.platform}
+                  </Badge>
+                  <Badge variant="outline" className="text-xs border-white/20 text-white">
+                    {ad.postType}
+                  </Badge>
+                  <Badge variant="outline" className="text-xs border-white/20 text-white">
+                    <Calendar className="w-3 h-3 mr-1" />
+                    <DateClient iso={ad.createdAt} options={{ month: 'short', day: 'numeric' }} />
+                  </Badge>
                 </div>
               </div>
-            </Card>
+
+              {/* Action Buttons */}
+              <div className="flex items-center justify-end gap-2 pt-2">
+                <TooltipProvider delayDuration={150}>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button 
+                        size="icon"
+                        className="h-9 w-9 pointer-events-auto rounded-full bg-primary/90 text-primary-foreground hover:bg-primary shadow-lg"
+                        onClick={() => {
+                          const safeHeading = ad.heading?.trim().replace(/\s+/g, "-").toLowerCase() || "image";
+                          const filename = `disoriti-${safeHeading || "image"}-${ad.id}.png`;
+                          downloadImage(ad.previewUrl, filename);
+                        }}
+                        aria-label="Download"
+                      >
+                        <Download className="w-4 h-4" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent side="top" align="end">
+                      <span>Download</span>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </div>
+            </div>
           </div>
-        );
-      })}
+        </div>
+      </Card>
     </div>
   );
+}
+
+function AdGallery({ ads }: { ads: Ad[] }) {
+
+  return (
+    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
+      {ads.map((ad, index) => (
+        <ImageCard key={ad.id} ad={ad} index={index} />
+      ))}
+    </div>
+  );
+}
+
+interface PaginationInfo {
+  total: number;
+  limit: number;
+  skip: number;
+  has_more: boolean;
 }
 
 export default function LibraryPage() {
   const [ads, setAds] = useState<Ad[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [generatingImage, setGeneratingImage] = useState(false);
   const [generatedImage, setGeneratedImage] = useState<string | null>(null);
   const [query, setQuery] = useState("");
@@ -245,15 +284,30 @@ export default function LibraryPage() {
   const [postType, setPostType] = useState<string>("all");
   const [sortBy, setSortBy] = useState<string>("newest");
   const [error, setError] = useState<string | null>(null);
+  
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [limit] = useState(50);
+  const [pagination, setPagination] = useState<PaginationInfo | null>(null);
+  const [allAds, setAllAds] = useState<Ad[]>([]); // Store all loaded ads for filtering
+  
   const router = useRouter();
+  const loadMoreRef = useRef<HTMLDivElement>(null);
 
   const loadLibrary = useCallback(
-    async (abortSignal?: AbortSignal) => {
+    async (page: number = 1, append: boolean = false, abortSignal?: AbortSignal) => {
       try {
-        setLoading(true);
+        if (append) {
+          setLoadingMore(true);
+        } else {
+          setLoading(true);
+        }
         setError(null);
 
-        const response = await authenticatedFetch(`${API_URLS.LIBRARY_URL}?limit=50`, {
+        const skip = (page - 1) * limit;
+        const url = `${API_URLS.LIBRARY_URL}?limit=${limit}&skip=${skip}`;
+
+        const response = await authenticatedFetch(url, {
           method: "GET",
           signal: abortSignal,
         });
@@ -263,7 +317,25 @@ export default function LibraryPage() {
         }
 
         const payload = await response.json();
-        const images: LibraryImagePayload[] = Array.isArray(payload?.data?.images) ? payload.data.images : [];
+        
+        // Handle new pagination response structure
+        const images: LibraryImagePayload[] = Array.isArray(payload?.data?.images) 
+          ? payload.data.images 
+          : [];
+        
+        const paginationInfo: PaginationInfo = payload?.data?.pagination 
+          ? {
+              total: payload.data.pagination.total || 0,
+              limit: payload.data.pagination.limit || limit,
+              skip: payload.data.pagination.skip || skip,
+              has_more: payload.data.pagination.has_more || false,
+            }
+          : {
+              total: images.length,
+              limit,
+              skip,
+              has_more: false,
+            };
 
         const mapped = images.reduce<Ad[]>((acc, image, index) => {
           const previewUrl = image.public_url ?? image.url ?? image.signed_url ?? "";
@@ -275,7 +347,7 @@ export default function LibraryPage() {
             id: image.id,
             media: "image",
             previewUrl,
-            heading: image.metadata?.custom_prompt?.trim() || `Generated Image ${index + 1}`,
+            heading: image.metadata?.custom_prompt?.trim() || `Generated Image ${skip + index + 1}`,
             platform: formatSource(image.source),
             postType: formatFilename(image.metadata?.reference_image?.filename),
             createdAt: image.created_at ?? new Date().toISOString(),
@@ -286,34 +358,92 @@ export default function LibraryPage() {
 
         if (abortSignal?.aborted) return;
 
-        setAds(mapped);
+        // If appending, add to existing ads, otherwise replace
+        if (append) {
+          setAllAds(prev => [...prev, ...mapped]);
+          setAds(prev => [...prev, ...mapped]);
+        } else {
+          setAllAds(mapped);
+          setAds(mapped);
+        }
+        
+        setPagination(paginationInfo);
         setError(null);
       } catch (err) {
         if (abortSignal?.aborted) return;
         console.error("Failed to load library items:", err);
-        setAds([]);
+        if (!append) {
+          setAds([]);
+          setAllAds([]);
+        }
         setError("We couldn't load your library items. Please try again.");
         toast.error("Failed to load library items");
       } finally {
         if (!abortSignal?.aborted) {
           setLoading(false);
+          setLoadingMore(false);
         }
       }
     },
-    []
+    [limit]
   );
 
+  // Load initial page
   useEffect(() => {
     const controller = new AbortController();
-    loadLibrary(controller.signal);
+    setCurrentPage(1);
+    setAllAds([]);
+    setAds([]);
+    loadLibrary(1, false, controller.signal);
 
     return () => {
       controller.abort();
     };
   }, [loadLibrary]);
 
+  // Reset to page 1 when filters change (but filters are applied client-side, so no need to reload)
+  // The filtering happens in the useMemo, so we don't need to reload from server
+
+  // Infinite scroll: load more when scrolling near bottom
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const firstEntry = entries[0];
+        if (
+          firstEntry.isIntersecting &&
+          pagination?.has_more &&
+          !loading &&
+          !loadingMore
+        ) {
+          const nextPage = currentPage + 1;
+          setCurrentPage(nextPage);
+          loadLibrary(nextPage, true);
+        }
+      },
+      {
+        root: null,
+        rootMargin: "200px", // Start loading 200px before reaching the bottom
+        threshold: 0.1,
+      }
+    );
+
+    const currentRef = loadMoreRef.current;
+    if (currentRef) {
+      observer.observe(currentRef);
+    }
+
+    return () => {
+      if (currentRef) {
+        observer.unobserve(currentRef);
+      }
+    };
+  }, [pagination, loading, loadingMore, currentPage, loadLibrary]);
+
   const handleRetry = useCallback(() => {
-    loadLibrary();
+    setCurrentPage(1);
+    setAllAds([]);
+    setAds([]);
+    loadLibrary(1, false);
   }, [loadLibrary]);
 
   const handleGenerateImage = async () => {
@@ -353,9 +483,9 @@ export default function LibraryPage() {
     return list;
   }, [ads, query, platform, postType, sortBy]);
 
-  const total = ads.length;
-  const last7 = ads.filter(a => (+new Date() - +new Date(a.createdAt)) < 7 * 86400000).length;
-  const platformsUsed = new Set(ads.map(a => a.platform)).size;
+  const total = pagination?.total || allAds.length;
+  const last7 = allAds.filter(a => (+new Date() - +new Date(a.createdAt)) < 7 * 86400000).length;
+  const platformsUsed = new Set(allAds.map(a => a.platform)).size;
 
   const distinctPostTypes = Array.from(new Set(ads.map(a => a.postType.toLowerCase())));
   const distinctPlatforms = Array.from(new Set(ads.map(a => a.platform.toLowerCase())));
@@ -535,12 +665,27 @@ export default function LibraryPage() {
         </Card>
       ) : (
         <>
-          <div className="flex items-center justify-between text-sm text-muted-foreground">
+          <div className="flex items-center justify-between text-sm text-muted-foreground mb-4">
             <span>
-              Showing <span className="text-foreground font-medium">{filteredAds.length}</span> of {total}
+              Showing <span className="text-foreground font-medium">{filteredAds.length}</span> of {total} total
             </span>
           </div>
           <AdGallery ads={filteredAds} />
+          
+          {/* Infinite scroll trigger and loading indicator */}
+          <div ref={loadMoreRef} className="h-20 flex items-center justify-center">
+            {loadingMore && (
+              <div className="flex items-center gap-3 text-muted-foreground">
+                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-primary"></div>
+                <span>Loading more images...</span>
+              </div>
+            )}
+            {!pagination?.has_more && filteredAds.length > 0 && (
+              <div className="text-sm text-muted-foreground">
+                You've reached the end of your library
+              </div>
+            )}
+          </div>
         </>
       )}
     </div>
