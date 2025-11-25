@@ -66,6 +66,12 @@ export default function CreatePage() {
                 selected === opt.key ? "border-secondary/80 ring-4 ring-primary/10" : "border-secondary/60"
               }`}
               onClick={() => setSelected(opt.key as typeof selected)}
+              onDoubleClick={() => {
+                setSelected(opt.key as typeof selected);
+                if (opt.key) {
+                  router.push(`/dashboard/create/media?type=${opt.key}`);
+                }
+              }}
               type="button"
             >
               <span className="mb-2">{opt.title}</span>

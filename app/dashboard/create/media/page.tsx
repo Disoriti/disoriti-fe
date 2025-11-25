@@ -63,6 +63,12 @@ function MediaPageInner() {
               selected === "image" ? "border-secondary/80 ring-4 ring-primary/30" : "border-secondary/60"
             }`}
             onClick={() => setSelected("image")}
+            onDoubleClick={() => {
+              setSelected("image");
+              if (type) {
+                router.push(`/dashboard/create/upload?type=${type}&media=image`);
+              }
+            }}
             type="button"
           >
             <Image className="h-12 w-12 mb-4" />

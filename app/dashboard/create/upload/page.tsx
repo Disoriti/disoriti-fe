@@ -89,6 +89,7 @@ function UploadPageInner() {
                 whileTap={{ scale: 0.98 }}
                 className="flex flex-col items-center justify-center rounded-2xl border-2 transition-all duration-300 shadow-xl bg-gradient-to-br from-disoriti-primary/10 to-disoriti-accent/10 px-8 py-12 text-xl font-bold w-[280px] hover:border-disoriti-primary/60 focus:outline-none focus:ring-2 focus:ring-disoriti-primary/40"
                 onClick={() => setSelectedPlatform(platform.platform)}
+                onDoubleClick={() => setSelectedPlatform(platform.platform)}
                 type="button"
               >
                 {getPlatformIcon(platform.platform)}
@@ -110,6 +111,22 @@ function UploadPageInner() {
                       : "border-secondary/60"
                   }`}
                   onClick={() => setSelectedPostType(post)}
+                  onDoubleClick={() => {
+                    setSelectedPostType(post);
+                    if (selectedPlatform && post) {
+                      const params = new URLSearchParams({
+                        ...(type && { type }),
+                        ...(media && { media }),
+                        platform: selectedPlatform,
+                        postType: post.type
+                      });
+                      const hasReference = searchParams?.get("hasReference") === "true";
+                      if (hasReference) {
+                        params.set('hasReference', 'true');
+                      }
+                      router.push(`/dashboard/create/editor?${params.toString()}`);
+                    }
+                  }}
                   type="button"
                 >
                   <span className="mb-2">{post.type}</span>

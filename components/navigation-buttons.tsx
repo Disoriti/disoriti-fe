@@ -27,6 +27,7 @@ const NavigationButtons: React.FC<NavigationButtonsProps> = ({
 }) => {
   const [internalProgress, setInternalProgress] = useState<number | undefined>(undefined);
   const rafRef = useRef<number | null>(null);
+  const lastExecuteTimeRef = useRef<number>(0);
 
   const startInternalProgress = useCallback(() => {
     if (!enableClickProgress || typeof nextProgress === 'number') return;
@@ -46,11 +47,28 @@ const NavigationButtons: React.FC<NavigationButtonsProps> = ({
     rafRef.current = requestAnimationFrame(tick);
   }, [enableClickProgress, nextProgress]);
 
-  const handleNextClick = useCallback(() => {
+  const executeNext = useCallback(() => {
     if (disableNext || isNextLoading) return;
+    
+    // Prevent rapid duplicate executions (within 100ms)
+    const now = Date.now();
+    if (now - lastExecuteTimeRef.current < 100) {
+      return;
+    }
+    lastExecuteTimeRef.current = now;
+    
     startInternalProgress();
     onNext?.();
   }, [disableNext, isNextLoading, onNext, startInternalProgress]);
+
+  const handleNextClick = useCallback(() => {
+    executeNext();
+  }, [executeNext]);
+
+  const handleNextDoubleClick = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    executeNext();
+  }, [executeNext]);
 
   const effectiveProgress = typeof nextProgress === 'number' ? nextProgress : internalProgress;
 
@@ -75,6 +93,7 @@ const NavigationButtons: React.FC<NavigationButtonsProps> = ({
             : "text-white border border-accent/20 hover:shadow-accent/40 hover:scale-105"
         }`}
         onClick={handleNextClick}
+        onDoubleClick={handleNextDoubleClick}
         disabled={disableNext || isNextLoading}
       >
         {/* In-button gradient progress fill */}
