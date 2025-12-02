@@ -93,12 +93,16 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
-        <div className="flex items-center justify-center p-2">
-          <img
-            src={isCollapsed ? data.company.logoCollapsed : data.company.logo}
-            alt={data.company.name}
-            className={isCollapsed ? "max-w-[32px] max-h-[40px] w-full h-auto" : "max-w-[110px] max-h-[40px] w-full h-auto mt-3"}
-          />
+        <div className="flex items-center justify-center p-2 relative">
+          {/* Subtle glow behind logo */}
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-accent/5 opacity-50 blur-xl rounded-lg" />
+          <div className="relative z-10">
+            <img
+              src={isCollapsed ? data.company.logoCollapsed : data.company.logo}
+              alt={data.company.name}
+              className={`transition-all duration-300 ${isCollapsed ? "w-10 h-8" : "max-w-[110px] max-h-[40px] w-full h-auto mt-3"} hover:scale-105`}
+            />
+          </div>
         </div>
       </SidebarHeader>
       <SidebarContent className="px-3 py-4 group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:flex group-data-[collapsible=icon]:justify-center">
