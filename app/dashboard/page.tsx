@@ -55,6 +55,7 @@ export default function DashboardPage() {
   const { user, monthlyCreditsLimit, monthlyCreditsUsed, plan } = useAuth();
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [loading, setLoading] = useState(true);
+  const [loadedImages, setLoadedImages] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     fetchDashboardData();
@@ -173,46 +174,59 @@ export default function DashboardPage() {
     return Math.min(100, (monthlyCreditsUsed || 0) / monthlyCreditsLimit * 100);
   };
 
+  const handleImageLoad = (key: string) => {
+    setLoadedImages((prev) => ({
+      ...prev,
+      [key]: true,
+    }));
+  };
+
   return (
-    <div className="space-y-8 p-6 animate-fade-in">
-      <Breadcrumb>
-        <BreadcrumbList>
-          <BreadcrumbItem>
-            <BreadcrumbPage>Dashboard</BreadcrumbPage>
-          </BreadcrumbItem>
-        </BreadcrumbList>
-      </Breadcrumb>
+    <div className="relative min-h-[calc(100vh-5rem)] overflow-hidden">
+      {/* Futuristic background orbs */}
+      <div className="pointer-events-none absolute -top-32 -left-24 h-72 w-72 rounded-full bg-primary/15 blur-3xl opacity-70" />
+      <div className="pointer-events-none absolute -bottom-40 -right-32 h-80 w-80 rounded-full bg-accent/20 blur-3xl opacity-60" />
+      <div className="pointer-events-none absolute inset-0 border border-primary/5 rounded-3xl mx-4 my-6" />
 
-      {/* Welcome Section */}
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="relative overflow-hidden rounded-xl border border-primary/20 bg-background/50 p-6 backdrop-blur-sm"
-      >
-        <div className="relative z-10">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-foreground">
-                Welcome back{user?.email ? `, ${user.email.split('@')[0]}` : ''}! 👋
-              </h1>
-              <p className="mt-2 text-muted-foreground">
-                {plan ? `You're on the ${plan} plan` : 'Ready to create something amazing today?'}
-              </p>
-            </div>
-            <motion.div
-              whileHover={{ scale: 1.1, rotate: 5 }}
-              className="hidden md:block"
-            >
-              <div className="rounded-full bg-primary/10 p-4">
-                <Sparkles className="h-8 w-8 text-primary" />
+      <div className="relative z-10 space-y-8 p-6 animate-fade-in">
+        <Breadcrumb>
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbPage>Dashboard</BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
+
+        {/* Welcome Section */}
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="relative overflow-hidden rounded-2xl border border-primary/25 bg-background/60 p-6 backdrop-blur-lg shadow-[0_0_40px_rgba(59,130,246,0.12)] before:pointer-events-none before:absolute before:inset-x-0 before:top-0 before:h-px before:bg-primary/40 before:opacity-60"
+        >
+          <div className="relative z-10">
+            <div className="flex items-center justify-between">
+              <div>
+                <h1 className="text-3xl font-bold text-foreground tracking-tight">
+                  Welcome back{user?.email ? `, ${user.email.split('@')[0]}` : ''}! 👋
+                </h1>
+                <p className="mt-2 text-muted-foreground text-sm md:text-base">
+                  {plan ? `You're on the ${plan} plan` : "Ready to create something amazing today?"}
+                </p>
               </div>
-            </motion.div>
+              <motion.div
+                whileHover={{ scale: 1.08, rotate: 4 }}
+                className="hidden md:block"
+              >
+                <div className="rounded-2xl border border-primary/30 bg-background/70 p-4 shadow-[0_0_30px_rgba(59,130,246,0.25)]">
+                  <Sparkles className="h-8 w-8 text-primary" />
+                </div>
+              </motion.div>
+            </div>
           </div>
-        </div>
-      </motion.div>
+        </motion.div>
 
-      {/* Stats Cards */}
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+        {/* Stats Cards */}
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
         {loading ? (
           <>
             {[1, 2, 3, 4].map((i) => (
@@ -229,7 +243,7 @@ export default function DashboardPage() {
             />
             <AnalyticsCard
               title="Credits Used"
-              value={`${stats?.creditsUsed || 0}/${stats?.creditsUsed + (stats?.creditsRemaining || 0) || 0}`}
+              value={`${stats?.creditsUsed || 0}/${(stats?.creditsUsed || 0) + (stats?.creditsRemaining || 0)}`}
               description={`${stats?.creditsRemaining || 0} credits remaining`}
               trend={{ 
                 value: monthlyCreditsLimit ? Math.round((monthlyCreditsUsed || 0) / monthlyCreditsLimit * 100) : 0, 
@@ -250,60 +264,60 @@ export default function DashboardPage() {
             />
           </>
         )}
-      </div>
+        </div>
 
-      {/* Credits Usage Bar */}
-      {monthlyCreditsLimit && monthlyCreditsLimit > 0 && (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-        >
-          <Card className="border-primary/20 bg-background/50 backdrop-blur-sm">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-lg">
-                <Zap className="h-5 w-5 text-primary" />
-                Monthly Credits Usage
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">
-                    {monthlyCreditsUsed || 0} of {monthlyCreditsLimit} credits used
-                  </span>
-                  <span className={`font-semibold ${
-                    getCreditsPercentage() > 80 ? 'text-red-400' : 
-                    getCreditsPercentage() > 50 ? 'text-yellow-400' : 
-                    'text-green-400'
-                  }`}>
-                    {Math.round(getCreditsPercentage())}%
-                  </span>
+        {/* Credits Usage Bar */}
+        {monthlyCreditsLimit && monthlyCreditsLimit > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+          >
+            <Card className="border-primary/25 bg-background/60 backdrop-blur-md shadow-[0_0_32px_rgba(15,23,42,0.55)]">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-lg">
+                  <Zap className="h-5 w-5 text-primary" />
+                  Monthly Credits Usage
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-muted-foreground">
+                      {monthlyCreditsUsed || 0} of {monthlyCreditsLimit} credits used
+                    </span>
+                    <span className={`font-semibold ${
+                      getCreditsPercentage() > 80 ? "text-red-400" : 
+                      getCreditsPercentage() > 50 ? "text-yellow-400" : 
+                      "text-green-400"
+                    }`}>
+                      {Math.round(getCreditsPercentage())}%
+                    </span>
+                  </div>
+                  <div className="h-3 w-full rounded-full bg-muted/30 overflow-hidden">
+                    <motion.div
+                      initial={{ width: 0 }}
+                      animate={{ width: `${getCreditsPercentage()}%` }}
+                      transition={{ duration: 1, ease: "easeOut" }}
+                      className={`h-full rounded-full ${
+                        getCreditsPercentage() > 80 ? "bg-red-500" : 
+                        getCreditsPercentage() > 50 ? "bg-yellow-500" : 
+                        "bg-primary"
+                      }`}
+                    />
+                  </div>
+                  {getCreditsPercentage() > 80 && (
+                    <p className="text-xs text-muted-foreground">
+                      You're running low on credits. Consider upgrading your plan.
+                    </p>
+                  )}
                 </div>
-                <div className="h-3 w-full rounded-full bg-muted/30 overflow-hidden">
-                  <motion.div
-                    initial={{ width: 0 }}
-                    animate={{ width: `${getCreditsPercentage()}%` }}
-                    transition={{ duration: 1, ease: "easeOut" }}
-                    className={`h-full rounded-full ${
-                      getCreditsPercentage() > 80 ? 'bg-red-500' : 
-                      getCreditsPercentage() > 50 ? 'bg-yellow-500' : 
-                      'bg-primary'
-                    }`}
-                  />
-                </div>
-                {getCreditsPercentage() > 80 && (
-                  <p className="text-xs text-muted-foreground">
-                    You're running low on credits. Consider upgrading your plan.
-                  </p>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-        </motion.div>
-      )}
+              </CardContent>
+            </Card>
+          </motion.div>
+        )}
 
-      <div className="grid gap-6 lg:grid-cols-3">
+        <div className="grid gap-6 lg:grid-cols-3">
         {/* Recent Images */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -311,7 +325,7 @@ export default function DashboardPage() {
           transition={{ delay: 0.3 }}
           className="lg:col-span-2"
         >
-          <Card className="border-primary/20 bg-background/50 backdrop-blur-sm h-full">
+          <Card className="border-primary/25 bg-background/60 backdrop-blur-md h-full shadow-[0_0_32px_rgba(15,23,42,0.55)]">
             <CardHeader>
               <div className="flex items-center justify-between">
                 <CardTitle className="flex items-center gap-2">
@@ -336,21 +350,28 @@ export default function DashboardPage() {
               ) : stats?.recentImages && stats.recentImages.length > 0 ? (
                 <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
                   {stats.recentImages.map((image, index) => {
-                    const imageUrl = image.public_url || image.url || image.signed_url || '';
+                    const imageUrl = image.public_url || image.url || image.signed_url || "";
+                    const key = String(image.id || index);
+                    const isLoaded = loadedImages[key];
+
                     return (
                       <motion.div
-                        key={image.id || index}
+                        key={key}
                         initial={{ opacity: 0, scale: 0.9 }}
                         animate={{ opacity: 1, scale: 1 }}
                         transition={{ delay: index * 0.1 }}
-                        className="group relative aspect-square overflow-hidden rounded-lg border border-primary/10 hover:border-primary/30 transition-all cursor-pointer"
+                        className="group relative aspect-square overflow-hidden rounded-xl border border-primary/15 bg-background/40 hover:border-primary/40 hover:shadow-[0_0_20px_rgba(59,130,246,0.4)] hover:-translate-y-0.5 transition-all duration-200 cursor-pointer"
                       >
+                        {!isLoaded && (
+                          <div className="absolute inset-0 bg-muted/20 animate-pulse" />
+                        )}
                         {imageUrl ? (
                           <img
                             src={imageUrl}
                             alt={image.metadata?.custom_prompt || "Generated image"}
                             className="h-full w-full object-cover group-hover:scale-110 transition-transform duration-300"
                             loading="lazy"
+                            onLoad={() => handleImageLoad(key)}
                           />
                         ) : (
                           <div className="h-full w-full bg-muted/20 flex items-center justify-center">
@@ -391,7 +412,7 @@ export default function DashboardPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
         >
-          <Card className="border-primary/20 bg-background/50 backdrop-blur-sm h-full">
+          <Card className="border-primary/25 bg-background/60 backdrop-blur-md h-full shadow-[0_0_32px_rgba(15,23,42,0.55)]">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Zap className="h-5 w-5 text-primary" />
@@ -400,7 +421,7 @@ export default function DashboardPage() {
             </CardHeader>
             <CardContent className="space-y-3">
               <Link href="/dashboard/create">
-                <div className="group flex items-center gap-3 rounded-lg border border-primary/10 bg-background/30 p-4 hover:border-primary/30 hover:bg-background/50 transition-all cursor-pointer">
+                <div className="group flex items-center gap-3 rounded-xl border border-primary/15 bg-background/40 p-4 hover:border-primary/40 hover:bg-background/70 hover:shadow-[0_0_28px_rgba(59,130,246,0.25)] hover:-translate-y-0.5 transition-all duration-200 cursor-pointer">
                   <div className="rounded-lg bg-primary/10 p-2 group-hover:bg-primary/20 transition-colors">
                     <PlusCircle className="h-5 w-5 text-primary" />
                   </div>
@@ -411,7 +432,7 @@ export default function DashboardPage() {
                 </div>
               </Link>
               <Link href="/dashboard/library">
-                <div className="group flex items-center gap-3 rounded-lg border border-primary/10 bg-background/30 p-4 hover:border-primary/30 hover:bg-background/50 transition-all cursor-pointer">
+                <div className="group flex items-center gap-3 rounded-xl border border-primary/15 bg-background/40 p-4 hover:border-primary/40 hover:bg-background/70 hover:shadow-[0_0_28px_rgba(59,130,246,0.25)] hover:-translate-y-0.5 transition-all duration-200 cursor-pointer">
                   <div className="rounded-lg bg-primary/10 p-2 group-hover:bg-primary/20 transition-colors">
                     <Library className="h-5 w-5 text-primary" />
                   </div>
@@ -422,7 +443,7 @@ export default function DashboardPage() {
                 </div>
               </Link>
               <Link href="/dashboard/chat">
-                <div className="group flex items-center gap-3 rounded-lg border border-primary/10 bg-background/30 p-4 hover:border-primary/30 hover:bg-background/50 transition-all cursor-pointer">
+                <div className="group flex items-center gap-3 rounded-xl border border-primary/15 bg-background/40 p-4 hover:border-primary/40 hover:bg-background/70 hover:shadow-[0_0_28px_rgba(59,130,246,0.25)] hover:-translate-y-0.5 transition-all duration-200 cursor-pointer">
                   <div className="rounded-lg bg-primary/10 p-2 group-hover:bg-primary/20 transition-colors">
                     <Bot className="h-5 w-5 text-primary" />
                   </div>
@@ -433,7 +454,7 @@ export default function DashboardPage() {
                 </div>
               </Link>
               <Link href="/dashboard/analytics">
-                <div className="group flex items-center gap-3 rounded-lg border border-primary/10 bg-background/30 p-4 hover:border-primary/30 hover:bg-background/50 transition-all cursor-pointer">
+                <div className="group flex items-center gap-3 rounded-xl border border-primary/15 bg-background/40 p-4 hover:border-primary/40 hover:bg-background/70 hover:shadow-[0_0_28px_rgba(59,130,246,0.25)] hover:-translate-y-0.5 transition-all duration-200 cursor-pointer">
                   <div className="rounded-lg bg-primary/10 p-2 group-hover:bg-primary/20 transition-colors">
                     <BarChart3 className="h-5 w-5 text-primary" />
                   </div>
@@ -446,54 +467,55 @@ export default function DashboardPage() {
             </CardContent>
           </Card>
         </motion.div>
-      </div>
-
-      {/* Feature Cards Grid */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.5 }}
-      >
-        <h2 className="mb-6 text-2xl font-semibold text-foreground">All Features</h2>
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          <FeatureCard
-            title="Create Post"
-            description="Generate and create new social media posts with AI assistance"
-            icon={PlusCircle}
-            href="/dashboard/create"
-          />
-          <FeatureCard
-            title="Library"
-            description="Manage and edit your existing posts and campaigns"
-            icon={Library}
-            href="/dashboard/library"
-          />
-          <FeatureCard
-            title="Disoriti Assistant"
-            description="Get AI-powered suggestions and optimize your content"
-            icon={Bot}
-            href="/dashboard/chat"
-          />
-          <FeatureCard
-            title="Scheduler"
-            description="Plan and schedule your posts and campaigns"
-            icon={Calendar}
-            href="/dashboard/scheduler"
-          />
-          <FeatureCard
-            title="Analytics"
-            description="Track performance and engagement metrics"
-            icon={BarChart3}
-            href="/dashboard/analytics"
-          />
-          <FeatureCard
-            title="Settings"
-            description="Manage your account and preferences"
-            icon={Settings}
-            href="/dashboard/settings"
-          />
         </div>
-      </motion.div>
+
+        {/* Feature Cards Grid */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5 }}
+        >
+          <h2 className="mb-6 text-2xl font-semibold text-foreground">All Features</h2>
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            <FeatureCard
+              title="Create Post"
+              description="Generate and create new social media posts with AI assistance"
+              icon={PlusCircle}
+              href="/dashboard/create"
+            />
+            <FeatureCard
+              title="Library"
+              description="Manage and edit your existing posts and campaigns"
+              icon={Library}
+              href="/dashboard/library"
+            />
+            <FeatureCard
+              title="Disoriti Assistant"
+              description="Get AI-powered suggestions and optimize your content"
+              icon={Bot}
+              href="/dashboard/chat"
+            />
+            <FeatureCard
+              title="Scheduler"
+              description="Plan and schedule your posts and campaigns"
+              icon={Calendar}
+              href="/dashboard/scheduler"
+            />
+            <FeatureCard
+              title="Analytics"
+              description="Track performance and engagement metrics"
+              icon={BarChart3}
+              href="/dashboard/analytics"
+            />
+            <FeatureCard
+              title="Settings"
+              description="Manage your account and preferences"
+              icon={Settings}
+              href="/dashboard/settings"
+            />
+          </div>
+        </motion.div>
+      </div>
     </div>
   );
 }
