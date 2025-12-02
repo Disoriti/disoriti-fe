@@ -93,6 +93,7 @@ export const API_ENDPOINTS = {
     ME: '/auth/me',
     FORGOT_PASSWORD: '/auth/forgot-password',
     RESET_PASSWORD: '/auth/reset-password',
+    GOOGLE_AUTH: '/auth/google',
   },
   
   // User Management
@@ -172,6 +173,7 @@ export const API_URLS = {
   // Authentication URLs
   LOGIN_URL: buildApiUrl(API_ENDPOINTS.AUTH.LOGIN),
   SIGNUP_URL: buildApiUrl(API_ENDPOINTS.AUTH.SIGNUP),
+  GOOGLE_AUTH_URL: buildApiUrl(API_ENDPOINTS.AUTH.GOOGLE_AUTH),
   REGISTER_URL: buildApiUrl(API_ENDPOINTS.AUTH.REGISTER),
   LOGOUT_URL: buildApiUrl(API_ENDPOINTS.AUTH.LOGOUT),
   REFRESH_URL: buildApiUrl(API_ENDPOINTS.AUTH.REFRESH),

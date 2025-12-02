@@ -1,8 +1,10 @@
 "use client"
 
-import React, { useState } from "react"
+import React from "react"
 import Image from "next/image"
 import Link from "next/link"
+import { motion } from "framer-motion"
+import { Mail, Lock, ArrowRight } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -18,6 +20,7 @@ export function LoginForm({
   onEmailChange,
   onPasswordChange,
   onSubmit,
+  onGoogleLogin,
   ...props
 }: React.ComponentProps<"div"> & {
   email: string
@@ -27,94 +30,204 @@ export function LoginForm({
   onEmailChange: (e: React.ChangeEvent<HTMLInputElement>) => void
   onPasswordChange: (e: React.ChangeEvent<HTMLInputElement>) => void
   onSubmit: (e: React.FormEvent) => void
+  onGoogleLogin?: () => void
 }) {
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
-      <form onSubmit={onSubmit}>
-        <div className="flex flex-col gap-6">
-          <div className="flex flex-col items-center gap-2">
-            <a
-              href="#"
-              className="flex flex-col items-center gap-2 font-medium"
+      {/* Animated Background Effects - Reduced */}
+      <div className="absolute inset-0 -z-10 overflow-hidden pointer-events-none">
+        <motion.div
+          className="absolute top-0 left-1/4 w-96 h-96 bg-primary/5 rounded-full blur-3xl"
+          animate={{
+            scale: [1, 1.1, 1],
+            opacity: [0.1, 0.15, 0.1],
+          }}
+          transition={{
+            duration: 8,
+            repeat: Infinity,
+            ease: "easeInOut",
+          }}
+        />
+        <motion.div
+          className="absolute bottom-0 right-1/4 w-96 h-96 bg-accent/5 rounded-full blur-3xl"
+          animate={{
+            scale: [1, 1.1, 1],
+            opacity: [0.1, 0.15, 0.1],
+          }}
+          transition={{
+            duration: 10,
+            repeat: Infinity,
+            ease: "easeInOut",
+            delay: 1,
+          }}
+        />
+      </div>
+
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="relative backdrop-blur-sm border border-primary/15 rounded-2xl p-8 bg-gradient-to-br from-background/80 via-background/60 to-background/80 shadow-lg"
+      >
+        {/* Logo and Header */}
+        <div className="flex flex-col items-center gap-4 mb-8">
+          <motion.div
+            whileHover={{ scale: 1.05 }}
+            transition={{ type: "spring", stiffness: 300 }}
+          >
+            <Image
+              src="/logo-primary.png"
+              alt="Disoriti Logo"
+              width={40}
+              height={40}
+              className="size-10"
+            />
+          </motion.div>
+          <div className="text-center">
+            <h1 className="text-3xl font-bold mb-2 text-foreground">
+              Welcome Back
+            </h1>
+            <p className="text-muted-foreground text-sm">
+              Sign in to continue your creative journey
+            </p>
+          </div>
+        </div>
+
+        <form onSubmit={onSubmit} className="space-y-6">
+          {/* Google Login Button */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+          >
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full border border-primary/10 hover:border-primary/20 bg-background/50 backdrop-blur-sm hover:bg-background/70 text-foreground transition-all group"
+              onClick={onGoogleLogin}
+              disabled={loading}
             >
-              <div className="flex size-8 items-center justify-center rounded-md">
-                <Image
-                  src="/logo-primary.png"
-                  alt="Disoriti Logo"
-                  width={24}
-                  height={24}
-                  className="size-6"
-                />
-              </div>
-              <span className="sr-only">Acme Inc.</span>
-            </a>
-            <h1 className="text-xl font-bold">Welcome to Disoriti</h1>
-            <div className="text-center text-sm">
-              Don&apos;t have an account?{" "}
-              <Link href="/signup" className="underline underline-offset-4">
-                Signup
-              </Link>
-            </div>
-          </div>
-          <div className="flex flex-col gap-6">
-            <div className="grid gap-3">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="m@example.com"
-                required
-                value={email}
-                onChange={onEmailChange}
-              />
-            </div>
-            <div className="grid gap-3">
-              <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                placeholder="********"
-                required
-                value={password}
-                onChange={onPasswordChange}
-              />
-            </div>
-            <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? "Logging in..." : "Login"}
-            </Button>
-          </div>
-          {/* <div className="after:border-border relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t">
-            <span className="bg-background text-muted-foreground relative z-10 px-2">
-              Or
-            </span>
-          </div> */}
-          {/* <div className="grid gap-4 sm:grid-cols-2">
-            <Button variant="outline" type="button" className="w-full">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                <path
-                  d="M12.152 6.896c-.948 0-2.415-1.078-3.96-1.04-2.04.027-3.91 1.183-4.961 3.014-2.117 3.675-.546 9.103 1.519 12.09 1.013 1.454 2.208 3.09 3.792 3.039 1.52-.065 2.09-.987 3.935-.987 1.831 0 2.35.987 3.96.948 1.637-.026 2.676-1.48 3.676-2.948 1.156-1.688 1.636-3.325 1.662-3.415-.039-.013-3.182-1.221-3.22-4.857-.026-3.04 2.48-4.494 2.597-4.559-1.429-2.09-3.623-2.324-4.39-2.376-2-.156-3.675 1.09-4.61 1.09zM15.53 3.83c.843-1.012 1.4-2.427 1.245-3.83-1.207.052-2.662.805-3.532 1.818-.78.896-1.454 2.338-1.273 3.714 1.338.104 2.715-.688 3.559-1.701"
-                  fill="currentColor"
-                />
-              </svg>
-              Continue with Apple
-            </Button>
-            <Button variant="outline" type="button" className="w-full">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+              <svg className="mr-2 h-5 w-5" viewBox="0 0 24 24">
                 <path
                   d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z"
                   fill="currentColor"
                 />
               </svg>
-              Continue with Google
+              <span className="text-foreground">Continue with Google</span>
+              <ArrowRight className="ml-2 h-4 w-4 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
             </Button>
-          </div> */}
+          </motion.div>
+
+          {/* Divider */}
+          <div className="relative flex items-center gap-4">
+            <div className="flex-1 h-px bg-gradient-to-r from-transparent via-border to-transparent"></div>
+            <span className="text-xs text-muted-foreground bg-background px-3">OR</span>
+            <div className="flex-1 h-px bg-gradient-to-r from-transparent via-border to-transparent"></div>
+          </div>
+
+          {/* Email Input */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="space-y-2"
+          >
+            <Label htmlFor="email" className="text-sm font-medium flex items-center gap-2">
+              <Mail className="h-4 w-4 text-primary/70" />
+              Email
+            </Label>
+            <div className="relative">
+              <Input
+                id="email"
+                type="email"
+                placeholder="you@example.com"
+                required
+                value={email}
+                onChange={onEmailChange}
+                className="pl-10 bg-background/50 border-primary/20 focus:border-primary/50 focus:ring-primary/20 backdrop-blur-sm"
+              />
+              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+            </div>
+          </motion.div>
+
+          {/* Password Input */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+            className="space-y-2"
+          >
+            <Label htmlFor="password" className="text-sm font-medium flex items-center gap-2">
+              <Lock className="h-4 w-4 text-primary/70" />
+              Password
+            </Label>
+            <div className="relative">
+              <Input
+                id="password"
+                type="password"
+                placeholder="••••••••"
+                required
+                value={password}
+                onChange={onPasswordChange}
+                className="pl-10 bg-background/50 border-primary/20 focus:border-primary/50 focus:ring-primary/20 backdrop-blur-sm"
+              />
+              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+            </div>
+          </motion.div>
+
+          {/* Error Message */}
+          {error && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="p-3 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive text-sm"
+            >
+              {error}
+            </motion.div>
+          )}
+
+          {/* Submit Button */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+          >
+            <Button
+              type="submit"
+              className="w-full bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 text-primary-foreground shadow-md transition-all group"
+              disabled={loading}
+            >
+              {loading ? (
+                <span className="flex items-center gap-2">
+                  <span className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></span>
+                  Signing in...
+                </span>
+              ) : (
+                <>
+                  Sign In
+                  <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                </>
+              )}
+            </Button>
+          </motion.div>
+        </form>
+
+        {/* Footer Links */}
+        <div className="mt-6 text-center space-y-3">
+          <p className="text-sm text-muted-foreground">
+            Don&apos;t have an account?{" "}
+            <Link href="/signup" className="text-primary/80 hover:text-primary font-medium transition-colors underline underline-offset-4">
+              Sign up
+            </Link>
+          </p>
+          <div className="text-xs text-muted-foreground">
+            By continuing, you agree to our{" "}
+            <Link href="/terms" className="text-primary/80 hover:text-primary hover:underline">Terms</Link>{" "}
+            and{" "}
+            <Link href="/privacy" className="text-primary/80 hover:text-primary hover:underline">Privacy Policy</Link>
+          </div>
         </div>
-        {error && <div className="text-red-500">{error}</div>}
-      </form>
-      <div className="text-muted-foreground *:[a]:hover:text-primary text-center text-xs text-balance *:[a]:underline *:[a]:underline-offset-4">
-        By clicking continue, you agree to our <a href="#">Terms of Service</a>{" "}
-        and <a href="#">Privacy Policy</a>.
-      </div>
+      </motion.div>
     </div>
   )
 }
