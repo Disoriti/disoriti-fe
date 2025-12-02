@@ -14,6 +14,8 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { useAuth } from "@/contexts/auth-context"
 import CreditsIndicator from "@/components/ui/credits-indicator"
+import { Home, Sparkles } from "lucide-react"
+import Link from "next/link"
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -38,6 +40,13 @@ function DashboardHeader({ breadcrumb }: { breadcrumb: React.ReactNode }) {
         {breadcrumb}
       </div>
       <div className="flex items-center gap-3">
+        <Button asChild variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground group relative">
+          <Link href="/" className="flex items-center gap-2">
+            <Home className="h-4 w-4 transition-transform group-hover:scale-110" />
+            <span className="hidden sm:inline">Home</span>
+            <div className="absolute -inset-1 bg-gradient-to-r from-primary/20 to-accent/20 rounded-lg opacity-0 group-hover:opacity-100 blur-sm transition-opacity -z-10" />
+          </Link>
+        </Button>
         <Button asChild variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground">
           <a href="/account/subscription">
             <Badge>{(plan || 'Free') + ' user'}</Badge>

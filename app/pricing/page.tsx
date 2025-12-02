@@ -28,11 +28,13 @@ const pricingPlans: PricingPlan[] = [
     monthlyLink: "",
     yearlyLink: "",
     features: [
-      "Up to 5 AI-generated ads per month",
-      "Basic templates and layouts",
+      "Up to 10 generated ads or posts per month",
+      "Up to 3 generated ads or posts using reference picture per month",
+      "Access to Disoriti AI chat",
+      "Access to layout generator",
+      "Access to automatic prompt generator",
       "Community support",
-      "Standard export formats",
-      "Basic analytics",
+      "Watermark on ads and posts from free users",
     ],
     planId: "free",
   },
@@ -44,10 +46,15 @@ const pricingPlans: PricingPlan[] = [
     monthlyLink: "https://buy.stripe.com/28E4gz89Y3oX2Hlde80Ny02",
     yearlyLink: "https://buy.stripe.com/5kQbJ1cqe0cLeq3a1W0Ny03",
     features: [
-      "Up to 50 AI-generated ads per month",
-      "Basic templates and layouts",
-      "Standard support",
-      "Export in common formats",
+      "Up to 30 generated ads or posts per month",
+      "Up to 10 generated ads or posts using reference image per month",
+      "Access to Disoriti Chat",
+      "Access to layout generator",
+      "Access to automatic prompt generator",
+      "Access to scheduler",
+      "Access to Disoriti library",
+      "Premium support",
+      "Export in different formats",
       "Basic analytics",
     ],
     planId: "essential",
@@ -60,14 +67,16 @@ const pricingPlans: PricingPlan[] = [
     monthlyLink: "https://buy.stripe.com/5kQcN5ai66B92Hl0rm0Ny00",
     yearlyLink: "https://buy.stripe.com/cNi5kDai61gPeq30rm0Ny01",
     features: [
-      "Unlimited AI-generated ads",
-      "Premium templates and layouts",
-      "Priority support",
-      "Advanced export options",
-      "Detailed analytics and insights",
-      "Custom branding",
-      "Team collaboration features",
-      "API access",
+      "Unlimited ads or posts per month",
+      "Up to 40 generated ads or posts using reference image per month",
+      "Access to Disoriti Chat",
+      "Access to layout generator",
+      "Access to automatic prompt generator",
+      "Access to scheduler",
+      "Access to Disoriti library",
+      "Automatic posting to social media accounts (when given access)",
+      "24/7 custom support",
+      "Advanced analytics",
     ],
     popular: true,
     planId: "premium",
@@ -87,8 +96,9 @@ export default function PricingPage() {
     return getCurrentPlanId() === planId;
   };
 
-  const getSavings = (monthlyPrice: number, yearlyPrice: number) => {
-    const yearlyTotal = yearlyPrice * 12;
+  const getSavings = (monthlyPrice: number, planId: string) => {
+    // Yearly totals matching homepage: Essential $199, Premium $399
+    const yearlyTotal = planId === 'essential' ? 199 : planId === 'premium' ? 399 : 0;
     const monthlyTotal = monthlyPrice * 12;
     const savings = monthlyTotal - yearlyTotal;
     const percentage = Math.round((savings / monthlyTotal) * 100);
@@ -146,9 +156,13 @@ export default function PricingPage() {
         {/* Pricing Cards */}
         <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
           {pricingPlans.map((planData) => {
-            const currentPrice = billingCycle === 'monthly' ? planData.monthlyPrice : planData.yearlyPrice;
+            // For yearly, show total yearly price (matching homepage: $199 for Essential, $399 for Premium)
+            const yearlyTotal = planData.planId === 'essential' ? 199 : planData.planId === 'premium' ? 399 : 0;
+            const currentPrice = billingCycle === 'monthly' 
+              ? planData.monthlyPrice 
+              : yearlyTotal;
             const currentLink = billingCycle === 'monthly' ? planData.monthlyLink : planData.yearlyLink;
-            const savings = getSavings(planData.monthlyPrice, planData.yearlyPrice);
+            const savings = getSavings(planData.monthlyPrice, planData.planId);
             const isCurrent = isCurrentPlan(planData.planId);
 
             return (
@@ -191,16 +205,16 @@ export default function PricingPage() {
                 <CardContent className="text-center pb-6 flex-grow">
                   <div className="mb-4">
                     <span className="text-4xl font-bold text-foreground">
-                      ${currentPrice}
+                      ${billingCycle === 'yearly' ? currentPrice.toFixed(0) : currentPrice}
                     </span>
-                    <span className="text-muted-foreground">/{billingCycle === 'monthly' ? 'month' : 'month'}</span>
+                    <span className="text-muted-foreground">/{billingCycle === 'monthly' ? 'month' : 'year'}</span>
                   </div>
                   
-                  {billingCycle === 'yearly' && (
+                  {billingCycle === 'yearly' && planData.planId !== 'free' && (
                     <div className="text-sm text-muted-foreground mb-4">
                       <span className="line-through">${planData.monthlyPrice}/month</span>
                       <span className="ml-2 text-accent font-medium">
-                        Save ${savings.savings} ({savings.percentage}%)
+                        Save ${savings.savings.toFixed(0)} ({savings.percentage}%)
                       </span>
                     </div>
                   )}

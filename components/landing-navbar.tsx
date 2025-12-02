@@ -93,7 +93,7 @@ export function LandingNavbar() {
               {isAuthenticated ? (
                 <>
                   <span className="text-sm text-muted-foreground">
-                    Logged in as {user?.email || user?.username || 'User'}
+                    Logged in as {user?.email || 'User'}
                   </span>
                   <Link href="/dashboard">
                     <Button className="bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 text-sm flex items-center gap-2">
@@ -156,7 +156,7 @@ export function LandingNavbar() {
                 {isAuthenticated ? (
                   <>
                     <div className="px-3 py-2 text-sm text-muted-foreground border-b border-primary/10 mb-2">
-                      Logged in as {user?.email || user?.username || 'User'}
+                      Logged in as {user?.email || 'User'}
                     </div>
                     <Link href="/dashboard" className="block">
                       <Button className="w-full bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 text-base flex items-center justify-center gap-2">
