@@ -151,47 +151,98 @@ export default function LandingPage() {
       {/* Beta Countdown Timer */}
       <section className="relative py-12 md:py-16">
         <div className="container mx-auto px-4 md:px-6">
-          <div className="max-w-4xl mx-auto">
-            <div className="relative backdrop-blur-sm border border-primary/20 rounded-2xl p-6 md:p-8 bg-gradient-to-br from-primary/10 via-accent/5 to-primary/10 shadow-glow">
-              <div className="text-center mb-6">
-                <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 px-3 md:px-4 py-1.5 md:py-2 text-xs md:text-sm text-primary/90 backdrop-blur-sm bg-primary/10 mb-4">
-                  <Clock className="h-3 md:h-4 w-3 md:w-4" />
-                  Beta Release Countdown
-                </div>
-                <h2 className="text-2xl md:text-3xl font-bold mb-2 bg-clip-text text-transparent bg-gradient-to-r from-primary via-accent to-primary">
-                  Disoriti Beta Launch
-                </h2>
-                <p className="text-muted-foreground text-sm md:text-base">
-                  Get ready for the future of AI-powered content creation
-                </p>
-              </div>
+          <div className="max-w-5xl mx-auto">
+            {/* Animated background orbs */}
+            <div className="absolute -inset-4 -z-10">
+              <div className="absolute top-0 left-1/4 w-64 h-64 bg-primary/20 rounded-full blur-3xl animate-pulse" />
+              <div className="absolute bottom-0 right-1/4 w-64 h-64 bg-accent/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
+            </div>
+            
+            <div className="relative backdrop-blur-sm border-2 border-primary/30 rounded-2xl p-6 md:p-10 bg-background/30 shadow-glow-lg overflow-hidden">
+              {/* Subtle animated border glow */}
+              <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-primary/5 via-accent/5 to-primary/5 opacity-50 animate-gradient" style={{ backgroundSize: '200% 200%' }} />
               
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
-                {[
-                  { label: "Days", value: timeLeft.days },
-                  { label: "Hours", value: timeLeft.hours },
-                  { label: "Minutes", value: timeLeft.minutes },
-                  { label: "Seconds", value: timeLeft.seconds },
-                ].map((item, index) => (
-                  <motion.div
-                    key={item.label}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.1 }}
-                    className="text-center"
-                  >
-                    <div className="relative p-4 md:p-6 rounded-xl border border-primary/20 bg-background/30 backdrop-blur-sm">
-                      <div className="text-3xl md:text-5xl font-bold text-primary mb-2">
-                        {String(item.value).padStart(2, '0')}
+              <div className="relative z-10">
+                <div className="text-center mb-8">
+                  <div className="inline-flex items-center gap-2 rounded-full border border-primary/30 px-4 md:px-5 py-2 md:py-2.5 text-xs md:text-sm text-primary backdrop-blur-sm bg-primary/20 mb-4 shadow-glow-sm">
+                    <Clock className="h-4 md:h-5 w-4 md:w-5 animate-pulse" />
+                    <span className="font-semibold">Beta Release Countdown</span>
+                  </div>
+                  
+                  <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-3 bg-clip-text text-transparent bg-gradient-to-r from-primary via-accent to-primary animate-gradient" style={{ backgroundSize: '200% 200%' }}>
+                    Disoriti Beta is Almost Here! 🚀
+                  </h2>
+                  
+                  <p className="text-base md:text-lg text-muted-foreground mb-4 max-w-2xl mx-auto">
+                    Count down to launch day and be among the first to experience the future of AI-powered content creation
+                  </p>
+                  
+                  {/* Hype chips */}
+                  <div className="flex flex-wrap items-center justify-center gap-2 md:gap-3 mb-6">
+                    <div className="inline-flex items-center gap-1.5 rounded-full border border-primary/20 px-3 py-1 text-xs backdrop-blur-sm bg-primary/10">
+                      <Sparkles className="h-3 w-3 text-primary" />
+                      <span>Early access spots are limited</span>
+                    </div>
+                    <div className="inline-flex items-center gap-1.5 rounded-full border border-accent/20 px-3 py-1 text-xs backdrop-blur-sm bg-accent/10">
+                      <Star className="h-3 w-3 text-accent" />
+                      <span>Founding users get bonus credits</span>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 mb-8">
+                  {[
+                    { label: "Days", value: timeLeft.days },
+                    { label: "Hours", value: timeLeft.hours },
+                    { label: "Minutes", value: timeLeft.minutes },
+                    { label: "Seconds", value: timeLeft.seconds },
+                  ].map((item, index) => (
+                    <motion.div
+                      key={item.label}
+                      initial={{ opacity: 0, y: 20, scale: 0.9 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      transition={{ delay: index * 0.1, type: "spring", stiffness: 200 }}
+                      whileHover={{ scale: 1.1 }}
+                      className="text-center cursor-pointer"
+                    >
+                      <div className="relative mb-3">
+                        {/* Number with hover fill effect */}
+                        <div className="relative inline-block group">
+                          {/* Background fill on hover */}
+                          <div className="absolute inset-0 bg-gradient-to-br from-primary to-accent rounded-2xl opacity-0 group-hover:opacity-100 transition-all duration-500 ease-out transform scale-0 group-hover:scale-110 blur-sm" />
+                          <div className="absolute inset-0 bg-gradient-to-br from-primary to-accent rounded-xl opacity-0 group-hover:opacity-100 transition-all duration-500 ease-out transform scale-0 group-hover:scale-100" />
+                          
+                          {/* Number text */}
+                          <div className="relative z-10 px-4 md:px-6 py-2 md:py-3">
+                            <div className="text-6xl md:text-8xl lg:text-9xl font-bold text-primary group-hover:text-primary-foreground transition-colors duration-500 drop-shadow-lg" style={{ textShadow: '0 0 20px rgba(0, 255, 169, 0.3)' }}>
+                              {String(item.value).padStart(2, '0')}
+                            </div>
+                          </div>
+                        </div>
                       </div>
-                      <div className="text-xs md:text-sm text-muted-foreground uppercase tracking-wider">
+                      
+                      {/* Label */}
+                      <div className="text-sm md:text-base text-muted-foreground uppercase tracking-wider font-semibold">
                         {item.label}
                       </div>
-                      {/* Glow effect */}
-                      <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-primary/10 to-accent/10 opacity-0 hover:opacity-100 transition-opacity blur-xl" />
-                    </div>
-                  </motion.div>
-                ))}
+                    </motion.div>
+                  ))}
+                </div>
+                
+                {/* CTA Button */}
+                <div className="text-center">
+                  <Link href="/signup">
+                    <Button 
+                      size="lg"
+                      className="bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 text-primary-foreground shadow-glow-lg px-8 py-6 text-base md:text-lg font-semibold group"
+                    >
+                      <span className="flex items-center gap-2">
+                        Get Early Access
+                        <Rocket className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                      </span>
+                    </Button>
+                  </Link>
+                </div>
               </div>
             </div>
           </div>
