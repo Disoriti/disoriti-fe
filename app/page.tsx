@@ -11,13 +11,39 @@ import Image from "next/image";
 import { 
   Sparkles, Bot, Wand2, Code, Zap, Shield, Lightbulb, Rocket, Target, Lock,
   Keyboard, Brain, LayoutTemplate, SlidersHorizontal, ArrowRight, Mail, 
-  Linkedin, Instagram, Check, Star, Users
+  Linkedin, Instagram, Check, Star, Users, Clock
 } from "lucide-react";
+import { motion } from "framer-motion";
 
 export default function LandingPage() {
   const [isYearly, setIsYearly] = useState(false);
   const { isAuthenticated, isLoading } = useAuth();
+  const [timeLeft, setTimeLeft] = useState({ days: 10, hours: 0, minutes: 0, seconds: 0 });
   // const t = useTranslations();
+
+  // Countdown timer effect (10 days from now)
+  useEffect(() => {
+    const targetDate = new Date();
+    targetDate.setDate(targetDate.getDate() + 10);
+    
+    const interval = setInterval(() => {
+      const now = new Date().getTime();
+      const distance = targetDate.getTime() - now;
+
+      if (distance > 0) {
+        setTimeLeft({
+          days: Math.floor(distance / (1000 * 60 * 60 * 24)),
+          hours: Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
+          minutes: Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60)),
+          seconds: Math.floor((distance % (1000 * 60)) / 1000),
+        });
+      } else {
+        setTimeLeft({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+      }
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   // Show loading spinner while checking authentication
   if (isLoading) {
@@ -116,6 +142,56 @@ export default function LandingPage() {
                     transform: 'scale(1.2)',
                   }}
                 />
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Beta Countdown Timer */}
+      <section className="relative py-12 md:py-16">
+        <div className="container mx-auto px-4 md:px-6">
+          <div className="max-w-4xl mx-auto">
+            <div className="relative backdrop-blur-sm border border-primary/20 rounded-2xl p-6 md:p-8 bg-gradient-to-br from-primary/10 via-accent/5 to-primary/10 shadow-glow">
+              <div className="text-center mb-6">
+                <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 px-3 md:px-4 py-1.5 md:py-2 text-xs md:text-sm text-primary/90 backdrop-blur-sm bg-primary/10 mb-4">
+                  <Clock className="h-3 md:h-4 w-3 md:w-4" />
+                  Beta Release Countdown
+                </div>
+                <h2 className="text-2xl md:text-3xl font-bold mb-2 bg-clip-text text-transparent bg-gradient-to-r from-primary via-accent to-primary">
+                  Disoriti Beta Launch
+                </h2>
+                <p className="text-muted-foreground text-sm md:text-base">
+                  Get ready for the future of AI-powered content creation
+                </p>
+              </div>
+              
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+                {[
+                  { label: "Days", value: timeLeft.days },
+                  { label: "Hours", value: timeLeft.hours },
+                  { label: "Minutes", value: timeLeft.minutes },
+                  { label: "Seconds", value: timeLeft.seconds },
+                ].map((item, index) => (
+                  <motion.div
+                    key={item.label}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.1 }}
+                    className="text-center"
+                  >
+                    <div className="relative p-4 md:p-6 rounded-xl border border-primary/20 bg-background/30 backdrop-blur-sm">
+                      <div className="text-3xl md:text-5xl font-bold text-primary mb-2">
+                        {String(item.value).padStart(2, '0')}
+                      </div>
+                      <div className="text-xs md:text-sm text-muted-foreground uppercase tracking-wider">
+                        {item.label}
+                      </div>
+                      {/* Glow effect */}
+                      <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-primary/10 to-accent/10 opacity-0 hover:opacity-100 transition-opacity blur-xl" />
+                    </div>
+                  </motion.div>
+                ))}
               </div>
             </div>
           </div>
