@@ -8,7 +8,7 @@ import Image from "next/image";
 import { 
   Sparkles, Bot, Wand2, Code, Zap, Shield, Lightbulb, Rocket, Target, Lock,
   Keyboard, Brain, LayoutTemplate, SlidersHorizontal, ArrowRight, Mail, 
-  Twitter, Github, Linkedin, Instagram, Check, Star, Users
+  Linkedin, Instagram, Check, Star, Users
 } from "lucide-react";
 
 export default function LandingPage() {
@@ -779,14 +779,14 @@ export default function LandingPage() {
               </p>
               <div className="flex space-x-4">
                 {[
-                  { icon: Twitter, href: "#", label: "Twitter" },
-                  { icon: Github, href: "#", label: "GitHub" },
-                  { icon: Linkedin, href: "#", label: "LinkedIn" },
-                  { icon: Instagram, href: "#", label: "Instagram" }
+                  { icon: Linkedin, href: "https://www.linkedin.com/company/disoriti/posts/?feedView=all", label: "LinkedIn" },
+                  { icon: Instagram, href: "https://www.instagram.com/disoriti_/", label: "Instagram" }
                 ].map((social, index) => (
                   <Link
                     key={index}
                     href={social.href}
+                    target={social.href.startsWith('http') ? '_blank' : undefined}
+                    rel={social.href.startsWith('http') ? 'noopener noreferrer' : undefined}
                     className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center hover:bg-primary/20 transition-colors group"
                   >
                     <social.icon className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" />
@@ -799,13 +799,11 @@ export default function LandingPage() {
             <div className="space-y-4">
               <h3 className="text-lg font-semibold">Product</h3>
               <ul className="space-y-2">
-                {["Features", "AI Generator", "Templates", "Editor", "Pricing"].map((item) => (
-                  <li key={item}>
-                    <Link href="#" className="text-muted-foreground hover:text-primary transition-colors text-sm">
-                      {item}
-                    </Link>
-                  </li>
-                ))}
+                <li>
+                  <Link href="/pricing" className="text-muted-foreground hover:text-primary transition-colors text-sm">
+                    Pricing
+                  </Link>
+                </li>
               </ul>
             </div>
 
@@ -813,13 +811,11 @@ export default function LandingPage() {
             <div className="space-y-4">
               <h3 className="text-lg font-semibold">Company</h3>
               <ul className="space-y-2">
-                {["About", "Blog", "Careers", "Press", "Partners"].map((item) => (
-                  <li key={item}>
-                    <Link href="#" className="text-muted-foreground hover:text-primary transition-colors text-sm">
-                      {item}
-                    </Link>
-                  </li>
-                ))}
+                <li>
+                  <Link href="/blogs" className="text-muted-foreground hover:text-primary transition-colors text-sm">
+                    Blog
+                  </Link>
+                </li>
               </ul>
             </div>
 
@@ -827,13 +823,11 @@ export default function LandingPage() {
             <div className="space-y-4">
               <h3 className="text-lg font-semibold">Support</h3>
               <ul className="space-y-2">
-                {["Help Center", "Community", "Contact", "Status", "Privacy"].map((item) => (
-                  <li key={item}>
-                    <Link href={item === "Privacy" ? "/privacy" : "#"} className="text-muted-foreground hover:text-primary transition-colors text-sm">
-                      {item}
-                    </Link>
-                  </li>
-                ))}
+                <li>
+                  <Link href="/privacy" className="text-muted-foreground hover:text-primary transition-colors text-sm">
+                    Privacy
+                  </Link>
+                </li>
               </ul>
             </div>
           </div>
@@ -873,8 +867,8 @@ export default function LandingPage() {
               <Link href="/terms" className="text-muted-foreground hover:text-primary transition-colors">
                 Terms of Service
               </Link>
-              <Link href="#" className="text-muted-foreground hover:text-primary transition-colors">
-                Cookie Policy
+              <Link href="/data-deletion" className="text-muted-foreground hover:text-primary transition-colors">
+                Data Deletion
               </Link>
             </div>
           </div>
