@@ -58,14 +58,22 @@ export function LandingNavbar() {
       <nav className="mx-auto max-w-7xl px-6 py-4">
         <div className="flex items-center justify-between">
           {/* Logo */}
-          <Link href="/" className="flex items-center">
-            <div className="relative h-10 w-10">
+          <Link href="/" className="flex items-center group/logo">
+            <div className="relative h-10 w-[110px]">
+              {/* Original logo */}
               <Image
                 src="/logo-primary.png"
                 alt="Disoriti"
                 fill
-                className="object-contain"
+                className="object-contain transition-opacity duration-300 group-hover/logo:opacity-0"
                 priority
+              />
+              {/* Dashboard logo on hover */}
+              <Image
+                src="/logo-primary-main.png"
+                alt="Disoriti"
+                fill
+                className="object-contain absolute inset-0 opacity-0 transition-opacity duration-300 group-hover/logo:opacity-100"
               />
             </div>
           </Link>
