@@ -26,7 +26,7 @@ import {
 } from "@/components/ui/breadcrumb"
 
 // Separate client component for the header content
-function DashboardHeader({ breadcrumb }: { breadcrumb: React.ReactNode }) {
+function DashboardHeader({ breadcrumb }: { breadcrumb?: React.ReactNode }) {
   const { plan } = useAuth();
   
   return (
@@ -63,7 +63,7 @@ export default function DashboardLayout({
   breadcrumb,
 }: {
   children: React.ReactNode,
-  breadcrumb: React.ReactNode
+  breadcrumb?: React.ReactNode
 }) {
   return (
     <ProtectedRoute>
