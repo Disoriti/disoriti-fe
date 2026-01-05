@@ -166,6 +166,14 @@ export const API_ENDPOINTS = {
     STATUS: '/subscriptions/status',
     CHECKOUT: '/subscriptions/checkout',
   },
+
+  // Admin
+  ADMIN: {
+    USERS: '/admin/users',
+    USER: '/admin/users',
+    TRAFFIC: '/admin/traffic',
+    STATS: '/admin/stats',
+  },
 } as const;
 
 // Build full API URLs
@@ -236,6 +244,12 @@ export const API_URLS = {
   SUBSCRIPTION_PLANS_URL: buildApiUrl(API_ENDPOINTS.SUBSCRIPTIONS.PLANS),
   SUBSCRIPTION_STATUS_URL: buildApiUrl(API_ENDPOINTS.SUBSCRIPTIONS.STATUS),
   SUBSCRIPTION_CHECKOUT_URL: buildApiUrl(API_ENDPOINTS.SUBSCRIPTIONS.CHECKOUT),
+
+  // Admin URLs
+  ADMIN_USERS_URL: buildApiUrl(API_ENDPOINTS.ADMIN.USERS),
+  ADMIN_USER_URL: buildApiUrl(API_ENDPOINTS.ADMIN.USER),
+  ADMIN_TRAFFIC_URL: buildApiUrl(API_ENDPOINTS.ADMIN.TRAFFIC),
+  ADMIN_STATS_URL: buildApiUrl(API_ENDPOINTS.ADMIN.STATS),
 } as const;
 
 // Environment info

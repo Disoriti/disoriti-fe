@@ -12,7 +12,8 @@ import {
   LayoutDashboard,
   MessageSquare,
   Calendar,
-  CreditCard
+  CreditCard,
+  Shield
 } from "lucide-react"
 
 import { NavMain } from "@/components/nav-main"
@@ -26,6 +27,7 @@ import {
   SidebarRail,
   useSidebar,
 } from "@/components/ui/sidebar"
+import { useAuth } from "@/contexts/auth-context"
 
 
 const data = {
@@ -88,7 +90,19 @@ const data = {
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { state } = useSidebar()
+  const { isAdmin } = useAuth()
   const isCollapsed = state === "collapsed"
+
+  const navItems = isAdmin
+    ? [
+        ...data.navMain,
+        {
+          title: "Admin",
+          url: "/dashboard/admin",
+          icon: Shield,
+        },
+      ]
+    : data.navMain
 
   return (
     <Sidebar collapsible="icon" {...props}>
@@ -106,7 +120,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </div>
       </SidebarHeader>
       <SidebarContent className="px-3 py-4 group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:flex group-data-[collapsible=icon]:justify-center">
-        <NavMain items={data.navMain} />
+        <NavMain items={navItems} />
       </SidebarContent>
       <SidebarFooter>
         <NavUser />

@@ -7,6 +7,7 @@ import {
   CreditCard,
   LogOut,
   Sparkles,
+  Shield,
 } from "lucide-react"
 
 import {
@@ -29,11 +30,12 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar"
+import { Badge } from "@/components/ui/badge"
 import { useAuth } from "@/contexts/auth-context"
 
 export function NavUser() {
   const { isMobile } = useSidebar()
-  const { user, logout } = useAuth()
+  const { user, logout, isAdmin } = useAuth()
 
   // If no user is authenticated, don't render the component
   if (!user) {
@@ -55,10 +57,18 @@ export function NavUser() {
                 <AvatarImage src="" alt={userDisplayName} />
                 <AvatarFallback className="rounded-lg">{userDisplayName.charAt(0).toUpperCase()}</AvatarFallback>
               </Avatar>
-              <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-medium">{userDisplayName}</span>
-                <span className="truncate text-xs">{user.email}</span>
-              </div>
+                <div className="grid flex-1 text-left text-sm leading-tight">
+                  <div className="flex items-center gap-2">
+                    <span className="truncate font-medium">{userDisplayName}</span>
+                    {isAdmin && (
+                      <Badge className="bg-gradient-to-r from-primary to-accent text-white text-[10px] px-1.5 py-0 h-4">
+                        <Shield className="w-2.5 h-2.5 mr-0.5" />
+                        Admin
+                      </Badge>
+                    )}
+                  </div>
+                  <span className="truncate text-xs">{user.email}</span>
+                </div>
               <ChevronsUpDown className="ml-auto size-4" />
             </SidebarMenuButton>
           </DropdownMenuTrigger>
@@ -75,7 +85,15 @@ export function NavUser() {
                   <AvatarFallback className="rounded-lg">{userDisplayName.charAt(0).toUpperCase()}</AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-medium">{userDisplayName}</span>
+                  <div className="flex items-center gap-2">
+                    <span className="truncate font-medium">{userDisplayName}</span>
+                    {isAdmin && (
+                      <Badge className="bg-gradient-to-r from-primary to-accent text-white text-[10px] px-1.5 py-0 h-4">
+                        <Shield className="w-2.5 h-2.5 mr-0.5" />
+                        Admin
+                      </Badge>
+                    )}
+                  </div>
                   <span className="truncate text-xs">{user.email}</span>
                 </div>
               </div>

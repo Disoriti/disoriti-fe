@@ -10,6 +10,7 @@ interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
   isLoading: boolean;
+  isAdmin: boolean;
   login: (credentials: LoginCredentials) => Promise<boolean>;
   register: (credentials: RegisterCredentials) => Promise<boolean>;
   logout: () => void;
@@ -184,10 +185,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     })();
   }, []);
 
+  const isAdmin = user?.email === "ufawad0@gmail.com";
+
   const value: AuthContextType = {
     user,
     isAuthenticated: !!user,
     isLoading,
+    isAdmin,
     login,
     register,
     logout,
